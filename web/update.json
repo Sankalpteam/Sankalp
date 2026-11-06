@@ -1,6 +1,6 @@
 {
-  "versionCode": 28,
+  "versionCode": 2912,
   "versionName": "2.1.16",
-  "downloadUrl": "https://indooneteam.github.io/indoone/main/downloads/indoone.apk",
-  "notes": "Indoone 2.1.16. Fix extra bottom navigation gap in Android 3-button system navigation mode."
+  "downloadUrl": "https://github.com/indooneteam/indoone/releases/latest/download/indoone-terminal.apk",
+  "notes": "Indoone 2.1.16. Privacy Policy and Terms of Use now describe the assistant: which model providers see your messages, how Aadhaar, PAN and card numbers are masked before the model sees them, what connected services are read, how voice and code execution work, and that share links are public and permanent."
 }
