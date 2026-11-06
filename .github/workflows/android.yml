@@ -65,6 +65,36 @@ jobs:
             -storepass "$INDOONE_KEYSTORE_PASSWORD" \
             -alias "$INDOONE_KEY_ALIAS" \
             | awk '/SHA1:/{print "Android signing SHA-1: " $2; found=1} END {if (!found) exit 1}'
+      - name: Refresh the bundled legal snapshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The web is the single source for the legal pages. The app carries a snapshot so a
+          # phone with no network can still read the policy; this regenerates that snapshot
+          # from the web branch on every build, so it can never drift from what is published.
+          #
+          # If the fetch fails the build continues with the committed snapshot: a stale policy
+          # is bad, a build that cannot ship at all is worse.
+          if git fetch --depth 1 origin web 2>/dev/null; then
+            for pair in "privacy-policy:Privacy Policy" "terms-of-use:Terms of Use"; do
+              slug="${pair%%:*}"; title="${pair##*:}"
+              if git show "origin/web:web/menu/${slug}/index.html" > /tmp/${slug}.fragment 2>/dev/null; then
+                {
+                  printf '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8" />\n'
+                  printf '  <meta name="viewport" content="width=device-width, initial-scale=1" />\n'
+                  printf '  <title>%s</title>\n' "$title"
+                  printf '  <style>body{margin:0;padding:18px;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#211d27}h3{font-size:17px;margin:22px 0 6px;color:#2c2733}p{margin:0 0 12px;color:#4a4552}</style>\n'
+                  printf '</head>\n<body>\n'
+                  cat /tmp/${slug}.fragment
+                  printf '\n</body>\n</html>\n'
+                } > "android/assets/legal/${slug}.html"
+                echo "Refreshed android/assets/legal/${slug}.html from the web branch."
+              fi
+            done
+          else
+            echo "Could not fetch the web branch; keeping the committed legal snapshot."
+          fi
+
       - name: Assemble debug APK
         shell: bash
         env:

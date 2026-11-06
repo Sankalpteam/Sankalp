@@ -86,6 +86,11 @@ android {
     )
     sourceSets["main"].manifest.srcFile(file("AndroidManifest.xml"))
 
+    // The offline snapshot of the legal pages. The web is the single source; these files are
+    // generated from it before the build, so a stale copy is impossible and a missing network
+    // still shows the policy.
+    sourceSets["main"].assets.srcDirs(listOf("assets"))
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
