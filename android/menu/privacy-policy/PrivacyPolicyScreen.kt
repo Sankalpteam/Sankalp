@@ -57,8 +57,15 @@ fun PrivacyPolicyScreen(
         PrivacySection("9. Third-Party Services", "Indoone may use third-party services such as Firebase and IndoVerification to provide authentication, OTP verification, and related functionality. These services may have their own privacy policies and terms."),
         PrivacySection("10. Data Sharing", "Indoone does not sell your personal information. Information may be processed by third-party services when necessary to provide authentication, OTP verification, or other supported technical functionality."),
         PrivacySection("11. User Responsibility", "You are responsible for protecting your password, PIN, authenticator information, recovery files, and device. Unauthorized access to your device or recovery information may affect the security of your data."),
-        PrivacySection("12. Privacy Policy Changes", "Indoone may update this Privacy Policy when features, services, or legal requirements change. Updated information may be published within the app or through an official Indoone channel."),
-        PrivacySection("13. Contact", "Email: indoone@zohomail.in"),
+        PrivacySection("12. The Assistant and Your Messages", "When you send a message to the Indoone assistant, the text of that message and a short summary of recent messages in the same conversation are sent to a third-party AI model provider (currently Google Gemini, with Microsoft Azure as a fallback) so that a reply can be generated. Messages are used to answer you; they are not sold. Conversation content is retained only as long as it is needed to show you your history, and you can delete a conversation from the app."),
+        PrivacySection("13. Sensitive Information Masking", "Before a message reaches the AI model, Indoone automatically detects and masks Aadhaar numbers, PAN, IFSC codes, UPI identifiers, card numbers, phone numbers and email addresses. The masked placeholders are what the model receives. This masking is automatic and does not require any action from you, and it is not a substitute for not sharing information you do not need to share."),
+        PrivacySection("14. Connected Services", "You may connect services such as GitHub, Zoho Mail and a calendar. When you ask a question that needs one of them, Indoone reads only what that question requires and passes the result to the AI model so it can explain it. Access tokens are stored securely and are never included in what the model sees, in logs, or in a reply. You can disconnect a service at any time, and no further reads happen after you do."),
+        PrivacySection("15. Voice", "If you use the voice feature, the audio you record is sent to a speech provider to be converted to text. The text then follows the same path as a typed message, described above. Indoone does not keep the recording after it has been transcribed, and the transcript is retained only as part of the conversation it belongs to."),
+        PrivacySection("16. Running Code", "Where the code feature is enabled, a snippet you ask the assistant to run is executed on Indoone's server in a restricted process with time and memory limits. The code and its output are used to answer you. Nothing you run has access to the network or to other users' data, and nothing is kept after the answer is produced."),
+        PrivacySection("17. Shared Conversations", "You can create a link that shares a conversation. A share link is public to anyone who has it, and it does not expire unless it is removed. Treat a share link as you would a public post: do not create one for a conversation containing something you would not want a stranger to read."),
+        PrivacySection("18. Usage Records", "Indoone records how many tokens a message used and what it cost, so that the service stays affordable and so that limits can be applied fairly. These records contain counts and costs, not the content of your messages."),
+        PrivacySection("19. Privacy Policy Changes", "Indoone may update this Privacy Policy when features, services, or legal requirements change. Updated information may be published within the app or through an official Indoone channel."),
+        PrivacySection("20. Contact", "Email: indoone@zohomail.in"),
     )
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
@@ -110,7 +117,7 @@ private fun PolicyHeader(title: String, onBack: () -> Unit) {
             color = PrivacyChip,
         ) {
             Text(
-                text = "Last updated 08/09/2026",
+                text = "Last updated 07/11/2026",
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 color = PrivacyPurple,
                 fontSize = 11.sp,
