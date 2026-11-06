@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="robots" content="noindex" />
+  <title>Indoone — Fleet Pulse</title>
+  <link rel="stylesheet" href="ops.css?v=20261107a" />
+</head>
+<body>
+  <header class="bar">
+    <h1>Fleet Pulse</h1>
+    <div class="meta">
+      <span id="updated">—</span>
+      <button id="refresh" type="button" aria-label="Refresh now">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="banner" class="banner banner--unknown" role="status" aria-live="polite">
+      <strong id="banner-status">Checking…</strong>
+      <span id="banner-summary"></span>
+    </section>
+
+    <section class="grid" id="pillars" aria-label="Subsystem pillars"></section>
+
+    <section class="panel" aria-label="Actions">
+      <h2>Suggested actions</h2>
+      <div id="chips" class="chips"></div>
+    </section>
+
+    <section class="panel" aria-label="Raw snapshot">
+      <details>
+        <summary>Raw snapshot</summary>
+        <pre id="raw">—</pre>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <span>Endpoint: <code id="endpoint">—</code></span>
+    <span>Polls every 30 s. Public endpoint: no token required.</span>
+  </footer>
+
+  <script src="ops.js?v=20261107a"></script>
+</body>
+</html>
