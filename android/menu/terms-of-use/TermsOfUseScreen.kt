@@ -52,9 +52,16 @@ private val TERMS_SECTIONS = listOf(
     TermsSection("12. Service Availability", "Indoone is provided with the goal of reasonable reliability. However, continuous, uninterrupted, or error-free operation cannot be guaranteed. Features may temporarily become unavailable because of technical issues, network problems, maintenance, device limitations, or third-party services."),
     TermsSection("13. Data and Account Responsibility", "Users are responsible for their own account credentials, authenticator information, backups, and recovery information. Loss of a device, credentials, deleted data, failed synchronization, or unavailable third-party services may result in loss of access or data."),
     TermsSection("14. Privacy", "Indoone may process account, authentication, and technical information as necessary to provide its features. Users should review the Indoone Privacy Policy for information about data collection, use, storage, and deletion."),
-    TermsSection("15. Changes to These Terms", "Indoone may update these Terms when its features, services, or legal requirements change. Updated Terms may be published within the application or through an official Indoone channel."),
-    TermsSection("16. Contact", "Email: indoone@zohomail.in"),
-    TermsSection("17. Acceptance", "By creating an account, logging in, or using Indoone, you acknowledge that you have read and accepted these Terms of Use. If you do not agree with these Terms, please stop using Indoone."),
+    TermsSection("15. The Assistant's Answers", "Indoone answers using an AI model. Answers are generated, not looked up, and they can be wrong, incomplete or out of date. Do not rely on an answer for a medical, legal, financial or safety decision; consult a qualified professional. Where Indoone gives you a date, a count or a figure from a connected service, that figure came from the service and not from the model, and it is the more reliable of the two."),
+    TermsSection("16. Connected Services and Permissions", "You decide which services Indoone may read, and you can disconnect any of them at any time. You are responsible for having the right to access any account you connect, and for what you ask Indoone to do with it. Actions that change something - sending a mail, merging a pull request - require your explicit confirmation and are never performed on the model's initiative."),
+    TermsSection("17. Voice", "The voice feature converts your speech to text and the reply to audio using a third-party speech provider. Speech recognition is imperfect, particularly with names, numbers and regional accents. Check anything important that was spoken before acting on it."),
+    TermsSection("18. Running Code", "Where the code feature is enabled, you may ask Indoone to run a short snippet. Execution is time- and memory-limited and has no network or filesystem access. Do not use it to attempt to reach systems you do not own or to attack the service; doing so is a breach of these terms and your account may be suspended."),
+    TermsSection("19. Fair Use and Limits", "Indoone applies usage limits so that the service stays available and affordable for everyone: a daily allowance for the assistant, and a monthly cap on messages sent through WhatsApp. When a limit is reached you will be told plainly, and the app remains available. Attempting to evade a limit is a breach of these terms."),
+    TermsSection("20. Shared Conversations", "A conversation you share becomes readable by anyone with the link, and the link does not expire. You are responsible for what you choose to share. Do not share a conversation containing another person's private information without their consent."),
+    TermsSection("21. Changes to the Service", "Indoone is under active development. Features may be added, changed or withdrawn, and an answer that was possible yesterday may not be today. We will not remove a feature you rely on without saying so in the app first."),
+    TermsSection("22. Changes to These Terms", "Indoone may update these Terms when its features, services, or legal requirements change. Updated Terms may be published within the application or through an official Indoone channel."),
+    TermsSection("23. Contact", "Email: indoone@zohomail.in"),
+    TermsSection("24. Acceptance", "By creating an account, logging in, or using Indoone, you acknowledge that you have read and accepted these Terms of Use. If you do not agree with these Terms, please stop using Indoone."),
 )
 
 @Composable
@@ -82,7 +89,7 @@ fun TermsOfUseScreen(onBack: () -> Unit, onAccountsClick: () -> Unit, onLobbyCli
                 color = TermsChip,
             ) {
                 Text(
-                    text = "Last updated 08/09/2026",
+                    text = "Last updated 07/11/2026",
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                     color = TermsPurple,
                     fontSize = 11.sp,
