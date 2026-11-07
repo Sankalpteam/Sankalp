@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -126,6 +127,40 @@ class MainActivity : ComponentActivity() {
                 val searchViewModel: SearchViewModel = viewModel()
                 val profileViewModel: ProfileViewModel = viewModel()
                 var route by remember { mutableStateOf(AppRoute.HOME) }
+
+                // The screens that show live authenticator codes are flagged secure, so the OS
+                // refuses screenshots and hides the app in the recents thumbnail. The web has
+                // asked for this all along through window.IndooneNative.setSecureScreen; nothing
+                // on the phone ever answered, so the codes could be captured. The flag is set
+                // and cleared here rather than once for the whole app: a PIN dialog on a
+                // settings screen is not a secret worth a black screenshot.
+                val secureRoutes = remember {
+                    setOf(
+                        AppRoute.LOBBY,
+                        AppRoute.ACCOUNT_DETAILS,
+                        AppRoute.EDIT_ACCOUNT,
+                        AppRoute.QR_ACCOUNT_DETAILS,
+                        AppRoute.IMPORT_ACCOUNT_DETAILS,
+                        AppRoute.ADD_ACCOUNT,
+                        AppRoute.SCAN_QR,
+                        AppRoute.ENTER_SETUP_KEY,
+                        AppRoute.IMPORT_OTP_URI,
+                        AppRoute.FAVORITES,
+                        AppRoute.HOME,
+                    )
+                }
+
+                LaunchedEffect(route) {
+                    if (route in secureRoutes) {
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                        )
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    }
+                }
+
                 var menuOpen by remember { mutableStateOf(false) }
                 var menuOriginRoute by remember { mutableStateOf(AppRoute.HOME) }
                 var settingsOpenAppLock by remember { mutableStateOf(false) }
