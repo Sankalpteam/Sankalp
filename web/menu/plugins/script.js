@@ -296,7 +296,9 @@ window.initMenuPlugins = function () {
     } else if (current.connected === false) {
       note.textContent = provider.offNote;
     } else {
-      note.textContent = 'Connection status unavailable';
+      note.textContent = current.reason
+        ? `Connection status unavailable · ${current.reason}`
+        : 'Connection status unavailable';
     }
 
     text.appendChild(title);
@@ -368,6 +370,18 @@ window.initMenuPlugins = function () {
     }, answer);
   }
 
+  // "Indoone backend returned 401" becomes "401"; a thrown TypeError becomes "network".
+  function shortReason(error) {
+    const message = String(error?.message || '');
+
+    const status = message.match(/\b(\d{3})\b/);
+    if (status) return status[1];
+
+    if (/fetch|network|load failed/i.test(message)) return 'network';
+
+    return message.slice(0, 24) || 'failed';
+  }
+
   async function refresh() {
     loading = true;
     if (checking) checking.hidden = false;
@@ -413,9 +427,11 @@ window.initMenuPlugins = function () {
           entry.account = String(at(list, provider.addressPath) || '');
         }
       } catch (error) {
-        // the app leaves the row saying the status is unavailable, but the
-        // page says why, so a failure is not mistaken for an empty account
+        // Keep the reason. "Connection status unavailable" told a person nothing and told me
+        // nothing either: a 404 (no such route), a 401 (token refused) and a network failure all
+        // looked the same. The card now carries the short reason.
         entry.connected = null;
+        entry.reason = shortReason(error);
         if (!firstProblem) firstProblem = error?.message || 'Could not reach the backend.';
       }
     }));
