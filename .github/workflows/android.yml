@@ -133,16 +133,16 @@ jobs:
 
           payload="$(jq -n --argjson code "$INDOONE_BUILD_VERSION_CODE" --arg name "$version_name" --arg url "$download_url" --arg notes "$notes" '{versionCode: $code, versionName: $name, downloadUrl: $url, notes: $notes}')"
 
-          current_sha="$(gh api "repos/${GITHUB_REPOSITORY}/contents/web/update.json?ref=web" --jq .sha 2>/dev/null || true)"
+          current_sha="$(gh api "repos/${GITHUB_REPOSITORY}/contents/web/update.json?ref=main" --jq .sha 2>/dev/null || true)"
           if [ -n "$current_sha" ]; then
             gh api -X PUT "repos/${GITHUB_REPOSITORY}/contents/web/update.json" \
               -f message="chore(web): publish update manifest for build ${INDOONE_BUILD_VERSION_CODE}" \
               -f content="$(printf '%s' "$payload" | base64 -w0)" \
               -f sha="$current_sha" \
-              -f branch=web >/dev/null
+              -f branch=main >/dev/null
             echo "Published web/update.json for build ${INDOONE_BUILD_VERSION_CODE}."
           else
-            echo "web/update.json not found on the web branch; skipped the manifest update."
+            echo "web/update.json not found on the main branch; skipped the manifest update."
           fi
 
   sync-main-to-develop:

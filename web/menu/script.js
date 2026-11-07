@@ -7,6 +7,11 @@
   // Bumped with the three plugin stylesheets added in this change: they are
   // fetched as <base>/style.css?v=<this>, and that exact URL used to 404, so a
   // browser that cached the miss would otherwise keep asking for it.
+  // One version for every asset this loader pulls in, and the same string is written into
+  // index.html's tags. They have to move together: index.html pinned menu/script.js to a
+  // version from October while this constant had been bumped several times, so a returning
+  // browser kept the old loader, which kept asking for the old section scripts - and the
+  // plugins page went on showing a provider that had been removed weeks earlier.
   const ASSET_VERSION = '20261107c';
   let suppressNextUnderlyingClick = false;
 
