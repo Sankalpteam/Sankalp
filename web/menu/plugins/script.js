@@ -12,6 +12,11 @@
     {
       id: 'email',
       title: 'Email',
+      // There is no Gmail integration on the backend: app/ has no /integrations/gmail route at
+      // all, so every call below answers 404. Offering the card anyway made the page say
+      // "Connection status unavailable" for a provider that can never be connected, which reads
+      // like a network blip rather than a missing feature.
+      available: false,
       offNote: 'Connect your Gmail account',
       defaultAccount: 'Gmail account',
       status: 'api/integrations/gmail/status',
@@ -286,6 +291,8 @@ window.initMenuPlugins = function () {
         line.textContent = '● Connected';
         line.style.color = connectedColour();
       }
+    } else if (provider.available === false) {
+      note.textContent = 'Not available yet';
     } else if (current.connected === false) {
       note.textContent = provider.offNote;
     } else {
@@ -309,7 +316,9 @@ window.initMenuPlugins = function () {
       card.appendChild(browse);
     }
 
-    if (current.connected === true) {
+    if (provider.available === false) {
+      // no + and no more menu: there is nothing behind either of them
+    } else if (current.connected === true) {
       card.appendChild(moreMenu(provider));
     } else {
       card.appendChild(plusButton(provider));
@@ -367,6 +376,12 @@ window.initMenuPlugins = function () {
 
     await Promise.all(window.IndoonePlugins.PROVIDERS.map(async provider => {
       const entry = state[provider.id];
+
+      if (provider.available === false) {
+        entry.connected = false;
+        entry.account = '';
+        return;
+      }
 
       try {
         const answer = await window.IndoonePlugins.statusOf(provider);
