@@ -156,19 +156,27 @@
     }
   }
 
+  const IST = { timeZone: 'Asia/Kolkata' };
+
   function whenLabel(millis) {
     if (!millis) {
       return '';
     }
 
     const then = new Date(Number(millis));
-    const now = new Date();
 
-    if (then.toDateString() === now.toDateString()) {
-      return then.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Asia/Kolkata, always - the same zone the app formats in. Using the browser's own zone
+    // meant a device set to another part of the world showed a different day for the same
+    // message, which reads as the wrong date rather than as a timezone.
+    const sameDay =
+      then.toLocaleDateString(IST, { day: '2-digit', month: '2-digit', year: 'numeric' }) ===
+      new Date().toLocaleDateString(IST, { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    if (sameDay) {
+      return then.toLocaleTimeString(IST, { hour: '2-digit', minute: '2-digit' });
     }
 
-    return then.toLocaleDateString();
+    return then.toLocaleDateString(IST, { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   async function openResume(conversationId) {
