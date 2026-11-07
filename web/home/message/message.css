@@ -87,6 +87,13 @@
   display: block;
 }
 
+/* A reply that carries link rows is a list, and a list reads across the line - which is what
+   the app shows. A reply that is only words still sizes to its words, so a short answer is a
+   small bubble rather than a full-width bar. */
+.chat-row.theirs .chat-bubble:has(.chat-link-row) {
+  width: 100%;
+}
+
 .chat-gap {
   margin-top: 8px;
 }
@@ -101,7 +108,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  max-width: 250px;
+  /* The row filled only 250px, so the bubble shrank to fit it and every repository list came
+     out as a narrow column with the URLs cut to "https://github.com/indoonetea...". The app
+     gives the row the bubble's width. */
+  width: 100%;
   padding: 5px 5px 5px 12px;
   border: 1px solid #e6def4;
   border-radius: 12px;
