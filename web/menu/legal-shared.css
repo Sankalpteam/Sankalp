@@ -1,0 +1,88 @@
+/*
+ * One set of rules for the four information pages: Privacy Policy, Terms of Use,
+ * Data & Privacy and Security.
+ *
+ * They were four independent stylesheets, so the same document rendered four different ways -
+ * a different modal width, a different date colour, a different body size, and in two of them
+ * no scroll container at all, which is why the text stopped short of the bottom and left a
+ * white band under it.
+ *
+ * Each section's own style.css imports this, so a page cannot drift from the others again.
+ */
+
+[data-menu-section="privacy-policy"],
+[data-menu-section="terms-of-use"],
+[data-menu-section="data-privacy"],
+[data-menu-section="security"],
+.privacy-policy-shell,
+.terms-of-use-shell {
+  width: min(860px, 100%);
+}
+
+/* The date line under the title. */
+[data-menu-section="privacy-policy"] .privacy-updated,
+[data-menu-section="terms-of-use"] .privacy-updated,
+[data-menu-section="terms-of-use"] .terms-updated,
+[data-menu-section="data-privacy"] .privacy-updated,
+[data-menu-section="security"] .privacy-updated {
+  margin: 0 0 16px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* The scrolling body. Both class names are used across the four pages. */
+[data-menu-section="privacy-policy"] .privacy-content,
+[data-menu-section="terms-of-use"] .privacy-content,
+[data-menu-section="terms-of-use"] .terms-content,
+[data-menu-section="data-privacy"] .privacy-content,
+[data-menu-section="security"] .privacy-content {
+  /*
+   * No max-height and no overflow here.
+   *
+   * The sheet itself already scrolls (#modal is overflow-y: auto in style.css). Giving the body
+   * a second scroll container at 60vh meant the inner box stopped short of the sheet, so the
+   * last few inches were unreachable and read as a white band under the text. One scroll
+   * container, and the content runs to the bottom.
+   */
+  padding-right: 8px;
+  padding-bottom: 28px;
+}
+
+[data-menu-section="privacy-policy"] .privacy-content h3,
+[data-menu-section="terms-of-use"] .privacy-content h3,
+[data-menu-section="terms-of-use"] .terms-content h3,
+[data-menu-section="data-privacy"] .privacy-content h3,
+[data-menu-section="security"] .privacy-content h3 {
+  margin: 18px 0 8px;
+  color: #2c2733;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+[data-menu-section="privacy-policy"] .privacy-content h3:first-child,
+[data-menu-section="terms-of-use"] .privacy-content h3:first-child,
+[data-menu-section="terms-of-use"] .terms-content h3:first-child,
+[data-menu-section="data-privacy"] .privacy-content h3:first-child,
+[data-menu-section="security"] .privacy-content h3:first-child {
+  margin-top: 0;
+}
+
+[data-menu-section="privacy-policy"] .privacy-content p,
+[data-menu-section="terms-of-use"] .privacy-content p,
+[data-menu-section="terms-of-use"] .terms-content p,
+[data-menu-section="data-privacy"] .privacy-content p,
+[data-menu-section="security"] .privacy-content p {
+  margin: 0 0 10px;
+  color: #4a4552;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+[data-menu-section="privacy-policy"] .privacy-content p:last-child,
+[data-menu-section="terms-of-use"] .privacy-content p:last-child,
+[data-menu-section="terms-of-use"] .terms-content p:last-child,
+[data-menu-section="data-privacy"] .privacy-content p:last-child,
+[data-menu-section="security"] .privacy-content p:last-child {
+  margin-bottom: 0;
+}
