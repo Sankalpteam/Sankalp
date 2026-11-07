@@ -21,7 +21,7 @@ fun TermsOfUseScreen(
 
     LegalWebScreen(
         title = "Terms of Use",
-        path = "/menu/terms-of-use/",
+        path = "/legal/terms-of-use.html",
         assetFile = "legal/terms-of-use.html",
         onBack = onBack,
     )

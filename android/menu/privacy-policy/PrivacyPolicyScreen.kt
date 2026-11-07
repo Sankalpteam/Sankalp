@@ -23,7 +23,7 @@ fun PrivacyPolicyScreen(
 
     LegalWebScreen(
         title = "Privacy Policy",
-        path = "/menu/privacy-policy/",
+        path = "/legal/privacy-policy.html",
         assetFile = "legal/privacy-policy.html",
         onBack = onBack,
     )

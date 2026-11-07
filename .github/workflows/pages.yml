@@ -39,6 +39,13 @@ jobs:
           test -f web/index.html
           test -f web/update.json
 
+      - name: Build the standalone legal pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Generated from web/menu/<slug>/index.html, which is the copy a person edits.
+          python3 scripts/legal_pages.py
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
