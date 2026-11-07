@@ -1,20 +1,4 @@
-.menu-feature-shell { display: block; }
-.menu-feature-list { display: grid; gap: 8px; }
-.menu-feature-row { width: 100%; }
-.menu-feature-note { margin: 8px 0 12px; color: #8a8492; font-size: 12px; line-height: 1.5; }
-.menu-feature-actions { display: grid; gap: 8px; margin-top: 12px; }
+@import url("../legal-shared.css");
 
-/* SecurityScreen.kt's header close is a 35dp box holding the word "Close"
-   (12sp, 0xFF5D5666), not the × glyph the other sheets use. */
-.menu-feature-shell[data-menu-section="security"] .close-btn.close-text {
-  width: 35px;
-  height: 35px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 11px;
-  background: #f5f2f8;
-  color: #5d5666;
-  font-size: 12px;
-  font-weight: 400;
-}
+/* Security is a document now: the four points that used to be cards in the app are sections
+   here, and legal-shared.css carries the width, date line, scroll container and typography. */

@@ -1,26 +1,2 @@
-.privacy-policy-shell {
-  width: min(860px, 100%);
-}
+@import url("../legal-shared.css");
 
-.privacy-updated {
-  margin: 0 0 16px;
-  color: var(--muted-text, #6b7280);
-  font-size: 13px;
-}
-
-.privacy-content {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-.privacy-content h3 {
-  margin: 18px 0 8px;
-  font-size: 15px;
-}
-
-.privacy-content p {
-  margin: 0;
-  line-height: 1.6;
-  font-size: 14px;
-}
