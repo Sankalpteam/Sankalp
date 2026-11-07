@@ -70,10 +70,10 @@
     </h3>
     <p>
       You can change your registered email address and mobile number from Profile.
-      If you forget your password, Forgot Password on the sign-in screen sends a
-      reset link to your registered email, and that link is how a password is
-      changed - there is no separate in-app password screen. Recovery of an
-      account you can no longer sign into is not available yet.
+      On the website, Forgot Password sends a reset link to your registered email,
+      and that link is how a password is changed there. The Android app has no
+      password reset yet, and an account you can no longer sign into cannot be
+      recovered for you.
     </p>
 
     <h3>
@@ -90,9 +90,11 @@
       7. Backup and Recovery
     </h3>
     <p>
-      Indoone may provide encrypted recovery PDF and supported device backup
-      features. You are responsible for keeping your recovery files, PINs,
-      passwords, and other recovery information secure.
+      Authenticator accounts are kept in an encrypted vault on your device and
+      synced to your account, so signing in on another device brings them back.
+      The website can produce a recovery PDF. The Android app has no separate
+      backup file yet. You are responsible for keeping your password, your PIN and
+      any recovery file you export secure.
     </p>
 
     <h3>
@@ -148,13 +150,13 @@
       14. Connected Services
     </h3>
     <p>
-      You may connect services such as GitHub, Zoho Mail and a calendar. When you ask a question that needs one of them, Indoone reads only what that question requires and passes the result to the AI model so it can explain it. Access tokens are stored securely and are never included in what the model sees, in logs, or in a reply. You can disconnect a service at any time, and no further reads happen after you do.
+      You may connect GitHub, Gmail or Zoho Mail. When you ask a question that needs one of them, Indoone reads only what that question requires and passes the result to the AI model so it can explain it. Access tokens are stored securely and are never included in what the model sees, in logs, or in a reply. You can disconnect a service at any time, and no further reads happen after you do.
     </p>
     <h3>
       15. Voice
     </h3>
     <p>
-      If you use the voice feature, the audio you record is sent to a speech provider to be converted to text. The text then follows the same path as a typed message, described above. Indoone does not keep the recording after it has been transcribed, and the transcript is retained only as part of the conversation it belongs to.
+      The app uses the speech engine on your phone to turn your voice into text, and the phone's own text-to-speech to read a reply aloud. The recording goes to that engine, which your device or its speech service provides - Indoone does not receive or keep the audio. The transcript follows the same path as a typed message, described above.
     </p>
     <h3>
       16. Running Code
