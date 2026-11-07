@@ -1,2 +1,8 @@
-@import url("../legal-shared.css");
-
+/*
+ * Privacy Policy has no rules of its own: web/menu/legal-shared.css carries its width, date
+ * chip, scroll behaviour and typography, and menu/script.js loads that sheet for all four
+ * information pages.
+ *
+ * This file stays because the loader asks every section for <section>/style.css, and a missing
+ * file answers 404 - which this app has been bitten by before.
+ */

@@ -7,7 +7,7 @@
   // Bumped with the three plugin stylesheets added in this change: they are
   // fetched as <base>/style.css?v=<this>, and that exact URL used to 404, so a
   // browser that cached the miss would otherwise keep asking for it.
-  const ASSET_VERSION = '20261023f';
+  const ASSET_VERSION = '20261107a';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
@@ -252,6 +252,15 @@
 
   async function loadStyle(base) {
     if (loadedStyles.has(base)) return;
+
+    // The four information pages share one stylesheet. It is loaded here, with the version,
+    // rather than by an @import inside each style.css: an @import carries no query string, so
+    // the browser kept serving its cached copy and a colour change never arrived.
+    const shared = document.createElement('link');
+    shared.rel = 'stylesheet';
+    shared.href = `menu/legal-shared.css?v=${ASSET_VERSION}`;
+    document.head.appendChild(shared);
+
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = `${base}/style.css?v=${ASSET_VERSION}`;
