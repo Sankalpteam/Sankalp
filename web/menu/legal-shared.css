@@ -19,14 +19,22 @@
   width: min(860px, 100%);
 }
 
-/* The date line under the title. */
+/*
+ * The date line under the title, as the same purple chip the app draws: #F3EDFF behind,
+ * #6330DB text, 9px radius. It was grey on the web and purple in the app, so the same
+ * sentence looked like two different things depending on where you read it.
+ */
 [data-menu-section="privacy-policy"] .privacy-updated,
 [data-menu-section="terms-of-use"] .privacy-updated,
 [data-menu-section="terms-of-use"] .terms-updated,
 [data-menu-section="data-privacy"] .privacy-updated,
 [data-menu-section="security"] .privacy-updated {
+  display: inline-block;
   margin: 0 0 16px;
-  color: #6b7280;
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: #f3edff;
+  color: #6330db;
   font-size: 13px;
   line-height: 1.4;
 }
