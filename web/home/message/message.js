@@ -39,42 +39,46 @@
   function replyParts(text) {
     const source = String(text || '');
     const parts = [];
-    let last = 0;
-    let match;
+
+    // Both patterns are matched in one pass, in the order they appear.
+    //
+    // They used to run one after the other: every [label](url) was found first and the text
+    // before the first one was pushed as a single prose run - so a reply that ended with a
+    // markdown link left every bare URL above it inline in the text, wrapped across the line
+    // and with no copy button. The same reply without the markdown link rendered correctly,
+    // which is why it looked like an intermittent display bug.
+    const found = [];
 
     MARKDOWN_LINK_PATTERN.lastIndex = 0;
-
+    let match;
     while ((match = MARKDOWN_LINK_PATTERN.exec(source)) !== null) {
-      const prose = source.slice(last, match.index);
-
-      if (prose) {
-        parts.push({ prose });
-      }
-
-      parts.push({ label: match[1], url: match[2] });
-      last = match.index + match[0].length;
+      found.push({ start: match.index, end: match.index + match[0].length, label: match[1], url: match[2] });
     }
-
-    const tailAfterMarkdown = source.slice(last);
-    const markdownPrefixLength = last;
 
     REPLY_LINK_PATTERN.lastIndex = 0;
-
-    while ((match = REPLY_LINK_PATTERN.exec(tailAfterMarkdown)) !== null) {
-      const prose = tailAfterMarkdown.slice(last - markdownPrefixLength, match.index);
-
-      if (prose) {
-        parts.push({ prose });
-      }
-
-      parts.push({ url: match[0] });
-      last = markdownPrefixLength + match.index + match[0].length;
+    while ((match = REPLY_LINK_PATTERN.exec(source)) !== null) {
+      const start = match.index;
+      const end = start + match[0].length;
+      // a URL that is already the target of a markdown link is not a second part
+      if (found.some(item => start >= item.start && start < item.end)) continue;
+      found.push({ start, end, url: match[0] });
     }
 
-    const tail = source.slice(last);
+    found.sort((a, b) => a.start - b.start);
 
-    if (tail) {
-      parts.push({ prose: tail });
+    let last = 0;
+
+    found.forEach(item => {
+      if (item.start > last) {
+        parts.push({ prose: source.slice(last, item.start) });
+      }
+
+      parts.push(item.label ? { label: item.label, url: item.url } : { url: item.url });
+      last = item.end;
+    });
+
+    if (last < source.length) {
+      parts.push({ prose: source.slice(last) });
     }
 
     return parts;
