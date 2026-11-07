@@ -22,9 +22,19 @@ import pathlib
 import re
 import sys
 
+# The four information screens. Each has one job, and none of them repeats another:
+#
+#   privacy-policy  what we collect and who sees it   (legal)
+#   terms-of-use    the rules you agree to            (legal)
+#   data-privacy    what is stored and for how long   (product facts)
+#   security        how the account is protected      (product facts)
+#
+# All four are written once, in web/menu/<slug>/index.html, and everything else is generated.
 DOCUMENTS = (
     ("privacy-policy", "Privacy Policy"),
     ("terms-of-use", "Terms of Use"),
+    ("data-privacy", "Data & Privacy"),
+    ("security", "Security"),
 )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent

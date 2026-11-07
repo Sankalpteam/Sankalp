@@ -3,8 +3,12 @@
   data-menu-feature
   data-menu-section="data-privacy"
 >
-  <div class="modal-head">
-    <h2>Data &amp; Privacy</h2>
+  <div
+    class="modal-head"
+  >
+    <h2>
+      Data &amp; Privacy
+    </h2>
     <button
       type="button"
       class="close-btn"
@@ -15,81 +19,59 @@
     </button>
   </div>
 
-  <div class="privacy-hero">
-    <span class="privacy-hero-tile" aria-hidden="true">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M12 3.2 20 6v6c0 4.2-3.2 7.6-8 8.8C7.2 19.6 4 16.2 4 12V6z"></path>
-        <path d="M12 9v4"></path>
-        <path d="M12 15.6h.01"></path>
-      </svg>
-    </span>
-    <span class="privacy-hero-text">
-      <b>Your data, your control</b>
-      <small>See what Indoone stores and how each part is used.</small>
-    </span>
-  </div>
+  <p
+    class="privacy-updated"
+  >
+    Last Updated: 07/11/2026
+  </p>
 
-  <div class="menu-feature-list">
-    <div class="settings-row">
-      <span>
-        <b>Profile</b>
-        <small>Name and other profile fields are user-controlled. Account email/mobile and existing authentication data stay in the existing account structure.</small>
-      </span>
-    </div>
+  <div
+    class="privacy-content"
+  >
+    <h3>
+      1. Profile
+    </h3>
+    <p>
+      Your name and the other profile fields are yours to change. Your account email, mobile
+      number and the authentication data behind them stay in the account structure they were
+      created in; the assistant cannot change them on its own.
+    </p>
 
-    <div class="settings-row">
-      <span>
-        <b>AI Memory</b>
-        <small>Only validated important long-term information should become memory. Name should not be silently changed by AI. Memory can be reviewed and deleted by the user.</small>
-      </span>
-    </div>
+    <h3>
+      2. AI Memory
+    </h3>
+    <p>
+      Memory only holds information that was validated as important enough to keep. The
+      assistant never silently changes your name or your profile, and everything in memory can be
+      reviewed and deleted by you.
+    </p>
 
-    <div class="settings-row">
-      <span>
-        <b>Chat History</b>
-        <small>Chats are account-linked and designed for multi-device sync. A conversation closes at 50 messages and the retention policy targets closed chats after 7 days of inactivity.</small>
-      </span>
-    </div>
+    <h3>
+      3. Chat History
+    </h3>
+    <p>
+      Conversations belong to your account and are built for multi-device sync. A conversation
+      closes at 50 messages, and a closed conversation is kept for 7 days of inactivity before it
+      is removed.
+    </p>
 
-    <div class="settings-row">
-      <span>
-        <b>Storage</b>
-        <small>Account, profile and memory data are stored separately from chat conversations and messages. Large files can be added later through object storage without changing the account identity model.</small>
-      </span>
-    </div>
+    <h3>
+      4. Storage
+    </h3>
+    <p>
+      Account, profile and memory data are stored separately from your conversations and messages,
+      so a chat is never part of your identity record. Larger files can be added later through
+      object storage without changing how an account is identified.
+    </p>
 
-    <div class="settings-row">
-      <span>
-        <b>Security</b>
-        <small>Reads and writes should be restricted to the authenticated user's UID. Destructive data actions will be added only after the server-side rules and retention worker are ready.</small>
-      </span>
-    </div>
-  </div>
-
-  <div class="privacy-footer">
-    <svg
-      class="privacy-footer-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="8"></circle>
-      <path d="M12 10.5v5"></path>
-      <path d="M12 7.5h.01"></path>
-    </svg>
-    <span>
-      This page reflects the current Indoone storage and security design. Future data-policy updates can be added as new sections without changing the existing layout.
-    </span>
+    <h3>
+      5. Access
+    </h3>
+    <p>
+      Reads and writes are restricted to the account that made them, so one user's data is never
+      reachable from another's session. Destructive data actions are added only once the
+      server-side rules and the retention worker are ready, which is why some of them are still
+      missing from the app.
+    </p>
   </div>
 </section>
