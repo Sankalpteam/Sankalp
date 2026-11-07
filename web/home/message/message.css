@@ -87,11 +87,12 @@
   display: block;
 }
 
-/* A reply that carries link rows is a list, and a list reads across the line - which is what
-   the app shows. A reply that is only words still sizes to its words, so a short answer is a
-   small bubble rather than a full-width bar. */
+/* A reply that carries link rows is a list, and a list needs room for the whole URL - which is
+   what the app shows. Three quarters of the column is that room: the full width made every
+   list look like a page rather than a message, and the old 250px cap cut the URLs. A reply
+   that is only words still sizes to its words, so a short answer stays a small bubble. */
 .chat-row.theirs .chat-bubble:has(.chat-link-row) {
-  width: 100%;
+  width: 75%;
 }
 
 .chat-gap {
