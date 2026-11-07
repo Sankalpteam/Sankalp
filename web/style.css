@@ -1385,3 +1385,15 @@ html, body { height: 100%; }
     padding-right: 34px;
   }
 }
+
+/* The build the page was served from, in plain text at the foot of the drawer.
+   It is here so that "it still looks wrong" becomes a number we can both read: if
+   this says anything other than the version in index.html, the browser is serving a
+   copy it kept, and no amount of redeploying will change what that person sees. */
+.drawer-build {
+  margin: 10px 0 2px;
+  padding: 0 10px;
+  color: #a9a2b4;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
