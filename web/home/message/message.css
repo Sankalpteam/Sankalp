@@ -78,6 +78,10 @@
   border-radius: 18px 18px 18px 5px;
   background: #f5f2fb;
   color: #292331;
+  /* Every reply stops at three quarters of the line. Without this a long answer ran edge to
+     edge and read like a page, while a short one was a small bubble - two shapes for the same
+     voice. The cap keeps them one shape; a short reply is still only as wide as its words. */
+  max-width: 75%;
 }
 
 /* One part of a reply is a block, so the 8px gap above every part after the
