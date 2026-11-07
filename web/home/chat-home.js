@@ -107,7 +107,12 @@
   // greets you by name - the profile in users/<uid>/profile carries one - and
   // the greeting below puts it on the empty screen too, with the hour.
   function partOfDay() {
-    const hour = new Date().getHours();
+    // The hour in Kolkata, not in whatever zone the browser thinks it is in. A device set
+    // elsewhere was greeted with "Good evening" at ten in the morning, which is the same
+    // mistake the dates had.
+    const hour = Number(
+      new Date().toLocaleString('en-GB', { ...IST, hour: '2-digit', hour12: false }).slice(0, 2)
+    );
 
     if (hour < 12) {
       return 'Good morning';
