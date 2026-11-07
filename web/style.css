@@ -612,8 +612,13 @@ body {
   height: 18px;
 }
 
-/* 13sp, lineHeight 17sp, SemiBold, 0xFF34445F, 11dp in from the tile */
-.drawer-item span {
+/* 13sp, lineHeight 17sp, SemiBold, 0xFF34445F, 11dp in from the tile.
+ *
+ * The selector is the label span only. It used to be ".drawer-item span", which also matched
+ * the icon tile - the tile is a span too - so the tile carried 11px of left padding, its
+ * content box shrank, and the centred icon sat 5.5px to the right of where it should be.
+ * That is the offset that showed in the drawer but never in the app. */
+.drawer-item > span:not([data-app-icon]) {
   flex: 1;
   padding-left: 11px;
   font-size: 13px;
