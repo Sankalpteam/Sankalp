@@ -1,6 +1,6 @@
 {
-  "versionCode": 2912,
-  "versionName": "2.1.16",
-  "downloadUrl": "https://github.com/indooneteam/indoone/releases/latest/download/indoone-terminal.apk",
-  "notes": "Indoone 2.1.16. Privacy Policy and Terms of Use now describe the assistant: which model providers see your messages, how Aadhaar, PAN and card numbers are masked before the model sees them, what connected services are read, how voice and code execution work, and that share links are public and permanent."
+  "versionCode": 2944,
+  "versionName": "2.1.17",
+  "downloadUrl": "https://github.com/indooneteam/indoone/releases/download/terminal-build-2944/indoone-terminal.apk",
+  "notes": "Indoone 2.1.17. Build 2944 from the terminal branch."
 }
