@@ -10,19 +10,27 @@ window.initMenuChatHistory = function () {
   }
 
   // Today reads as a time, anything older as a date - the app does the same.
+  const IST = { timeZone: 'Asia/Kolkata' };
+
   function whenLabel(millis) {
     if (!millis) {
       return '';
     }
 
     const then = new Date(Number(millis));
-    const now = new Date();
 
-    if (then.toDateString() === now.toDateString()) {
-      return then.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    // Asia/Kolkata, always - the zone the app formats in, so the same conversation reads the
+    // same on both. The browser's own zone put a message in the wrong day for anyone whose
+    // device is set elsewhere.
+    const sameDay =
+      then.toLocaleDateString(IST, { day: '2-digit', month: '2-digit', year: 'numeric' }) ===
+      new Date().toLocaleDateString(IST, { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    if (sameDay) {
+      return then.toLocaleTimeString(IST, { hour: 'numeric', minute: '2-digit' });
     }
 
-    return then.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    return then.toLocaleDateString(IST, { day: 'numeric', month: 'short' });
   }
 
   function metaLine(chat) {
