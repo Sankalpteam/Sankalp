@@ -95,6 +95,7 @@ fun LegalWebScreen(
             // screenshot. Without this row the app showed the text and hid the one thing that
             // makes it verifiable.
             LegalAddressBar(
+                title = title,
                 url = LEGAL_BASE_URL + path,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
@@ -162,7 +163,7 @@ fun LegalWebScreen(
  * than one that is out of date. Both are accepted while the old links are still in the wild.
  */
 @Composable
-private fun LegalAddressBar(url: String, modifier: Modifier = Modifier) {
+private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var copied by remember(url) { mutableStateOf(false) }
 
@@ -170,14 +171,26 @@ private fun LegalAddressBar(url: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth().padding(bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = url.removePrefix("https://"),
-            modifier = Modifier.weight(1f),
-            fontSize = 12.sp,
-            color = Color(0xFF6B5B86),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            // What the page is, then where it lives. The two together are what makes a link
+            // worth sending: "Privacy Policy" alone could be any page, and an address alone
+            // does not say what someone is being asked to read.
+            Text(
+                text = title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF2C2733),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = url.removePrefix("https://"),
+                fontSize = 11.sp,
+                color = Color(0xFF6B5B86),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
 
         IconButton(
             onClick = {
