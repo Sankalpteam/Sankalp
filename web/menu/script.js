@@ -12,7 +12,7 @@
   // version from October while this constant had been bumped several times, so a returning
   // browser kept the old loader, which kept asking for the old section scripts - and the
   // plugins page went on showing a provider that had been removed weeks earlier.
-  const ASSET_VERSION = '20261108c';
+  const ASSET_VERSION = '20261108d';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
