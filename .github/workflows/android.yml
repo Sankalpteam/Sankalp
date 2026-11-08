@@ -145,6 +145,12 @@ jobs:
             echo "web/update.json not found on the main branch; skipped the manifest update."
           fi
 
+  # main is where everything lands, and two branches have to follow it. develop is what a
+  # person reads, terminal is the working branch; either one drifting is how the same file
+  # starts behaving differently depending on which branch a browser is looking at.
+  #
+  # terminal was missing here, and it did drift: a web change merged to main left terminal a
+  # commit behind, so the site and the branch disagreed about what was live.
   sync-main-to-develop:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -156,12 +162,14 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Merge main into develop
+      - name: Merge main into develop and terminal
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin develop
-          git checkout -B develop origin/develop
-          git merge --no-edit origin/main
-          git push origin develop
+          for branch in develop terminal; do
+            git fetch origin "$branch"
+            git checkout -B "$branch" "origin/$branch"
+            git merge --no-edit origin/main
+            git push origin "$branch"
+          done
