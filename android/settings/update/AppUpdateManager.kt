@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -17,6 +18,15 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object AppUpdateManager {
+    /**
+     * A download that failed, and whether trying again could help.
+     *
+     * A 504 from the CDN is worth another attempt; a 404 is not. Treating the two the same is
+     * how an update either gives up on a bad afternoon or burns a person's data retrying a
+     * file that is not there.
+     */
+    private class DownloadFailure(message: String, val worthRetrying: Boolean) : Exception(message)
+
     data class UpdateInfo(
         val versionCode: Long,
         val downloadUrl: String,
@@ -190,6 +200,17 @@ object AppUpdateManager {
      * link reopening it costs a full round trip. Reporting on every percent meant
      * around a hundred such pauses per download.
      */
+    /**
+     * The release page, for when the direct download will not come through.
+     *
+     * A CDN answering 504 is not something this app can fix, and a person who cannot install
+     * an update has no way forward unless the app gives them one.
+     */
+    const val RELEASE_PAGE_URL = "https://github.com/indooneteam/indoone/releases/latest"
+
+    /** How many times a failed download is tried again before the person is told. */
+    private const val DOWNLOAD_ATTEMPTS = 3
+
     suspend fun downloadApk(
         context: Context,
         update: UpdateInfo,
@@ -197,51 +218,104 @@ object AppUpdateManager {
     ): File = withContext(Dispatchers.IO) {
         val updateDir = File(context.cacheDir, UPDATE_DIR).apply { mkdirs() }
         val apkFile = File(updateDir, APK_ASSET_NAME)
-        if (apkFile.exists()) apkFile.delete()
 
-        val request = Request.Builder()
-            .url(update.downloadUrl)
-            .header("User-Agent", "Indoone-Android-Updater")
-            .build()
+        var lastFailure: Throwable? = null
 
-        downloadClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                error("APK download failed: HTTP ${response.code}")
-            }
+        for (attempt in 1..DOWNLOAD_ATTEMPTS) {
+            try {
+                return@withContext downloadOnce(update, apkFile, onProgress)
+            } catch (error: DownloadFailure) {
+                lastFailure = error
 
-            val body = response.body ?: error("APK download returned no file.")
-            val totalBytes = body.contentLength().takeIf { it > 0L } ?: update.sizeBytes
-            onProgress(0L, totalBytes)
+                // A 4xx is an answer, not an accident: retrying a 404 or a 403 only wastes the
+                // person's data. A 5xx, or a connection that died mid-file, is worth another try.
+                if (!error.worthRetrying) break
 
-            body.byteStream().use { input ->
-                apkFile.outputStream().use { output ->
-                    val buffer = ByteArray(PROGRESS_BUFFER_BYTES)
-                    var copied = 0L
-                    var lastReportedAt = 0L
-
-                    while (true) {
-                        val read = input.read(buffer)
-                        if (read <= 0) break
-
-                        output.write(buffer, 0, read)
-                        copied += read
-
-                        // A few reports a second is plenty for the figure the user
-                        // reads, and it keeps the read loop moving.
-                        val now = System.currentTimeMillis()
-                        if (now - lastReportedAt >= PROGRESS_INTERVAL_MS) {
-                            lastReportedAt = now
-                            onProgress(copied, totalBytes)
-                        }
-                    }
-
-                    onProgress(copied, totalBytes)
+                if (attempt < DOWNLOAD_ATTEMPTS) {
+                    delay(attempt * 2_000L)
                 }
             }
         }
 
+        throw lastFailure ?: error("APK download failed.")
+    }
+
+    /** One attempt. A partial file is kept, so the next attempt resumes instead of restarting. */
+    private suspend fun downloadOnce(
+        update: UpdateInfo,
+        apkFile: File,
+        onProgress: suspend (downloadedBytes: Long, totalBytes: Long) -> Unit,
+    ): File {
+        val alreadyHave = if (apkFile.exists()) apkFile.length() else 0L
+        if (alreadyHave >= update.sizeBytes && update.sizeBytes > 0L) {
+            return apkFile
+        }
+
+        val request = Request.Builder()
+            .url(update.downloadUrl)
+            .header("User-Agent", "Indoone-Android-Updater")
+            .apply { if (alreadyHave > 0L) header("Range", "bytes=$alreadyHave-") }
+            .build()
+
+        downloadClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw DownloadFailure(
+                    "APK download failed: HTTP ${response.code}",
+                    worthRetrying = response.code >= 500,
+                )
+            }
+
+            val body = response.body ?: throw DownloadFailure("APK download returned no file.", true)
+
+            // 206 means the server honoured the Range and is sending the rest; anything else
+            // means it started again, so the old bytes are thrown away rather than prepended.
+            val resuming = response.code == 206 && alreadyHave > 0L
+            if (!resuming && apkFile.exists()) apkFile.delete()
+
+            val totalBytes = (if (resuming) alreadyHave else 0L) +
+                (body.contentLength().takeIf { it > 0L } ?: update.sizeBytes)
+            onProgress(if (resuming) alreadyHave else 0L, totalBytes)
+
+            try {
+                body.byteStream().use { input ->
+                    // Append when resuming: truncating here would throw away the bytes the
+                    // Range asked to keep, and the file would end up holding only the tail.
+                    java.io.FileOutputStream(apkFile, resuming).use { output ->
+                        val buffer = ByteArray(PROGRESS_BUFFER_BYTES)
+                        var copied = if (resuming) alreadyHave else 0L
+                        var lastReportedAt = 0L
+
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read <= 0) break
+
+                            output.write(buffer, 0, read)
+                            copied += read
+
+                            // A few reports a second is plenty for the figure the user
+                            // reads, and it keeps the read loop moving.
+                            val now = System.currentTimeMillis()
+                            if (now - lastReportedAt >= PROGRESS_INTERVAL_MS) {
+                                lastReportedAt = now
+                                onProgress(copied, totalBytes)
+                            }
+                        }
+
+                        onProgress(copied, totalBytes)
+                    }
+                }
+            } catch (io: java.io.IOException) {
+                // The connection died mid-file. The bytes already on disk are kept, so the
+                // next attempt asks for the rest instead of starting again.
+                throw DownloadFailure(
+                    io.message ?: "The download was interrupted.",
+                    worthRetrying = true,
+                )
+            }
+        }
+
         if (!apkFile.exists() || apkFile.length() == 0L) {
-            error("Downloaded APK is empty.")
+            throw DownloadFailure("Downloaded APK is empty.", true)
         }
 
         apkFile

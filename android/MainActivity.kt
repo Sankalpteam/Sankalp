@@ -2,8 +2,10 @@ package com.indoone
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -240,11 +242,24 @@ class MainActivity : ComponentActivity() {
                         }.onSuccess {
                             updateReady = true
                         }.onFailure { error ->
+                            // A failed download used to end as a toast, and the person was
+                            // left with no way to install the update at all. The message now
+                            // says what happened and offers the release page, which is the one
+                            // route that does not depend on this app's download working.
                             Toast.makeText(
                                 this@MainActivity,
                                 error.message ?: "Could not download the update.",
                                 Toast.LENGTH_LONG,
                             ).show()
+
+                            runCatching {
+                                startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(AppUpdateManager.RELEASE_PAGE_URL),
+                                    ),
+                                )
+                            }
                         }
                         isDownloadingUpdate = false
                     }
