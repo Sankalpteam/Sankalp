@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="20261108b">
+<html lang="en" data-build="20261108c">
 <head>
   <meta charset="UTF-8" />
   <meta
@@ -77,24 +77,24 @@
     }
   </script>
 
-  <link rel="stylesheet" href="style.css?v=20261108b" />
-  <link rel="stylesheet" href="home/home.css?v=20261108b" />
-  <link rel="stylesheet" href="home/message/message.css?v=20261108b" />
-  <link rel="stylesheet" href="home/plus/plus.css?v=20261108b" />
+  <link rel="stylesheet" href="style.css?v=20261108c" />
+  <link rel="stylesheet" href="home/home.css?v=20261108c" />
+  <link rel="stylesheet" href="home/message/message.css?v=20261108c" />
+  <link rel="stylesheet" href="home/plus/plus.css?v=20261108c" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" />
-  <link rel="stylesheet" href="vibe/vibe.css?v=20261108b" />
-  <link rel="stylesheet" href="shared/safe-layout/safe-layout.css?v=20261108b" />
-  <link rel="stylesheet" href="bottom-nav-svg.css?v=20261108b" />
-  <link rel="stylesheet" href="shared/app-icons.css?v=20261108b" />
-  <link rel="stylesheet" href="menu/style.css?v=20261108b" />
-  <link rel="stylesheet" href="settings/settings.css?v=20261108b" />
-  <link rel="stylesheet" href="settings/profile/style.css?v=20261108b" />
-  <link rel="stylesheet" href="settings/update/style.css?v=20261108b" />
-  <link rel="stylesheet" href="settings/profile/change-email/style.css?v=20261108b" />
-  <link rel="stylesheet" href="settings/profile/change-mobile-number/style.css?v=20261108b" />
-  <link rel="stylesheet" href="authentication/auth.css?v=20261108b" />
-  <link rel="stylesheet" href="authentication/forgot-password/style.css?v=20261108b" />
+  <link rel="stylesheet" href="vibe/vibe.css?v=20261108c" />
+  <link rel="stylesheet" href="shared/safe-layout/safe-layout.css?v=20261108c" />
+  <link rel="stylesheet" href="bottom-nav-svg.css?v=20261108c" />
+  <link rel="stylesheet" href="shared/app-icons.css?v=20261108c" />
+  <link rel="stylesheet" href="menu/style.css?v=20261108c" />
+  <link rel="stylesheet" href="settings/settings.css?v=20261108c" />
+  <link rel="stylesheet" href="settings/profile/style.css?v=20261108c" />
+  <link rel="stylesheet" href="settings/update/style.css?v=20261108c" />
+  <link rel="stylesheet" href="settings/profile/change-email/style.css?v=20261108c" />
+  <link rel="stylesheet" href="settings/profile/change-mobile-number/style.css?v=20261108c" />
+  <link rel="stylesheet" href="authentication/auth.css?v=20261108c" />
+  <link rel="stylesheet" href="authentication/forgot-password/style.css?v=20261108c" />
 </head>
 
 <body>
@@ -545,14 +545,18 @@
         <span>Chat History</span>
       </button>
 
-      <button
-        type="button"
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
         class="drawer-item"
+        href="/legal/data-privacy.html"
         data-action="data-privacy"
       >
         <span data-app-icon="privacyTip"></span>
         <span>Data &amp; Privacy</span>
-      </button>
+      </a>
 
       <p class="drawer-section-label">ACCOUNTS</p>
 
@@ -576,32 +580,44 @@
 
       <p class="drawer-section-label">SECURITY &amp; INFORMATION</p>
 
-      <button
-        type="button"
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
         class="drawer-item"
+        href="/legal/security.html"
         data-action="security"
       >
         <span data-app-icon="security"></span>
         <span>Security</span>
-      </button>
+      </a>
 
-      <button
-        type="button"
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
         class="drawer-item"
+        href="/legal/terms-of-use.html"
         data-action="terms-of-use"
       >
         <span data-app-icon="description"></span>
         <span>Terms of Use</span>
-      </button>
+      </a>
 
-      <button
-        type="button"
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
         class="drawer-item"
+        href="/legal/privacy-policy.html"
         data-action="privacy-policy"
       >
         <span data-app-icon="visibility"></span>
         <span>Privacy Policy</span>
-      </button>
+      </a>
 
       <button
         type="button"
@@ -620,7 +636,7 @@
         <span data-app-icon="lock"></span>
         <span>Lock App</span>
       </button>
-      <p class="drawer-build">build 20261108b</p>
+      <p class="drawer-build">build 20261108c</p>
     </section>
   </aside>
 
@@ -793,51 +809,51 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-  <script src="authentication/firebase-config.js?v=20261108b"></script>
-  <script src="authentication/firebase-auth.js?v=20261108b"></script>
-  <script src="authentication/indoverification.js?v=20261108b"></script>
-  <script src="authentication/firebase-auth-otp.js?v=20261108b"></script>
-  <script src="authentication/auth-session-persistence.js?v=20261108b"></script>
-  <script src="authentication/forgot-password/script.js?v=20261108b"></script>
-  <script src="authentication/auth-page.js?v=20261108b"></script>
-  <script src="authentication/login/login.js?v=20261108b"></script>
-  <script src="authentication/sign-up/signup.js?v=20261108b"></script>
+  <script src="authentication/firebase-config.js?v=20261108c"></script>
+  <script src="authentication/firebase-auth.js?v=20261108c"></script>
+  <script src="authentication/indoverification.js?v=20261108c"></script>
+  <script src="authentication/firebase-auth-otp.js?v=20261108c"></script>
+  <script src="authentication/auth-session-persistence.js?v=20261108c"></script>
+  <script src="authentication/forgot-password/script.js?v=20261108c"></script>
+  <script src="authentication/auth-page.js?v=20261108c"></script>
+  <script src="authentication/login/login.js?v=20261108c"></script>
+  <script src="authentication/sign-up/signup.js?v=20261108c"></script>
 
-  <script src="home/home.js?v=20261108b"></script>
-  <script src="home/chat-home.js?v=20261108b"></script>
-  <script src="shared/branding.js?v=20261108b"></script>
-  <script src="shared/app-icons.js?v=20261108b"></script>
-  <script src="shared/core.js?v=20261108b"></script>
-  <script src="shared/state.js?v=20261108b"></script>
+  <script src="home/home.js?v=20261108c"></script>
+  <script src="home/chat-home.js?v=20261108c"></script>
+  <script src="shared/branding.js?v=20261108c"></script>
+  <script src="shared/app-icons.js?v=20261108c"></script>
+  <script src="shared/core.js?v=20261108c"></script>
+  <script src="shared/state.js?v=20261108c"></script>
 
   <!-- The web counterpart of android/menu/data/UserDataRepository.kt. Profile
        and Memory read and write through it, and Chat History lists through it.
        It was written and then never loaded by anything, so all three reported
        "Cannot read properties of undefined (reading 'readProfile')" instead of
        showing their data. -->
-  <script src="menu/data/user-data.js?v=20261108b"></script>
-  <script src="shared/cloud-accounts.js?v=20261108b"></script>
-  <script src="lobby/accounts/totp.js?v=20261108b"></script>
-  <script src="authentication/secure-session.js?v=20261108b"></script>
-  <script src="shared/persistence.js?v=20261108b"></script>
+  <script src="menu/data/user-data.js?v=20261108c"></script>
+  <script src="shared/cloud-accounts.js?v=20261108c"></script>
+  <script src="lobby/accounts/totp.js?v=20261108c"></script>
+  <script src="authentication/secure-session.js?v=20261108c"></script>
+  <script src="shared/persistence.js?v=20261108c"></script>
 
-  <script src="menu/script.js?v=20261108b"></script>
-  <script src="lobby/accounts/search/script.js?v=20261108b"></script>
-  <script src="lobby/accounts/accounts/edit/script.js?v=20261108b"></script>
-  <script src="lobby/accounts/accounts/edit/edit.js?v=20261108b"></script>
-  <script src="lobby/accounts/totp-controller.js?v=20261108b"></script>
-  <script src="shared/favorite.js?v=20261108b"></script>
+  <script src="menu/script.js?v=20261108c"></script>
+  <script src="lobby/accounts/search/script.js?v=20261108c"></script>
+  <script src="lobby/accounts/accounts/edit/script.js?v=20261108c"></script>
+  <script src="lobby/accounts/accounts/edit/edit.js?v=20261108c"></script>
+  <script src="lobby/accounts/totp-controller.js?v=20261108c"></script>
+  <script src="shared/favorite.js?v=20261108c"></script>
 
-  <script src="settings/profile/script.js?v=20261108b"></script>
-  <script src="settings/update/script.js?v=20261108b"></script>
-  <script src="settings/profile/change-mobile-number/script.js?v=20261108b"></script>
-  <script src="settings/profile/change-email/script.js?v=20261108b"></script>
-  <script src="settings/settings.js?v=20261108b"></script>
+  <script src="settings/profile/script.js?v=20261108c"></script>
+  <script src="settings/update/script.js?v=20261108c"></script>
+  <script src="settings/profile/change-mobile-number/script.js?v=20261108c"></script>
+  <script src="settings/profile/change-email/script.js?v=20261108c"></script>
+  <script src="settings/settings.js?v=20261108c"></script>
 
-  <script src="shared/navigation.js?v=20261108b"></script>
-  <script src="shared/navigation-icons.js?v=20261108b"></script>
+  <script src="shared/navigation.js?v=20261108c"></script>
+  <script src="shared/navigation-icons.js?v=20261108c"></script>
 
-  <script src="shared/events.js?v=20261108b"></script>
-  <script src="shared/safe-layout/safe-layout.js?v=20261108b"></script>
+  <script src="shared/events.js?v=20261108c"></script>
+  <script src="shared/safe-layout/safe-layout.js?v=20261108c"></script>
 </body>
 </html>
