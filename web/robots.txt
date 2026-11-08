@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Behind the login there is nothing to index: a crawler sees the sign-in screen, and the
+# pages after it are one person's conversations. The legal pages are meant to be found.
+Disallow: /menu/
+Disallow: /settings/
+Disallow: /lobby/
+Disallow: /home/
+
+Sitemap: https://indoone.indoworkspace.in/sitemap.xml
