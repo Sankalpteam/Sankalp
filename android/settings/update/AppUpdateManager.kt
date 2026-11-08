@@ -318,6 +318,6 @@ object AppUpdateManager {
             throw DownloadFailure("Downloaded APK is empty.", true)
         }
 
-        apkFile
+        return apkFile
     }
 }
