@@ -30,11 +30,17 @@ import sys
 #   security        how the account is protected      (product facts)
 #
 # All four are written once, in web/menu/<slug>/index.html, and everything else is generated.
+# The description is what a search engine shows under the title. One line each, written to
+# answer the question someone typed to get here, not to repeat the heading.
 DOCUMENTS = (
-    ("privacy-policy", "Privacy Policy"),
-    ("terms-of-use", "Terms of Use"),
-    ("data-privacy", "Data & Privacy"),
-    ("security", "Security"),
+    ("privacy-policy", "Privacy Policy",
+     "What Indoone collects, who sees it, and how long it is kept."),
+    ("terms-of-use", "Terms of Use",
+     "The rules for using Indoone, in plain language."),
+    ("data-privacy", "Data & Privacy",
+     "What Indoone stores, where it is stored, and how to get rid of it."),
+    ("security", "Security",
+     "How an Indoone account and its one-time codes are protected."),
 )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -44,8 +50,25 @@ PAGE = """<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="robots" content="noindex" />
-  <title>{title}</title>
+  <meta name="robots" content="index, follow" />
+  <title>{title} · Indoone</title>
+  <meta name="description" content="{description}" />
+  <link rel="canonical" href="https://indoone.indoworkspace.in/legal/{slug}.html" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Indoone AI" />
+  <meta property="og:title" content="{title} · Indoone" />
+  <meta property="og:description" content="{description}" />
+  <meta property="og:url" content="https://indoone.indoworkspace.in/legal/{slug}.html" />
+
+  <!-- These four pages were served with robots noindex while the sitemap listed them. That
+       is a contradiction: the sitemap asked for an index and the page refused it, and a
+       search console reports it as an error. They are public documents, so they are
+       indexable, and each one carries its own title, description and breadcrumb - which is
+       how one site earns several results instead of one. -->
+  <script type="application/ld+json">
+    {jsonld}
+  </script>
   <style>
     :root {{ color-scheme: light dark; }}
     * {{ box-sizing: border-box; }}
@@ -132,19 +155,63 @@ def content_of(slug: str) -> str:
     return body[:closing].strip()
 
 
-def write(path: pathlib.Path, title: str, content: str, stamp: str) -> None:
+def structured_data(slug: str, title: str, description: str) -> str:
+    """WebPage plus a breadcrumb, so the result shows Indoone > Legal > Privacy Policy."""
+    import json
+
+    url = f"https://indoone.indoworkspace.in/legal/{slug}.html"
+
+    return json.dumps(
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "WebPage",
+                    "@id": url,
+                    "url": url,
+                    "name": f"{title} · Indoone",
+                    "description": description,
+                    "isPartOf": {"@id": "https://indoone.indoworkspace.in/#website"},
+                    "inLanguage": "en",
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        {"@type": "ListItem", "position": 1, "name": "Indoone",
+                         "item": "https://indoone.indoworkspace.in/"},
+                        {"@type": "ListItem", "position": 2, "name": title, "item": url},
+                    ],
+                },
+            ],
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+def write(path: pathlib.Path, slug: str, title: str, description: str, content: str, stamp: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(PAGE.format(title=title, stamp=stamp, content=content), encoding="utf-8")
+    path.write_text(
+        PAGE.format(
+            title=title,
+            slug=slug,
+            description=description,
+            jsonld=structured_data(slug, title, description),
+            stamp=stamp,
+            content=content,
+        ),
+        encoding="utf-8",
+    )
     print(f"  {path.relative_to(ROOT)}  ({path.stat().st_size} bytes)")
 
 
 def main() -> int:
     print("Building standalone legal pages:")
-    for slug, title in DOCUMENTS:
+    for slug, title, description in DOCUMENTS:
         content = content_of(slug)
         stamp = stamp_of(slug)
-        write(ROOT / "web" / "legal" / f"{slug}.html", title, content, stamp)
-        write(ROOT / "android" / "assets" / "legal" / f"{slug}.html", title, content, stamp)
+        write(ROOT / "web" / "legal" / f"{slug}.html", slug, title, description, content, stamp)
+        write(ROOT / "android" / "assets" / "legal" / f"{slug}.html", slug, title, description, content, stamp)
     return 0
 
 
