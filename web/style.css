@@ -592,6 +592,10 @@ body {
   font-size: 13px;
   text-align: left;
   cursor: pointer;
+  /* Four of these rows are anchors, because the page behind them has an address that has to
+     be linkable and findable. An anchor brings an underline and a visited colour; this keeps
+     it looking exactly like the buttons beside it. */
+  text-decoration: none;
 }
 
 /* the icon sits in a 32dp tile of its own, 10dp corners, faintly lit from the

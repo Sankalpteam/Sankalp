@@ -92,6 +92,17 @@ PAGE = """<!doctype html>
     }}
     h3 {{ margin: 26px 0 6px; font-size: 16px; line-height: 1.4; color: #2c2733; }}
     p {{ margin: 0 0 12px; color: #4a4552; }}
+    .legal-nav {{
+      margin: 34px 0 0;
+      padding-top: 16px;
+      border-top: 1px solid #e7e1f2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: 14px;
+    }}
+    .legal-nav a {{ color: #6330db; text-decoration: none; }}
+    .legal-nav a:hover {{ text-decoration: underline; }}
     .stamp {{
       display: inline-block;
       margin: 0 0 18px;
@@ -114,6 +125,9 @@ PAGE = """<!doctype html>
 <h1 class="sr-only">{title}</h1>
 {stamp}
 {content}
+<nav class="legal-nav" aria-label="Indoone documents">
+{links}
+</nav>
 </main>
 </body>
 </html>
@@ -189,6 +203,23 @@ def structured_data(slug: str, title: str, description: str) -> str:
     )
 
 
+def nav_links(slug: str) -> str:
+    """Links to the other three documents, and back to the app.
+
+    Five pages that never mention each other are five strangers; five that link to each other
+    are one site. A crawler that lands on any of them can reach all of them, which is what
+    makes the sitemap a confirmation rather than a hope. It is also the reason a person can
+    forward a policy link and the recipient can read the rest.
+    """
+    parts = [
+        f'<a href="/legal/{other}.html">{label}</a>'
+        for other, label, _ in DOCUMENTS
+        if other != slug
+    ]
+    parts.append('<a href="/">Indoone app</a>')
+    return "\n".join(f"  {part}" for part in parts)
+
+
 def write(path: pathlib.Path, slug: str, title: str, description: str, content: str, stamp: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -197,6 +228,7 @@ def write(path: pathlib.Path, slug: str, title: str, description: str, content: 
             slug=slug,
             description=description,
             jsonld=structured_data(slug, title, description),
+            links=nav_links(slug),
             stamp=stamp,
             content=content,
         ),
