@@ -1,5 +1,8 @@
 package com.indoone.menu.legal
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -13,17 +16,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -80,6 +88,17 @@ fun LegalWebScreen(
                 )
             }
 
+            // The address of the page, and a way to take it with you.
+            //
+            // These documents have a public address now, and someone checking them - an
+            // employer, a bank, a store reviewer - usually needs the link rather than a
+            // screenshot. Without this row the app showed the text and hid the one thing that
+            // makes it verifiable.
+            LegalAddressBar(
+                url = LEGAL_BASE_URL + path,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+
             Box(modifier = Modifier.fillMaxSize()) {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
@@ -103,7 +122,7 @@ fun LegalWebScreen(
                                 ): Boolean {
                                     // true means "handled here, do not navigate": anything
                                     // that is not our own host is refused outright.
-                                    return request.url.host != LEGAL_HOST
+                                    return request.url.host !in LEGAL_HOSTS
                                 }
 
                                 override fun onReceivedError(
@@ -134,5 +153,47 @@ fun LegalWebScreen(
     }
 }
 
-private const val LEGAL_HOST = "indooneteam.github.io"
-private const val LEGAL_BASE_URL = "https://indooneteam.github.io/indoone"
+/**
+ * The host the document is served from, and the one it used to be served from.
+ *
+ * The site moved to its own subdomain, and this screen still named the old address. GitHub
+ * redirects the old address to the new one, so the WebView was handed a navigation to a host
+ * that was no longer in the allowlist above - and a legal page that refuses to load is worse
+ * than one that is out of date. Both are accepted while the old links are still in the wild.
+ */
+@Composable
+private fun LegalAddressBar(url: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var copied by remember(url) { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier.fillMaxWidth().padding(bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = url.removePrefix("https://"),
+            modifier = Modifier.weight(1f),
+            fontSize = 12.sp,
+            color = Color(0xFF6B5B86),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        IconButton(
+            onClick = {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Indoone document", url))
+                copied = true
+            },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.ContentCopy,
+                contentDescription = if (copied) "Link copied" else "Copy link",
+                tint = Color(0xFF703BE2),
+            )
+        }
+    }
+}
+
+private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "indooneteam.github.io")
+private const val LEGAL_BASE_URL = "https://indoone.indoworkspace.in"
