@@ -40,7 +40,7 @@ DOCUMENTS = (
     ("data-privacy", "Data & Privacy",
      "What Sankalp stores, where it is stored, and how to get rid of it."),
     ("security", "Security",
-     "How an Sankalp account and its one-time codes are protected."),
+     "How a Sankalp account and its one-time codes are protected."),
 )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
