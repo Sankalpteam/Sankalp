@@ -25,7 +25,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SITE = "https://indoone.indoworkspace.in"
+SITE = "https://sankalp.indoworkspace.in"
 ENDPOINT = "https://api.indexnow.org/indexnow"
 
 
