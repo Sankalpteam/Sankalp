@@ -5,3 +5,6 @@ build/
 **/build/
 .idea/
 *.iml
+
+# The published tree, assembled by scripts/build_site.py on every deploy
+site/
