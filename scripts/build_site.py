@@ -126,9 +126,15 @@ def main() -> None:
     shutil.copy2(SITE / "app" / "update.json", SITE / "update.json")
 
     # 5. the mark and the icons, at the root, because the app's own index.html links to them
-    #    absolutely (/assets/icon-48.png)
+    #    absolutely (/assets/icon-48.png). The social preview lives in landing/assets and is
+    #    copied here too, because og:image points at /assets/og-image.png.
     assets = SITE / "assets"
     assets.mkdir()
+    landing_assets = LANDING / "assets"
+    if landing_assets.exists():
+        for item in landing_assets.iterdir():
+            if item.is_file():
+                shutil.copy2(item, assets / item.name)
     for name in LOGOS + ICONS:
         source = WEB / "assets" / name
         if source.exists():
