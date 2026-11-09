@@ -121,7 +121,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          name: indoone-debug-apk
+          name: sankalp-debug-apk
           path: android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
       - name: Publish terminal APK release
@@ -133,13 +133,20 @@ jobs:
         run: |
           set -euo pipefail
           apk="$(find android/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' -print -quit)"
-          release_apk="$RUNNER_TEMP/indoone-terminal.apk"
+          release_apk="$RUNNER_TEMP/sankalp-terminal.apk"
           cp "$apk" "$release_apk"
           tag="terminal-build-${INDOONE_BUILD_VERSION_CODE}"
+          # An app installed before the rename looks for the asset named indoone-terminal.apk,
+          # and it only reads releases whose tag starts with terminal-build-. The tag stays as
+          # it is for that reason; the asset is published under both names while those installs
+          # are still out there. Delete this block and the legacy copy once they are gone.
+          legacy_apk="$RUNNER_TEMP/indoone-terminal.apk"
+          cp "$release_apk" "$legacy_apk"
+
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$release_apk" --clobber
+            gh release upload "$tag" "$release_apk" "$legacy_apk" --clobber
           else
-            gh release create "$tag" "$release_apk" --target terminal --title "Indoone terminal build ${INDOONE_BUILD_VERSION_CODE}" --notes "Automated terminal APK build for Indoone."
+            gh release create "$tag" "$release_apk" "$legacy_apk" --target terminal --title "Sankalp terminal build ${INDOONE_BUILD_VERSION_CODE}" --notes "Automated terminal APK build for Sankalp."
           fi
 
           # The app decides whether an update exists by comparing its own versionCode with
@@ -150,8 +157,8 @@ jobs:
           #
           # So the build updates the manifest itself, from the values it just published.
           version_name="$(grep -oE 'versionName = "[^"]+"' android/build.gradle.kts | head -1 | cut -d'"' -f2)"
-          download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/indoone-terminal.apk"
-          notes="Indoone ${version_name}. Build ${INDOONE_BUILD_VERSION_CODE} from the terminal branch."
+          download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/sankalp-terminal.apk"
+          notes="Sankalp ${version_name}. Build ${INDOONE_BUILD_VERSION_CODE} from the terminal branch."
 
           payload="$(jq -n --argjson code "$INDOONE_BUILD_VERSION_CODE" --arg name "$version_name" --arg url "$download_url" --arg notes "$notes" '{versionCode: $code, versionName: $name, downloadUrl: $url, notes: $notes}')"
 

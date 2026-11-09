@@ -36,7 +36,10 @@ object AppUpdateManager {
     private const val RELEASES_URL =
         "https://api.github.com/repos/Sankalpteam/Sankalp/releases?per_page=20"
     private const val RELEASE_TAG_PREFIX = "terminal-build-"
-    private const val APK_ASSET_NAME = "indoone-terminal.apk"
+    private const val APK_ASSET_NAME = "sankalp-terminal.apk"
+
+    /** The name this asset had before the rename. Releases still carry a copy of it. */
+    private const val LEGACY_APK_ASSET_NAME = "indoone-terminal.apk"
     private const val UPDATE_DIR = "updates"
     private const val PROGRESS_BUFFER_BYTES = 64 * 1024
     private const val PROGRESS_INTERVAL_MS = 250L
@@ -171,7 +174,8 @@ object AppUpdateManager {
 
                 for (assetIndex in 0 until assets.length()) {
                     val asset = assets.optJSONObject(assetIndex) ?: continue
-                    if (asset.optString("name") != APK_ASSET_NAME) continue
+                    val assetName = asset.optString("name")
+                    if (assetName != APK_ASSET_NAME && assetName != LEGACY_APK_ASSET_NAME) continue
 
                     val downloadUrl = asset.optString("browser_download_url")
                     if (versionCode > installedVersionCode && downloadUrl.isNotBlank()) {
