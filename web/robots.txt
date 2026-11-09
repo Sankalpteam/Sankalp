@@ -8,4 +8,4 @@ Disallow: /settings/
 Disallow: /lobby/
 Disallow: /home/
 
-Sitemap: https://indoone.indoworkspace.in/sitemap.xml
+Sitemap: https://sankalp.indoworkspace.in/sitemap.xml

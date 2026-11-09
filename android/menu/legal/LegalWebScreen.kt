@@ -212,5 +212,5 @@ private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Mod
 // here after the account was renamed to Sankalpteam, and a github.io subdomain is only held
 // while its account holds it: whoever took the old name next would have been trusted to serve
 // the policy this app shows. Only the current hosts are listed.
-private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "sankalpteam.github.io")
-private const val LEGAL_BASE_URL = "https://indoone.indoworkspace.in"
+private val LEGAL_HOSTS = setOf("sankalp.indoworkspace.in", "indoone.indoworkspace.in", "sankalpteam.github.io")
+private const val LEGAL_BASE_URL = "https://sankalp.indoworkspace.in"

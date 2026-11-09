@@ -53,13 +53,13 @@ PAGE = """<!doctype html>
   <meta name="robots" content="index, follow" />
   <title>{title} · Sankalp</title>
   <meta name="description" content="{description}" />
-  <link rel="canonical" href="https://indoone.indoworkspace.in/legal/{slug}.html" />
+  <link rel="canonical" href="https://sankalp.indoworkspace.in/legal/{slug}.html" />
 
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Sankalp" />
   <meta property="og:title" content="{title} · Sankalp" />
   <meta property="og:description" content="{description}" />
-  <meta property="og:url" content="https://indoone.indoworkspace.in/legal/{slug}.html" />
+  <meta property="og:url" content="https://sankalp.indoworkspace.in/legal/{slug}.html" />
 
   <!-- These four pages were served with robots noindex while the sitemap listed them. That
        is a contradiction: the sitemap asked for an index and the page refused it, and a
@@ -173,7 +173,7 @@ def structured_data(slug: str, title: str, description: str) -> str:
     """WebPage plus a breadcrumb, so the result shows Sankalp > Legal > Privacy Policy."""
     import json
 
-    url = f"https://indoone.indoworkspace.in/legal/{slug}.html"
+    url = f"https://sankalp.indoworkspace.in/legal/{slug}.html"
 
     return json.dumps(
         {
@@ -185,14 +185,14 @@ def structured_data(slug: str, title: str, description: str) -> str:
                     "url": url,
                     "name": f"{title} · Sankalp",
                     "description": description,
-                    "isPartOf": {"@id": "https://indoone.indoworkspace.in/#website"},
+                    "isPartOf": {"@id": "https://sankalp.indoworkspace.in/#website"},
                     "inLanguage": "en",
                 },
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         {"@type": "ListItem", "position": 1, "name": "Sankalp",
-                         "item": "https://indoone.indoworkspace.in/"},
+                         "item": "https://sankalp.indoworkspace.in/"},
                         {"@type": "ListItem", "position": 2, "name": title, "item": url},
                     ],
                 },
