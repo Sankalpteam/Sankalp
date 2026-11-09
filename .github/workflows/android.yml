@@ -69,6 +69,13 @@ jobs:
             -storepass "$INDOONE_KEYSTORE_PASSWORD" \
             -alias "$INDOONE_KEY_ALIAS" \
             | awk '/SHA1:/{print "Android signing SHA-1: " $2; found=1} END {if (!found) exit 1}'
+      # The old purple diamond was drawn by three Compose screens, the web's branding.js and
+      # the launcher vectors at once, and they drifted. scripts/check_brand.py makes any copy
+      # of it a build failure instead of something a person has to notice in a screenshot.
+      - name: Check the old mark is not being drawn
+        shell: bash
+        run: python3 scripts/check_brand.py
+
       - name: Build the standalone legal pages
         shell: bash
         run: |

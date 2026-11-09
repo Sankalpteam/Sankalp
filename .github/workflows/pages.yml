@@ -39,6 +39,10 @@ jobs:
           test -f web/index.html
           test -f web/update.json
 
+      - name: Check the old mark is not being drawn
+        shell: bash
+        run: python3 scripts/check_brand.py
+
       - name: Build the standalone legal pages
         shell: bash
         run: |
