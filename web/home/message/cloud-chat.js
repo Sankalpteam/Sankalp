@@ -151,6 +151,29 @@
     } catch (error) {
       console.warn('Sankalp chat index remove failed:', error);
     }
+
+    // The account's copy is gone; the backend keeps its own copy of the same conversation,
+    // keyed by this id, and it is that copy that answers the next message. Deleting only here
+    // left the backend believing the thread was still open.
+    try {
+      const user = window.firebase?.auth?.().currentUser;
+
+      if (user) {
+        const token = await user.getIdToken(false);
+        const response = await fetch(
+          `https://indooneai.duckdns.org/api/chat/conversations/${encodeURIComponent(conversationId)}`,
+          { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        // 404 is acceptable: the backend may never have stored this thread, and the delete
+        // that matters - the account's - has already succeeded.
+        if (!response.ok && response.status !== 404) {
+          console.warn('Sankalp backend conversation delete failed:', response.status);
+        }
+      }
+    } catch (error) {
+      console.warn('Sankalp backend conversation delete failed:', error);
+    }
   }
 
   // The web counterpart of CloudChatRepository.loadConversations(limit). The

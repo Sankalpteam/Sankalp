@@ -267,6 +267,11 @@ class CloudChatRepository(
             Tasks.await(batch.commit())
         }
         Tasks.await(chatIndex(userId).child(conversationId).removeValue())
+
+        // The account's copy is gone; the backend keeps its own. Without this the thread still
+        // exists on the server, and any message that arrives with this id continues it.
+        runCatching { ChatApi.deleteConversation(conversationId) }
+            .onFailure { Log.w("SankalpChat", "Backend conversation delete failed", it) }
     }
 
     suspend fun cleanupExpiredConversations(maxAgeDays: Long = 7L) = withContext(Dispatchers.IO) {

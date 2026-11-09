@@ -507,6 +507,34 @@ private const val READ_TIMEOUT_MS = 300_000
         }
     }
 
+    /**
+     * Tell the backend that a thread is gone.
+     *
+     * The backend keeps its own copy of every conversation, keyed by the same id, and it is that
+     * copy that answers the next message. Deleting only the Firestore document left the backend
+     * believing the thread was still open, so a client that sent the id again got the old context
+     * back. This is the call that removes it there too.
+     */
+    suspend fun deleteConversation(conversationId: String) = withContext(Dispatchers.IO) {
+        val connection = openConnection(
+            "${requireBackendUrl()}/api/chat/conversations/$conversationId",
+            requireAuthToken(),
+        )
+
+        try {
+            connection.requestMethod = "DELETE"
+            val code = connection.responseCode
+
+            // 404 is fine: the backend may never have stored this thread, and the caller's
+            // delete has already succeeded where it mattered.
+            if (code !in 200..299 && code != 404) {
+                throw ChatApiException("Sankalp backend could not delete the conversation")
+            }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     /** Rename a thread, and return the title as the backend stored it. */
     suspend fun renameThread(conversationId: String, title: String): String = withContext(Dispatchers.IO) {
         val connection = openConnection(
