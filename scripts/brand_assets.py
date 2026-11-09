@@ -190,6 +190,18 @@ def android(mark: Image.Image) -> None:
         )
 
 
+def hd(mark: Image.Image) -> None:
+    """A large copy for anywhere the mark is shared rather than drawn by the app.
+
+    The artwork was supplied at 512px with the stroke about 400px wide, so this is a 2.25x
+    render - the largest that stays honest. Anything bigger is upscaling dressed as detail;
+    a vector or a larger original would have to come from the designer.
+    """
+    write(place(mark, (1024, 1024), 0.88, background=None),
+          os.path.join(WEB_ASSETS, "logo-1024.png"))
+    write(place(mark, (1024, 1024), 0.88), os.path.join(WEB_ASSETS, "logo-1024-white.png"), opaque=True)
+
+
 def web(mark: Image.Image) -> None:
     # The inline mark the site draws in its header, drawers and auth screens. Native
     # resolution of the artwork: it is displayed at 24-72 CSS px, so it is already
@@ -328,6 +340,8 @@ def main(argv: Iterable[str]) -> int:
     android(mark)
     print("web:")
     web(mark)
+    print("hd:")
+    hd(mark)
     if args.preview:
         preview(mark, args.preview)
     return 0
