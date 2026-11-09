@@ -20,6 +20,10 @@ on:
       - "settings.gradle.kts"
       - "gradle.properties"
       - ".github/workflows/android.yml"
+  # A push made with GITHUB_TOKEN - the sync job below - does not trigger workflows. That
+  # left terminal sitting on a green build from an older commit with no way to rebuild it
+  # without inventing a commit. Dispatch is that way: pick the branch, get a build.
+  workflow_dispatch:
 
 jobs:
   build:
