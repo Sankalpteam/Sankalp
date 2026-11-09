@@ -104,6 +104,18 @@
   ]
 }
   </script>
+  <!-- The one heading a crawler can read without running the app. The interface is built by
+       JavaScript, so the served page had no h1 at all and there was nothing for a search
+       result to take a heading from. The noscript line is for the crawler that does not run
+       scripts either - the same two sentences a person would read in the description. -->
+  <h1 class="visually-hidden">Sankalp — the assistant app by Indo Workspace</h1>
+  <noscript>
+    <p>
+      Sankalp is an assistant app by Indo Workspace. It answers in 22 Indian languages, keeps
+      your one-time passwords in one place, and works with GitHub and Zoho Mail.
+    </p>
+  </noscript>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
