@@ -9,6 +9,9 @@ on:
       - main
     paths:
       - "web/**"
+      - "landing/**"
+      - "scripts/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
