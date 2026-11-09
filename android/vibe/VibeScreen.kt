@@ -195,16 +195,16 @@ fun VibeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // One Text with styled pieces, not three separate Texts. Three Texts in a
-            // Row are centre-aligned against each other, so the large "I" and the
-            // smaller "ndoone" ended up on different baselines and the name looked
+            // Row are centre-aligned against each other, so the large first letter and
+            // the smaller rest ended up on different baselines and the name looked
             // ragged. Pieces of one Text share a baseline, so it sits straight.
             Text(
                 text = buildAnnotatedString {
                     withStyle(SpanStyle(fontFamily = WordmarkFont, color = Color.White, fontSize = 25.sp)) {
-                        append("I")
+                        append("S")
                     }
                     withStyle(SpanStyle(fontFamily = WordmarkFont, color = Color.White, fontSize = 17.sp)) {
-                        append("ndoone")
+                        append("ankalp")
                     }
                     append(" ")
                     withStyle(SpanStyle(fontFamily = WordmarkFont, color = Color.White, fontSize = 24.sp)) {

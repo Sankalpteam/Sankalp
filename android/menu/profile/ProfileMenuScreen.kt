@@ -76,7 +76,7 @@ fun ProfileMenuScreen(onBack: () -> Unit) {
         .filter { it.isNotBlank() }
         .take(2)
         .joinToString("") { it.first().uppercase() }
-        .ifBlank { "I" }
+        .ifBlank { "S" }
 
     fun save() {
         if (saving) return

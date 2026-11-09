@@ -1,6 +1,7 @@
 package com.indoone.settings.applock.setapplock
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,10 +29,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.indoone.R
 
 private val Purple = Color(0xFF6330DB)
 private val PurpleLight = Color(0xFF9147ED)
@@ -107,15 +111,14 @@ internal fun PinPadScaffold(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .background(
-                                Brush.linearGradient(listOf(Color(0xFF5E2CE2), PurpleLight)),
-                                RoundedCornerShape(11.dp),
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) { Text("I", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black) }
+                    // The mark, not a letter on a purple tile: that tile was the previous
+                    // product's logo, and this screen was the last place still drawing it.
+                    Image(
+                        painter = painterResource(R.drawable.sankalp_logo),
+                        contentDescription = "Sankalp logo",
+                        modifier = Modifier.size(34.dp),
+                        contentScale = ContentScale.Fit,
+                    )
                     Text("Sankalp", color = Color(0xFF5E2DD2), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
