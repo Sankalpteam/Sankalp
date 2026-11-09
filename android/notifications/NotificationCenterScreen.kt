@@ -77,7 +77,7 @@ fun NotificationCenterScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("No notifications yet", color = Color(0xFF2C2733), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                        Text("New Indoone alerts will appear here.", Modifier.padding(top = 5.dp), color = Color(0xFF8A8392), fontSize = 12.sp)
+                        Text("New Sankalp alerts will appear here.", Modifier.padding(top = 5.dp), color = Color(0xFF8A8392), fontSize = 12.sp)
                     }
                 }
             } else {

@@ -214,7 +214,7 @@
 
     void window.IndooneCloudChat
       ?.appendMessage?.(conversationId, 'user', text || message)
-      .catch(error => console.warn('Indoone chat save failed:', error));
+      .catch(error => console.warn('Sankalp chat save failed:', error));
 
     window.IndooneInflight?.begin({
       conversationId,
@@ -226,7 +226,7 @@
       const api = window.IndooneChatApi;
 
       if (!api) {
-        throw new Error('Indoone AI is not reachable right now.');
+        throw new Error('Sankalp is not reachable right now.');
       }
 
       // The stream is preferred: the first delta is the answer starting, so the indicator
@@ -272,7 +272,7 @@
           // A stream that fails before a single token falls back to the blocking call:
           // same pipeline, same answer, without the progressive reveal. A partial bubble
           // is removed so the fallback does not leave half an answer behind.
-          console.warn('Indoone stream failed, falling back:', error);
+          console.warn('Sankalp stream failed, falling back:', error);
 
           if (streamedMessage) {
             store.remove(streamedMessage);
@@ -317,13 +317,13 @@
 
       void window.IndooneCloudChat
         ?.appendMessage?.(result.conversationId, 'assistant', result.reply)
-        .catch(error => console.warn('Indoone chat save failed:', error));
+        .catch(error => console.warn('Sankalp chat save failed:', error));
     } catch (error) {
       if (error?.name === 'AbortError') {
         return;
       }
 
-      console.error('Indoone chat send failed:', error);
+      console.error('Sankalp chat send failed:', error);
       window.IndooneInflight?.finish();
       store.remove(mine);
       store.add({
@@ -331,7 +331,7 @@
           error?.message &&
           !/undefined|not a function|null/i.test(error.message)
             ? error.message
-            : 'Indoone AI could not complete the request.',
+            : 'Sankalp could not complete the request.',
         mine: false
       });
     } finally {

@@ -14,7 +14,7 @@
         JSON.stringify({ conversationId, messages })
       );
     } catch (error) {
-      console.warn('Indoone chat thread could not be cached:', error);
+      console.warn('Sankalp chat thread could not be cached:', error);
     }
   }
 
@@ -53,7 +53,7 @@
           return;
         }
       } catch (error) {
-        console.warn('Indoone chat could not be read from the account:', error);
+        console.warn('Sankalp chat could not be read from the account:', error);
       }
     }
 

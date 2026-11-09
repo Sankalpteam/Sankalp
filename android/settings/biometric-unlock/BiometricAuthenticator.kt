@@ -31,9 +31,9 @@ class BiometricAuthenticator(private val activity: Activity) {
         onError: (String) -> Unit,
     ) {
         authenticateInternal(
-            title = "Unlock Indoone",
+            title = "Unlock Sankalp",
             subtitle = "Use your fingerprint or device biometric",
-            description = "Authenticate to unlock Indoone.",
+            description = "Authenticate to unlock Sankalp.",
             onSuccess = onSuccess,
             onError = onError,
         )

@@ -68,7 +68,7 @@ class AutoLockController(private val context: Context) {
 
     fun onPaused() {
         // The activity pauses during normal in-app navigation and when another
-        // Indoone screen is shown. The watch is re-armed on the next resume, and the
+        // Sankalp screen is shown. The watch is re-armed on the next resume, and the
         // background-time check covers the app being left.
         watchingInactivity = false
         handler.removeCallbacks(inactivityRunnable)

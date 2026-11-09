@@ -68,7 +68,7 @@ fun AutoLockScreen(
                             color = Color(0xFF2C2733),
                         )
                         Text(
-                            "Automatically lock Indoone after a period of inactivity.",
+                            "Automatically lock Sankalp after a period of inactivity.",
                             modifier = Modifier.padding(top = 5.dp),
                             fontSize = 12.sp,
                             lineHeight = 18.sp,

@@ -33,7 +33,7 @@ object CrashLogStore {
     }
 
     fun buildDetail(context: Context, throwable: Throwable): String = buildString {
-        appendLine("Indoone build: ${buildNumber(context)}")
+        appendLine("Sankalp build: ${buildNumber(context)}")
         appendLine(
             "When: " +
                 SimpleDateFormat("dd MMM yyyy, HH:mm:ss", Locale.US).format(Date()),

@@ -495,7 +495,7 @@
           name: APP_NAME
         });
       } catch (error) {
-        console.warn('Indoone welcome email failed:', error);
+        console.warn('Sankalp welcome email failed:', error);
       }
 
       setAuthSession(user.uid);

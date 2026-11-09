@@ -148,7 +148,7 @@ fun PluginsMenuScreen(
             try {
                 val authorizationUrl = ZohoMailPluginApi.createAuthorizationUrl()
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(authorizationUrl)))
-                statusMessage = "Approve Indoone in Zoho Mail. Waiting for connection verification…"
+                statusMessage = "Approve Sankalp in Zoho Mail. Waiting for connection verification…"
                 var confirmed = false
                 var latestConnected = false
                 for (attempt in 0 until 60) {
@@ -197,7 +197,7 @@ fun PluginsMenuScreen(
             try {
                 val result = GitHubPluginApi.startConnection()
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.authorizationUrl)))
-                githubStatusMessage = "Approve Indoone in GitHub. Waiting for connection verification…"
+                githubStatusMessage = "Approve Sankalp in GitHub. Waiting for connection verification…"
                 var confirmed: GitHubConnectionStatus? = null
                 for (attempt in 0 until 60) {
                     delay(2_000L)
@@ -484,7 +484,7 @@ fun PluginsMenuScreen(
             title = { Text(disconnectTitle, color = Ink, fontWeight = FontWeight.SemiBold) },
             text = {
                 Text(
-                    "Indoone AI will no longer be able to use this account until you connect it again.",
+                    "Sankalp will no longer be able to use this account until you connect it again.",
                     color = Muted,
                 )
             },

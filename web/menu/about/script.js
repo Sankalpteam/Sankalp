@@ -10,7 +10,7 @@ window.initMenuAbout = function () {
       class="modal-head"
     >
       <h2>
-        About Indoone
+        About Sankalp
       </h2>
       <button
         class="close-btn"
@@ -26,7 +26,7 @@ window.initMenuAbout = function () {
       >
         <span>
           <b>
-            About Indoone
+            About Sankalp
           </b>
           <small>
             Securely generate and manage time-based one-time passwords for your accounts.
@@ -68,7 +68,7 @@ window.initMenuAbout = function () {
             Account Storage
           </b>
           <small>
-            Cloud synced with your Indoone account
+            Cloud synced with your Sankalp account
           </small>
         </span>
       </div>

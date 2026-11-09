@@ -17,7 +17,7 @@
       window.IndooneNative?.setSecureScreen?.(!!enabled);
     } catch (error) {
       console.warn(
-        'Indoone screenshot protection native bridge unavailable:',
+        'Sankalp screenshot protection native bridge unavailable:',
         error
       );
     }

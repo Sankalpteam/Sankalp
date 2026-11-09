@@ -195,7 +195,7 @@ private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Mod
         IconButton(
             onClick = {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("Indoone document", url))
+                clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp document", url))
                 copied = true
             },
         ) {

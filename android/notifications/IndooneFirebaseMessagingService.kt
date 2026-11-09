@@ -25,7 +25,7 @@ class IndooneFirebaseMessagingService : FirebaseMessagingService() {
         val title = data["title"]
             ?.takeIf { it.isNotBlank() }
             ?: message.notification?.title
-            ?: "Indoone"
+            ?: "Sankalp"
 
         val body = data["body"]
             ?.takeIf { it.isNotBlank() }

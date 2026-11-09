@@ -96,7 +96,7 @@ fun EditAccountScreen(
                         enabled = state.canSave,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
-                        // Indoone's own purple. Without this the button falls back to
+                        // Sankalp's own purple. Without this the button falls back to
                         // Material's default primary, which is not the app's brand.
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF703BE2)),
                     ) {

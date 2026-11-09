@@ -108,7 +108,7 @@
     });
 
     if (!response.ok) {
-      throw new Error(`Indoone backend returned ${response.status}`);
+      throw new Error(`Sankalp backend returned ${response.status}`);
     }
 
     return response.json().catch(() => ({}));
@@ -370,7 +370,7 @@ window.initMenuPlugins = function () {
     }, answer);
   }
 
-  // "Indoone backend returned 401" becomes "401"; a thrown TypeError becomes "network".
+  // "Sankalp backend returned 401" becomes "401"; a thrown TypeError becomes "network".
   function shortReason(error) {
     const message = String(error?.message || '');
 
@@ -486,8 +486,8 @@ window.initMenuPlugins = function () {
         const clientId = String(config?.server_client_id || '');
 
         setStatus(clientId
-          ? 'Gmail connects through Google Sign-In, which this page cannot open. Connect it in the Indoone app.'
-          : 'Google sign-in is not configured on the Indoone backend.');
+          ? 'Gmail connects through Google Sign-In, which this page cannot open. Connect it in the Sankalp app.'
+          : 'Google sign-in is not configured on the Sankalp backend.');
         return;
       }
 
@@ -507,7 +507,7 @@ window.initMenuPlugins = function () {
 
       if (url) {
         window.open(url, '_blank', 'noopener');
-        setStatus(`Approve Indoone in ${provider.title}. Waiting for connection verification…`);
+        setStatus(`Approve Sankalp in ${provider.title}. Waiting for connection verification…`);
       } else {
         setStatus(`${provider.title} connection started.`);
       }

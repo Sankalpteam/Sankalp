@@ -203,7 +203,7 @@
       `;
       bindMenu(mount);
       console.error(
-        'Indoone Add Account menu failed:',
+        'Sankalp Add Account menu failed:',
         error
       );
     }
@@ -257,7 +257,7 @@
         );
 
       console.error(
-        `Indoone Add Account ${name} feature failed:`,
+        `Sankalp Add Account ${name} feature failed:`,
         error
       );
     }

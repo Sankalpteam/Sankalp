@@ -335,7 +335,7 @@ object GitHubPluginApi {
             JSONObject().put("tool", "github_update_repository_file").put("ttl_seconds", 180),
         )
         result.optString("approval_token").trim().takeIf { it.isNotBlank() }
-            ?: throw GitHubPluginException("Indoone did not issue a file-commit approval token.")
+            ?: throw GitHubPluginException("Sankalp did not issue a file-commit approval token.")
     }
 
     suspend fun commitRepositoryFile(
@@ -392,7 +392,7 @@ object GitHubPluginApi {
             },
         )
         result.optString("content").takeIf { it.isNotBlank() }
-            ?: throw GitHubPluginException("Indoone AI returned no complete file proposal.")
+            ?: throw GitHubPluginException("Sankalp returned no complete file proposal.")
     }
 
     suspend fun searchRepositoryCode(
@@ -534,23 +534,23 @@ object GitHubPluginApi {
 
     private fun requireBackendUrl(): String =
         BuildConfig.INDOONE_BACKEND_URL.trimEnd('/').takeIf { it.isNotBlank() }
-            ?: throw GitHubPluginException("Indoone backend URL is not configured.")
+            ?: throw GitHubPluginException("Sankalp backend URL is not configured.")
 
     private fun requireUserId(): String =
         FirebaseAuth.getInstance().currentUser?.uid?.takeIf { it.isNotBlank() }
-            ?: throw GitHubPluginException("Please sign in to Indoone first.")
+            ?: throw GitHubPluginException("Please sign in to Sankalp first.")
 
     private fun requireAuthToken(): String {
         val user = FirebaseAuth.getInstance().currentUser
-            ?: throw GitHubPluginException("Please sign in to Indoone first.")
+            ?: throw GitHubPluginException("Please sign in to Sankalp first.")
         return try {
             Tasks.await(user.getIdToken(false)).token
                 ?.takeIf { it.isNotBlank() }
-                ?: throw GitHubPluginException("Could not get your Indoone authentication token.")
+                ?: throw GitHubPluginException("Could not get your Sankalp authentication token.")
         } catch (error: GitHubPluginException) {
             throw error
         } catch (error: Exception) {
-            throw GitHubPluginException("Could not refresh your Indoone authentication session.", error)
+            throw GitHubPluginException("Could not refresh your Sankalp authentication session.", error)
         }
     }
 
@@ -580,14 +580,14 @@ object GitHubPluginApi {
                     JSONObject(body).optString("detail").ifBlank { JSONObject(body).optString("message") }
                 }.getOrDefault("").trim()
                 throw GitHubPluginException(
-                    message.takeIf { it.isNotBlank() } ?: "Indoone backend returned HTTP $code.",
+                    message.takeIf { it.isNotBlank() } ?: "Sankalp backend returned HTTP $code.",
                 )
             }
             return if (body.isBlank()) JSONObject() else JSONObject(body)
         } catch (error: GitHubPluginException) {
             throw error
         } catch (error: Exception) {
-            throw GitHubPluginException("Could not reach the Indoone backend. Check your connection.", error)
+            throw GitHubPluginException("Could not reach the Sankalp backend. Check your connection.", error)
         } finally {
             connection.disconnect()
         }

@@ -1,9 +1,9 @@
-/* Delete Indoone account, matched to DangerZoneScreen.kt.
+/* Delete Sankalp account, matched to DangerZoneScreen.kt.
  *
  * The app draws this in DangerModalShell(onBack, title = null), which falls back
  * to the heading "Danger Zone". Inside it:
  *
- *   Text("This permanently deletes your Indoone account, your cloud data and
+ *   Text("This permanently deletes your Sankalp account, your cloud data and
  *         everything stored on this device. This action cannot be undone.",
  *        12.sp, lineHeight 19.sp, Color(0xFF8A8492))
  *   OutlinedTextField(..., label = { Text("ACCOUNT PASSWORD") },
@@ -13,7 +13,7 @@
  *                          value = confirmation.uppercase())
  *   Text(status, 12.sp, lineHeight 18.sp, Color(0xFFB42318))   // errors
  *   Button(containerColor = Color(0xFFB42318), height(48.dp),
- *          shape = RoundedCornerShape(14.dp)) { Text("Delete Indoone account", Bold) }
+ *          shape = RoundedCornerShape(14.dp)) { Text("Delete Sankalp account", Bold) }
  *   TextButton(height(48.dp)) { Text("Cancel", Bold) }
  *
  * The shell's own geometry - the 25.dp card, padding(horizontal = 21.dp,
@@ -86,7 +86,7 @@
   margin-top: 14px;
 }
 
-/* Delete Indoone account: the app's 48dp, 14dp-cornered #B42318 button. */
+/* Delete Sankalp account: the app's 48dp, 14dp-cornered #B42318 button. */
 .menu-feature-actions .primary
 {
   box-sizing: border-box;

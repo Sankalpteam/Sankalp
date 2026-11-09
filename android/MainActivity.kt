@@ -859,7 +859,7 @@ class MainActivity : ComponentActivity() {
                             CrashLogStore.clear(this@MainActivity)
                             lastCrash = null
                         },
-                        title = { Text("Indoone closed unexpectedly") },
+                        title = { Text("Sankalp closed unexpectedly") },
                         text = {
                             Text(
                                 CrashLogStore.summary(lastCrash.orEmpty()) +

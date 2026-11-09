@@ -62,9 +62,9 @@ fun DangerZoneScreen(
 @Composable
 private fun DangerZoneRoot(onBack: () -> Unit, onDeleteAccount: () -> Unit) {
     DangerModalShell(onBack) {
-        Text("This permanently removes your Indoone account, your cloud data, and everything Indoone keeps on this device. Continue only when you are sure.", color = Color(0xFF8A8492), fontSize = 12.sp, lineHeight = 18.sp)
+        Text("This permanently removes your Sankalp account, your cloud data, and everything Sankalp keeps on this device. Continue only when you are sure.", color = Color(0xFF8A8492), fontSize = 12.sp, lineHeight = 18.sp)
         Spacer(Modifier.height(12.dp))
-        DangerRow("Delete Indoone account", "Permanently delete your Indoone account, cloud data and local files", onDeleteAccount)
+        DangerRow("Delete Sankalp account", "Permanently delete your Sankalp account, cloud data and local files", onDeleteAccount)
     }
 }
 
@@ -107,7 +107,7 @@ private fun DeleteAccountScreen(onBack: () -> Unit, onDeleted: () -> Unit) {
     var working by remember { mutableStateOf(false) }
 
     if (user == null) {
-        DangerModalShell(onBack, "Delete Indoone account?") {
+        DangerModalShell(onBack, "Delete Sankalp account?") {
             Text("Please login first.", color = Color(0xFF8A8492), fontSize = 12.sp, lineHeight = 19.sp)
             Spacer(Modifier.height(16.dp))
             TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Close", fontWeight = FontWeight.Bold, color = Color(0xFF6330DB)) }
@@ -115,8 +115,8 @@ private fun DeleteAccountScreen(onBack: () -> Unit, onDeleted: () -> Unit) {
         return
     }
 
-    DangerModalShell(onBack, "Delete Indoone account?") {
-        Text("This permanently deletes your Indoone account, your cloud data and everything stored on this device. This action cannot be undone.", color = Color(0xFF8A8492), fontSize = 12.sp, lineHeight = 19.sp)
+    DangerModalShell(onBack, "Delete Sankalp account?") {
+        Text("This permanently deletes your Sankalp account, your cloud data and everything stored on this device. This action cannot be undone.", color = Color(0xFF8A8492), fontSize = 12.sp, lineHeight = 19.sp)
         Spacer(Modifier.height(14.dp))
         OutlinedTextField(password, { password = it }, label = { Text("ACCOUNT PASSWORD") }, placeholder = { Text("Enter your password") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, enabled = !working, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
         Spacer(Modifier.height(10.dp))
@@ -137,7 +137,7 @@ private fun DeleteAccountScreen(onBack: () -> Unit, onDeleted: () -> Unit) {
             modifier = Modifier.fillMaxWidth().height(48.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB42318)),
-        ) { Text("Delete Indoone account", fontWeight = FontWeight.Bold) }
+        ) { Text("Delete Sankalp account", fontWeight = FontWeight.Bold) }
         Spacer(Modifier.height(8.dp))
         TextButton(onClick = onBack, enabled = !working, modifier = Modifier.fillMaxWidth().height(48.dp)) { Text("Cancel", fontWeight = FontWeight.Bold, color = Color(0xFF6330DB)) }
     }
@@ -195,7 +195,7 @@ private fun DangerModalShell(onBack: () -> Unit, title: String? = null, content:
 }
 
 /**
- * Wipes everything Indoone keeps on this device, permanently — nothing goes to the
+ * Wipes everything Sankalp keeps on this device, permanently — nothing goes to the
  * Trash on the way out. The file and database names mirror the stores that own
  * them: accounts.enc and trash.enc in EncryptedAccountRepository, last-crash.txt in
  * CrashLogStore, indoone_notification_history.db in NotificationRepository.
@@ -239,7 +239,7 @@ private fun deleteAccount(
     user.reauthenticate(EmailAuthProvider.getCredential(email, password))
         .addOnSuccessListener {
             user.reload().addOnSuccessListener {
-                onStatus("Removing your Indoone cloud data…")
+                onStatus("Removing your Sankalp cloud data…")
                 val uid = user.uid
                 db.child("users").child(uid).child("profile").get()
                     .addOnCompleteListener { profileTask ->
@@ -287,7 +287,7 @@ private fun removeOwnCloudData(
     }
     db.updateChildren(updates)
         .addOnSuccessListener {
-            onStatus("Deleting your Indoone account…")
+            onStatus("Deleting your Sankalp account…")
             val current = auth.currentUser
             if (current == null) {
                 clearLocalData(context)
@@ -331,7 +331,7 @@ private fun sweepDuplicateAccounts(
 
 private fun formatAuthError(code: String, fallback: String): String = when (code) {
     "ERROR_WRONG_PASSWORD", "ERROR_INVALID_CREDENTIAL" -> "Incorrect account password."
-    "ERROR_USER_MISMATCH" -> "The account credentials do not match this Indoone account."
+    "ERROR_USER_MISMATCH" -> "The account credentials do not match this Sankalp account."
     "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Please try again later."
     "ERROR_NETWORK_REQUEST_FAILED" -> "Network error. Check your connection and try again."
     else -> fallback

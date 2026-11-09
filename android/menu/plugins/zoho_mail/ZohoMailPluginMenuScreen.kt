@@ -196,7 +196,7 @@ fun ZohoMailPluginMenuScreen(
                             fontSize = 15.sp,
                         )
                         Text(
-                            text = "Authorize once. Indoone AI can then work with permitted email tasks in Chat.",
+                            text = "Authorize once. Sankalp can then work with permitted email tasks in Chat.",
                             color = ZohoMuted,
                             fontSize = 12.sp,
                             lineHeight = 17.sp,

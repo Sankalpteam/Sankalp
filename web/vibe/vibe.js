@@ -118,12 +118,12 @@
 
       case 'transcript': {
         // VibeSessionService.kt stores a user line as "You: $text" and an
-        // assistant line as "Indoone: $text", so the transcript carries the
+        // assistant line as "Sankalp: $text", so the transcript carries the
         // speaker's name.
         const line = String(event.text || '').trim();
 
         if (event.role === 'assistant') {
-          setTranscript(`Indoone: ${line}`);
+          setTranscript(`Sankalp: ${line}`);
         } else {
           userLine = line;
           setTranscript(`You: ${line}`);

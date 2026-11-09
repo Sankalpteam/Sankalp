@@ -56,7 +56,7 @@ class SendTurnWorker(
         } catch (error: Exception) {
             val reason = error.message
                 ?.takeIf { it.isNotBlank() && !it.contains("undefined", ignoreCase = true) }
-                ?: "Indoone AI could not complete the request."
+                ?: "Sankalp could not complete the request."
             store.markFailed(turn.id, reason)
             // Not Result.retry(): see the class comment. A person decides, not the queue.
             Result.failure()

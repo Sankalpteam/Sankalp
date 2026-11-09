@@ -320,25 +320,25 @@ object ZohoMailPluginApi {
 
     private fun requireBackendUrl(): String {
         val value = BuildConfig.INDOONE_BACKEND_URL.trimEnd('/')
-        if (value.isBlank()) throw ZohoMailPluginException("Indoone backend URL is not configured.")
+        if (value.isBlank()) throw ZohoMailPluginException("Sankalp backend URL is not configured.")
         return value
     }
 
     private fun requireUserId(): String =
         FirebaseAuth.getInstance().currentUser?.uid?.takeIf { it.isNotBlank() }
-            ?: throw ZohoMailPluginException("Please sign in to Indoone first.")
+            ?: throw ZohoMailPluginException("Please sign in to Sankalp first.")
 
     private fun requireAuthToken(): String {
         val user = FirebaseAuth.getInstance().currentUser
-            ?: throw ZohoMailPluginException("Please sign in to Indoone first.")
+            ?: throw ZohoMailPluginException("Please sign in to Sankalp first.")
         return try {
             Tasks.await(user.getIdToken(false)).token
                 ?.takeIf { it.isNotBlank() }
-                ?: throw ZohoMailPluginException("Could not get your Indoone authentication token.")
+                ?: throw ZohoMailPluginException("Could not get your Sankalp authentication token.")
         } catch (error: ZohoMailPluginException) {
             throw error
         } catch (error: Exception) {
-            throw ZohoMailPluginException("Could not refresh your Indoone authentication session.", error)
+            throw ZohoMailPluginException("Could not refresh your Sankalp authentication session.", error)
         }
     }
 
@@ -379,7 +379,7 @@ object ZohoMailPluginApi {
                 }.getOrDefault("").trim()
                 throw ZohoMailPluginException(
                     message.takeIf { it.isNotBlank() }
-                        ?: "Indoone backend returned HTTP $responseCode.",
+                        ?: "Sankalp backend returned HTTP $responseCode.",
                 )
             }
             return body
@@ -387,7 +387,7 @@ object ZohoMailPluginApi {
             throw error
         } catch (error: Exception) {
             throw ZohoMailPluginException(
-                "Could not reach Indoone backend. Check your internet connection.",
+                "Could not reach Sankalp backend. Check your internet connection.",
                 error,
             )
         }

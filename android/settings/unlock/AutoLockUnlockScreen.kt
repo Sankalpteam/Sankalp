@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.indoone.R
 
-// The app's own palette, so the lock screen looks like the rest of Indoone.
+// The app's own palette, so the lock screen looks like the rest of Sankalp.
 private val LockPurple = Color(0xFF6330DB)
 private val LockPurpleLight = Color(0xFF9147ED)
 private val LockPurpleDark = Color(0xFF5E2DD2)
@@ -89,19 +89,19 @@ fun AutoLockUnlockScreen(
         ) {
             Image(
                 painter = painterResource(R.drawable.sankalp_logo),
-                contentDescription = "Indoone logo",
+                contentDescription = "Sankalp logo",
                 modifier = Modifier.size(76.dp),
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                "Indoone",
+                "Sankalp",
                 color = LockPurpleDark,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "Unlock Indoone",
+                "Unlock Sankalp",
                 color = LockText,
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,

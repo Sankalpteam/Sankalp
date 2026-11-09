@@ -403,7 +403,7 @@
           : error?.message || 'Authentication failed.';
 
       setStatus(message, true);
-      console.error('Indoone auth action failed:', error);
+      console.error('Sankalp auth action failed:', error);
     } finally {
       if (button.isConnected) {
         button.textContent = previous;

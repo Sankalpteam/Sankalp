@@ -274,7 +274,7 @@
       `;
       bind(mount, options);
       console.error(
-        'Indoone Add Account Manual feature failed:',
+        'Sankalp Add Account Manual feature failed:',
         error
       );
     }

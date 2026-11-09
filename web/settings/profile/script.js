@@ -13,7 +13,7 @@
   //
   //   "Checking saved connections…"                        while it looks
   //   "Gmail linked · ${status.emailAddress}"               connected, with an address
-  //   "Gmail linked to this Indoone profile"                connected, no address
+  //   "Gmail linked to this Sankalp profile"                connected, no address
   //   "Connect Gmail and manage your plugin connections"    not connected
   //   "Could not load saved connections"                    the call failed
   //
@@ -33,7 +33,7 @@
     }
 
     if (status?.connected) {
-      return 'Gmail linked to this Indoone profile';
+      return 'Gmail linked to this Sankalp profile';
     }
 
     return 'Connect Gmail and manage your plugin connections';
@@ -63,7 +63,7 @@
       );
 
       if (!response.ok) {
-        throw new Error(`Indoone backend returned ${response.status}`);
+        throw new Error(`Sankalp backend returned ${response.status}`);
       }
 
       const status = await response.json().catch(() => ({}));

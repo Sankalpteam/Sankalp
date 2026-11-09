@@ -38,7 +38,7 @@ class VibeClient(
 
                 val token = Tasks.await(user.getIdToken(false)).token
                     ?.takeIf { it.isNotBlank() }
-                    ?: throw IllegalStateException("Could not get the Indoone authentication token.")
+                    ?: throw IllegalStateException("Could not get the Sankalp authentication token.")
 
                 val request = Request.Builder()
                     .url(buildWebSocketUrl())
@@ -146,7 +146,7 @@ class VibeClient(
             backend.startsWith("https://") -> backend.replaceFirst("https://", "wss://")
             backend.startsWith("http://") -> backend.replaceFirst("http://", "ws://")
             backend.startsWith("wss://") || backend.startsWith("ws://") -> backend
-            else -> throw IllegalStateException("Indoone backend URL must use http:// or https://")
+            else -> throw IllegalStateException("Sankalp backend URL must use http:// or https://")
         }
 
         return "$websocketBase/api/vibe/session"

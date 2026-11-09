@@ -1,5 +1,5 @@
 // Renders the message list, the way the app draws it:
-//   - an AI reply has the Indoone mark to its left
+//   - an AI reply has the Sankalp mark to its left
 //   - a user reply is a violet bubble, right aligned
 //   - sent photos stack, sent files show a badge
 //   - a URL in a reply gets its own row with a copy button

@@ -22,10 +22,10 @@
   // drawn as rows that open nothing.
   //
   // The Version row IS drawn. It is the row the app has where it once had
-  // "About Indoone": the terminal branch replaced SettingsMenuItem(InfoIcon,
-  // "About Indoone") with SettingsMenuAction(InfoIcon, "Version", versionName,
+  // "About Sankalp": the terminal branch replaced SettingsMenuItem(InfoIcon,
+  // "About Sankalp") with SettingsMenuAction(InfoIcon, "Version", versionName,
   // "Check for updates"), and the merge brought that into main - so main has no
-  // About row here and no android/settings/about/ any more. About Indoone is
+  // About row here and no android/settings/about/ any more. About Sankalp is
   // still a drawer row, under SECURITY & INFORMATION, and this file does not
   // draw one.
   //

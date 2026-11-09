@@ -204,10 +204,10 @@ private const val READ_TIMEOUT_MS = 300_000
                     val reply = json.optString("reply")
                     val returnedConversationId = json.optString("conversation_id")
                     if (returnedConversationId.isBlank()) {
-                        throw ChatApiException("Indoone backend returned no conversation id")
+                        throw ChatApiException("Sankalp backend returned no conversation id")
                     }
                     if (reply.isBlank()) {
-                        throw ChatApiException("Indoone backend returned an empty reply")
+                        throw ChatApiException("Sankalp backend returned an empty reply")
                     }
                     ChatResponse(
                         returnedConversationId,
@@ -236,7 +236,7 @@ private const val READ_TIMEOUT_MS = 300_000
             }
         }
 
-        throw lastTransientError ?: ChatApiException("Indoone backend request failed")
+        throw lastTransientError ?: ChatApiException("Sankalp backend request failed")
     }
 
     fun uploadTextFile(filename: String, bytes: ByteArray): FileUploadResponse {
@@ -259,7 +259,7 @@ private const val READ_TIMEOUT_MS = 300_000
                 bytes = json.optInt("bytes"),
                 textPreview = json.optString("text_preview"),
             )
-            if (response.fileId.isBlank()) throw ChatApiException("Indoone backend returned no file id")
+            if (response.fileId.isBlank()) throw ChatApiException("Sankalp backend returned no file id")
             response
         } finally {
             connection.disconnect()
@@ -268,7 +268,7 @@ private const val READ_TIMEOUT_MS = 300_000
 
     private fun requireBackendUrl(): String {
         val backendUrl = BuildConfig.INDOONE_BACKEND_URL.trimEnd('/')
-        if (backendUrl.isBlank()) throw ChatApiException("Indoone backend URL is not configured")
+        if (backendUrl.isBlank()) throw ChatApiException("Sankalp backend URL is not configured")
         if (BuildConfig.INDOONE_CHANNEL == "terminal" &&
             backendUrl != "https://indooneai.duckdns.org" &&
             backendUrl != "https://52.62.244.79" &&
@@ -281,15 +281,15 @@ private const val READ_TIMEOUT_MS = 300_000
 
     private fun requireAuthToken(): String {
         val user = FirebaseAuth.getInstance().currentUser
-            ?: throw ChatApiException("Please sign in to use Indoone AI.")
+            ?: throw ChatApiException("Please sign in to use Sankalp.")
         return try {
             Tasks.await(user.getIdToken(false)).token
                 ?.takeIf { it.isNotBlank() }
-                ?: throw ChatApiException("Could not get the Indoone authentication token.")
+                ?: throw ChatApiException("Could not get the Sankalp authentication token.")
         } catch (error: ChatApiException) {
             throw error
         } catch (error: Exception) {
-            throw ChatApiException("Could not refresh your Indoone authentication session. Please login again.", error)
+            throw ChatApiException("Could not refresh your Sankalp authentication session. Please login again.", error)
         }
     }
 
@@ -353,7 +353,7 @@ private const val READ_TIMEOUT_MS = 300_000
                 val code = connection.responseCode
 
                 if (code !in 200..299) {
-                    throw ChatApiException("Indoone stream failed ($code)")
+                    throw ChatApiException("Sankalp stream failed ($code)")
                 }
 
                 var conversation = conversationId.orEmpty()
@@ -402,7 +402,7 @@ private const val READ_TIMEOUT_MS = 300_000
                     }
                 }
 
-                final ?: throw ChatApiException("Indoone stream ended without a reply")
+                final ?: throw ChatApiException("Sankalp stream ended without a reply")
             } finally {
                 connection.disconnect()
             }
@@ -454,8 +454,8 @@ private const val READ_TIMEOUT_MS = 300_000
                 val displayMessage = if (responseCode >= 500 && !safeServerMessage.isNullOrBlank()) {
                     safeServerMessage
                 } else {
-                    safeServerMessage?.let { "Indoone backend returned HTTP $responseCode: $it" }
-                        ?: "Indoone backend returned HTTP $responseCode"
+                    safeServerMessage?.let { "Sankalp backend returned HTTP $responseCode: $it" }
+                        ?: "Sankalp backend returned HTTP $responseCode"
                 }
                 throw ChatApiException(
                     displayMessage,
@@ -465,12 +465,12 @@ private const val READ_TIMEOUT_MS = 300_000
             }
             return body
         } catch (error: SocketTimeoutException) {
-            throw ChatApiException("Indoone AI is taking too long to respond. Please try again.", error)
+            throw ChatApiException("Sankalp is taking too long to respond. Please try again.", error)
         } catch (error: UnknownHostException) {
-            throw ChatApiException("Indoone AI backend could not be reached. Check your internet connection.", error)
+            throw ChatApiException("Sankalp backend could not be reached. Check your internet connection.", error)
         } catch (error: IOException) {
             throw ChatApiException(
-                "Indoone AI network error (${error.javaClass.simpleName}). Please check your internet connection and try again.",
+                "Sankalp network error (${error.javaClass.simpleName}). Please check your internet connection and try again.",
                 error,
             )
         }
@@ -494,12 +494,12 @@ private const val READ_TIMEOUT_MS = 300_000
                 ?.bufferedReader()?.use { it.readText() }.orEmpty()
 
             if (code !in 200..299) {
-                throw ChatApiException("Indoone backend could not create a share link")
+                throw ChatApiException("Sankalp backend could not create a share link")
             }
 
             val url = JSONObject(body).optString("share_url").trim()
 
-            if (url.isBlank()) throw ChatApiException("Indoone backend returned no share link")
+            if (url.isBlank()) throw ChatApiException("Sankalp backend returned no share link")
 
             url
         } finally {
@@ -526,7 +526,7 @@ private const val READ_TIMEOUT_MS = 300_000
                 ?.bufferedReader()?.use { it.readText() }.orEmpty()
 
             if (code !in 200..299) {
-                throw ChatApiException("Indoone backend could not rename this chat")
+                throw ChatApiException("Sankalp backend could not rename this chat")
             }
 
             JSONObject(body).optString("status").trim().ifBlank { title.trim() }

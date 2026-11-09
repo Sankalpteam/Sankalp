@@ -75,7 +75,7 @@ fun ChangeEmailScreen(
                 )
                 Text("Change email", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text(
-                    "The email on your Indoone account is shown below. Enter the new email and your current password to confirm.",
+                    "The email on your Sankalp account is shown below. Enter the new email and your current password to confirm.",
                     modifier = Modifier.padding(top = 5.dp, bottom = 18.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

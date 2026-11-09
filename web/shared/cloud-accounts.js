@@ -139,7 +139,7 @@ window.IndooneCloudAccounts = (() => {
       });
     } catch (error) {
       console.warn(
-        'Indoone legacy account lookup skipped:',
+        'Sankalp legacy account lookup skipped:',
         error
       );
     }

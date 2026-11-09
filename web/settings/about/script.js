@@ -1,4 +1,4 @@
-/* About Indoone. The web counterpart of android/settings/about/AboutScreen.kt,
+/* About Sankalp. The web counterpart of android/settings/about/AboutScreen.kt,
  * which is the Settings row's About - not the drawer's About, which is
  * android/menu/about/MenuAboutScreen.kt and opens under the 'about' key.
  *

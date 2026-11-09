@@ -12,11 +12,11 @@ window.initMenuDeleteAccount = function () {
 
   modal.innerHTML = `
     <div class="modal-head">
-      <h2>Delete Indoone account?</h2>
+      <h2>Delete Sankalp account?</h2>
       <button class="close-btn" data-close>×</button>
     </div>
     <p>
-      This permanently deletes your Indoone account, your cloud data and
+      This permanently deletes your Sankalp account, your cloud data and
       everything stored on this device. This action cannot be undone.
     </p>
     <div class="field">
@@ -41,7 +41,7 @@ window.initMenuDeleteAccount = function () {
     </div>
     <div id="accountDeleteStatus" class="auth-status" hidden></div>
     <button type="button" class="primary danger" id="confirmAccountDelete">
-      Delete Indoone account
+      Delete Sankalp account
     </button>
     <button type="button" class="secondary" data-close>
       Cancel
@@ -150,7 +150,7 @@ window.initMenuDeleteAccount = function () {
           throw new Error('Login session expired. Please login again.');
         }
 
-        setStatus('Removing your Indoone cloud data…');
+        setStatus('Removing your Sankalp cloud data…');
 
         const profileSnapshot = await db
           .ref(`users/${liveUser.uid}/profile`)
@@ -193,7 +193,7 @@ window.initMenuDeleteAccount = function () {
 
         await db.ref().update(updates);
 
-        setStatus('Deleting your Indoone account…');
+        setStatus('Deleting your Sankalp account…');
 
         await liveUser.delete();
 
@@ -244,7 +244,7 @@ window.initMenuDeleteAccount = function () {
         }
 
         setStatus(error?.message || 'Account deletion failed.', true);
-        toast(error?.message || 'Could not delete Indoone account');
+        toast(error?.message || 'Could not delete Sankalp account');
       }
     });
 };

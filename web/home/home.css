@@ -49,7 +49,7 @@
   display: none;
 }
 
-/* The greeting. The app's welcome used to say a flat "Indoone AI"; it now
+/* The greeting. The app's welcome used to say a flat "Sankalp"; it now
    greets you by name and by the hour, so the line is mostly body colour with
    the name in the brand purple. chat-home.js fills it in. */
 .welcome-title {
@@ -70,7 +70,7 @@
 }
 
 /* The panel. It was a plain bordered box; it now carries the purple, with a
-   3px accent down its left edge so the greeting reads as coming from Indoone
+   3px accent down its left edge so the greeting reads as coming from Sankalp
    rather than as a chat bubble. */
 .welcome-card {
   position: relative;

@@ -4,7 +4,7 @@ Android Scan QR Code account-add flow.
 
 ## UI reference
 
-The screen follows the current main reference: compact Indoone top bar, `Scan QR Code` heading, helper text, portrait camera preview, centered white scan frame, scan status, `Cancel Scan`, and the four-item bottom navigation.
+The screen follows the current main reference: compact Sankalp top bar, `Scan QR Code` heading, helper text, portrait camera preview, centered white scan frame, scan status, `Cancel Scan`, and the four-item bottom navigation.
 
 ## Scanner behavior
 

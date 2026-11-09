@@ -132,7 +132,7 @@
       `;
       bind(mount);
       console.error(
-        'Indoone Add Account Import feature failed:',
+        'Sankalp Add Account Import feature failed:',
         error
       );
     }

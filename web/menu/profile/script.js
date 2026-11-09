@@ -28,12 +28,12 @@ window.initMenuProfile = function () {
     status.classList.toggle('is-error', kind === 'error');
   }
 
-  // The app's displayName: the name, then the nickname, then "Indoone User".
+  // The app's displayName: the name, then the nickname, then "Sankalp User".
   function shownName(profile) {
     const full = String(profile.name || '').trim();
     const nick = String(profile.nickname || '').trim();
 
-    return full || nick || 'Indoone User';
+    return full || nick || 'Sankalp User';
   }
 
   function shownInitials(label) {
@@ -89,7 +89,7 @@ window.initMenuProfile = function () {
 
   if (email) {
     // The account's own email. With none it keeps the line the screen had.
-    email.textContent = account?.email || 'Your Indoone profile';
+    email.textContent = account?.email || 'Your Sankalp profile';
   }
 
   editButton?.addEventListener('click', () => {

@@ -34,13 +34,13 @@ import sys
 # answer the question someone typed to get here, not to repeat the heading.
 DOCUMENTS = (
     ("privacy-policy", "Privacy Policy",
-     "What Indoone collects, who sees it, and how long it is kept."),
+     "What Sankalp collects, who sees it, and how long it is kept."),
     ("terms-of-use", "Terms of Use",
-     "The rules for using Indoone, in plain language."),
+     "The rules for using Sankalp, in plain language."),
     ("data-privacy", "Data & Privacy",
-     "What Indoone stores, where it is stored, and how to get rid of it."),
+     "What Sankalp stores, where it is stored, and how to get rid of it."),
     ("security", "Security",
-     "How an Indoone account and its one-time codes are protected."),
+     "How an Sankalp account and its one-time codes are protected."),
 )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -51,13 +51,13 @@ PAGE = """<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="robots" content="index, follow" />
-  <title>{title} · Indoone</title>
+  <title>{title} · Sankalp</title>
   <meta name="description" content="{description}" />
   <link rel="canonical" href="https://indoone.indoworkspace.in/legal/{slug}.html" />
 
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Indoone AI" />
-  <meta property="og:title" content="{title} · Indoone" />
+  <meta property="og:site_name" content="Sankalp" />
+  <meta property="og:title" content="{title} · Sankalp" />
   <meta property="og:description" content="{description}" />
   <meta property="og:url" content="https://indoone.indoworkspace.in/legal/{slug}.html" />
 
@@ -125,7 +125,7 @@ PAGE = """<!doctype html>
 <h1 class="sr-only">{title}</h1>
 {stamp}
 {content}
-<nav class="legal-nav" aria-label="Indoone documents">
+<nav class="legal-nav" aria-label="Sankalp documents">
 {links}
 </nav>
 </main>
@@ -170,7 +170,7 @@ def content_of(slug: str) -> str:
 
 
 def structured_data(slug: str, title: str, description: str) -> str:
-    """WebPage plus a breadcrumb, so the result shows Indoone > Legal > Privacy Policy."""
+    """WebPage plus a breadcrumb, so the result shows Sankalp > Legal > Privacy Policy."""
     import json
 
     url = f"https://indoone.indoworkspace.in/legal/{slug}.html"
@@ -183,7 +183,7 @@ def structured_data(slug: str, title: str, description: str) -> str:
                     "@type": "WebPage",
                     "@id": url,
                     "url": url,
-                    "name": f"{title} · Indoone",
+                    "name": f"{title} · Sankalp",
                     "description": description,
                     "isPartOf": {"@id": "https://indoone.indoworkspace.in/#website"},
                     "inLanguage": "en",
@@ -191,7 +191,7 @@ def structured_data(slug: str, title: str, description: str) -> str:
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
-                        {"@type": "ListItem", "position": 1, "name": "Indoone",
+                        {"@type": "ListItem", "position": 1, "name": "Sankalp",
                          "item": "https://indoone.indoworkspace.in/"},
                         {"@type": "ListItem", "position": 2, "name": title, "item": url},
                     ],
@@ -216,7 +216,7 @@ def nav_links(slug: str) -> str:
         for other, label, _ in DOCUMENTS
         if other != slug
     ]
-    parts.append('<a href="/">Indoone app</a>')
+    parts.append('<a href="/">Sankalp app</a>')
     return "\n".join(f"  {part}" for part in parts)
 
 

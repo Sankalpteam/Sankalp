@@ -488,7 +488,7 @@ private fun exportChatAsPdf(context: Context, messages: List<ChatMessage>) {
     }
 
     val body = messages.joinToString("") { message ->
-        val who = if (message.fromUser) "You" else "Indoone AI"
+        val who = if (message.fromUser) "You" else "Sankalp"
         val background = if (message.fromUser) "#F4F2FF" else "#FFFFFF"
         val escaped = message.text
             .replace("&", "&amp;")
@@ -508,7 +508,7 @@ private fun exportChatAsPdf(context: Context, messages: List<ChatMessage>) {
           .row { border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; border: 1px solid #E5E0ED; }
           .who { font-size: 11px; color: #6B6478; margin-bottom: 4px; }
           .text { font-size: 13px; line-height: 1.45; }
-        </style></head><body><h1>Indoone chat</h1>$body</body></html>
+        </style></head><body><h1>Sankalp chat</h1>$body</body></html>
     """.trimIndent()
 
     val webView = WebView(context)
@@ -516,8 +516,8 @@ private fun exportChatAsPdf(context: Context, messages: List<ChatMessage>) {
     webView.webViewClient = object : WebViewClient() {
         override fun onPageFinished(view: WebView?, url: String?) {
             val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-            val adapter = webView.createPrintDocumentAdapter("Indoone chat")
-            printManager.print("Indoone chat", adapter, PrintAttributes.Builder().build())
+            val adapter = webView.createPrintDocumentAdapter("Sankalp chat")
+            printManager.print("Sankalp chat", adapter, PrintAttributes.Builder().build())
         }
     }
     webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
@@ -865,7 +865,7 @@ fun HomeScreen(
                         input = turn.text
                     }
                     messages = messages + ChatMessage(
-                        turn.error ?: "Indoone AI could not complete the request.",
+                        turn.error ?: "Sankalp could not complete the request.",
                         false,
                     )
                 }
@@ -1225,7 +1225,7 @@ fun HomeScreen(
                     )
                 }
                 if (input.isBlank()) input = typed
-                val failureReply = error.message ?: "Indoone AI could not complete the request."
+                val failureReply = error.message ?: "Sankalp could not complete the request."
                 messages = messages + ChatMessage(failureReply, false)
                 // A reply the backend actually sent is part of the conversation, so
                 // save it: refreshing the chat then shows what was said at the time.
@@ -1379,7 +1379,7 @@ fun HomeScreen(
             launchCameraCapture()
         } else {
             messages = messages + ChatMessage(
-                "Camera permission is required. Allow Camera in Android Settings > Apps > Indoone > Permissions.",
+                "Camera permission is required. Allow Camera in Android Settings > Apps > Sankalp > Permissions.",
                 false,
             )
         }
@@ -1417,7 +1417,7 @@ fun HomeScreen(
             }
 
             // Android 14+ supports automatic spoken-language detection and switching.
-            // Keep every language Indoone supports available as a recognition choice.
+            // Keep every language Sankalp supports available as a recognition choice.
             // This list is what the recogniser may detect and switch between, so a
             // missing entry means that language cannot be spoken to the app at all.
             if (Build.VERSION.SDK_INT >= 34) {
@@ -1548,7 +1548,7 @@ fun HomeScreen(
                 runCatching { ChatApi.shareThread(thread) }
                     .onSuccess { url ->
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        clipboard.setPrimaryClip(ClipData.newPlainText("Indoone chat", url))
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp chat", url))
                         Toast.makeText(
                             context,
                             "Link copied to clipboard! Anyone with this link can view this chat",
@@ -1687,7 +1687,7 @@ fun HomeScreen(
                                 .padding(top = 26.dp, bottom = 8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            // The greeting. It used to say a flat "Indoone AI";
+                            // The greeting. It used to say a flat "Sankalp";
                             // it now greets you by name and by the hour, the
                             // same way the web's welcome does.
                             Row(
@@ -2170,7 +2170,7 @@ fun HomeScreen(
                         // The send action remains locked until the current reply finishes.
                         enabled = true,
                         textStyle = androidx.compose.ui.text.TextStyle(color = Color(0xFF17151D), fontSize = 15.sp),
-                        decorationBox = { innerTextField -> Box { if (input.isEmpty()) Text("Message Indoone AI", color = Color(0xFF8A8492), fontSize = 15.sp); innerTextField() } },
+                        decorationBox = { innerTextField -> Box { if (input.isEmpty()) Text("Message Sankalp", color = Color(0xFF8A8492), fontSize = 15.sp); innerTextField() } },
                     )
                 }
 
@@ -2382,7 +2382,7 @@ private fun MessageActions(
             ) {
                 val clipboard =
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("Indoone exchange", pair))
+                clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp exchange", pair))
                 // A tap with no visible result reads as a broken button.
                 Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
             }
@@ -2517,7 +2517,7 @@ private fun ReplyLinkRow(url: String, modifier: Modifier = Modifier) {
                     .background(Color(0xFFF3EEFC))
                     .clickable {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        clipboard.setPrimaryClip(ClipData.newPlainText("Indoone link", url))
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp link", url))
                         Toast.makeText(context, "Link copied", Toast.LENGTH_SHORT).show()
                     },
                 contentAlignment = Alignment.Center,

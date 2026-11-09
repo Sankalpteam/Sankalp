@@ -11,7 +11,7 @@
   };
 
   if (!window.firebase) {
-    console.error('Indoone Firebase SDK is not loaded.');
+    console.error('Sankalp Firebase SDK is not loaded.');
     return;
   }
 
@@ -27,7 +27,7 @@
   // attach the auth-state listener only after Firebase finishes configuring it.
   const persistenceReady = auth?.setPersistence && firebase.auth?.Auth?.Persistence?.LOCAL
     ? auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(error => {
-        console.warn('Indoone Firebase local persistence setup failed:', error);
+        console.warn('Sankalp Firebase local persistence setup failed:', error);
       })
     : Promise.resolve();
 

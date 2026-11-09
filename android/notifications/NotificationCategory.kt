@@ -10,5 +10,5 @@ enum class NotificationCategory(
     VIBE("vibe", "Vibe", "Vibe voice session updates"),
     ACCOUNTS("accounts", "Accounts", "Authenticator account and code-related updates"),
     INTEGRATIONS("integrations", "Integrations", "Connected plugins and services"),
-    UPDATES("updates", "Updates", "Indoone app and service updates"),
+    UPDATES("updates", "Updates", "Sankalp app and service updates"),
 }

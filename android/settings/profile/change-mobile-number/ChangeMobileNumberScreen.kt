@@ -68,7 +68,7 @@ fun ChangeMobileNumberScreen(
                 }
                 Text("Change mobile number", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text(
-                    "The number on your Indoone account is shown below. Enter the new number and your current password to confirm.",
+                    "The number on your Sankalp account is shown below. Enter the new number and your current password to confirm.",
                     modifier = Modifier.padding(top = 5.dp, bottom = 18.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

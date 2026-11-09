@@ -210,7 +210,7 @@ fun AppTopBar(
                     modifier = Modifier.size(34.dp),
                 )
                 Text(
-                    "Indoone",
+                    "Sankalp",
                     color = Color(0xFF5E2DD2),
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,

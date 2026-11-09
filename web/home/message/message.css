@@ -46,7 +46,7 @@
   align-items: flex-start;
 }
 
-/* The app puts the Indoone mark beside every reply of its own. */
+/* The app puts the Sankalp mark beside every reply of its own. */
 .chat-logo {
   flex: none;
   width: 24px;

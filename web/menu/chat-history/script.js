@@ -74,7 +74,7 @@ window.initMenuChatHistory = function () {
         );
       }
     } catch (error) {
-      console.warn('Indoone chat could not be opened:', error);
+      console.warn('Sankalp chat could not be opened:', error);
     }
 
     window.showHome?.();

@@ -77,7 +77,7 @@ object IndooneNotificationManager {
         show(
             context,
             NotificationCategory.UPDATES,
-            "Indoone Notifications",
+            "Sankalp Notifications",
             "Notifications are working correctly on this device.",
         )
     }

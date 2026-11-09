@@ -525,7 +525,7 @@
       `;
       bind(mount);
       console.error(
-        'Indoone Add Account QR feature failed:',
+        'Sankalp Add Account QR feature failed:',
         error
       );
     }

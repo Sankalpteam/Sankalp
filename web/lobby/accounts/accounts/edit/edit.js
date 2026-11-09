@@ -30,7 +30,7 @@
       });
     } catch (error) {
       console.error(
-        'Indoone account edit navigation failed:',
+        'Sankalp account edit navigation failed:',
         error
       );
       toast(

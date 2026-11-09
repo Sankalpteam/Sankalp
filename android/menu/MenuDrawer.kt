@@ -187,7 +187,7 @@ fun MenuDrawer(
             onDismissRequest = { showSetLockPrompt = false },
             title = { Text("Set your App Lock") },
             text = {
-                Text("Indoone is not locked yet. Set an App PIN, and Lock App will ask for it, or for your fingerprint, before the app opens.")
+                Text("Sankalp is not locked yet. Set an App PIN, and Lock App will ask for it, or for your fingerprint, before the app opens.")
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -230,10 +230,10 @@ fun MenuDrawer(
                         .padding(start = 5.dp, end = 0.dp, top = 3.dp, bottom = 13.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // Keep Indoone's existing logo and wordmark unchanged; no avatar is added.
+                    // Keep Sankalp's existing logo and wordmark unchanged; no avatar is added.
                     IndooneMenuLogo(modifier = Modifier.size(36.dp))
                     Text(
-                        "Indoone",
+                        "Sankalp",
                         modifier = Modifier.padding(start = 9.dp).weight(1f),
                         color = Color(0xFF263753),
                         fontSize = 19.sp,
@@ -284,7 +284,7 @@ fun MenuDrawer(
                 DrawerItem(Icons.Outlined.Security, "Security", null) { showSecurity = true }
                 DrawerItem(Icons.Outlined.Description, "Terms of Use", null) { showTerms = true }
                 DrawerItem(Icons.Outlined.Visibility, "Privacy Policy", null) { showPrivacy = true }
-                DrawerItem(Icons.Outlined.Info, "About Indoone", null) { showAbout = true }
+                DrawerItem(Icons.Outlined.Info, "About Sankalp", null) { showAbout = true }
                 DrawerItem(Icons.Outlined.Lock, "Lock App", null) {
                     if (AppLockStore(context).isEnabled()) {
                         onDismiss()

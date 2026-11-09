@@ -120,7 +120,7 @@
         const detail = await response.text().catch(() => '');
 
         throw new Error(
-          `Indoone backend returned ${response.status}` +
+          `Sankalp backend returned ${response.status}` +
             (detail ? `: ${detail.slice(0, 200)}` : '')
         );
       }
@@ -164,11 +164,11 @@
     const json = await postJson('/api/chat', payload);
 
     if (!json.conversation_id) {
-      throw new Error('Indoone backend returned no conversation id.');
+      throw new Error('Sankalp backend returned no conversation id.');
     }
 
     if (!json.reply) {
-      throw new Error('Indoone backend returned an empty reply.');
+      throw new Error('Sankalp backend returned an empty reply.');
     }
 
     return {
@@ -217,7 +217,7 @@
     });
 
     if (!response.ok || !response.body) {
-      throw new Error(`Indoone stream failed (${response.status})`);
+      throw new Error(`Sankalp stream failed (${response.status})`);
     }
 
     const reader = response.body.getReader();
@@ -281,7 +281,7 @@
     // A stream that ends without its last event is not a reply. The caller falls back to
     // the blocking endpoint rather than showing half an answer as if it were whole.
     if (!final) {
-      throw new Error('Indoone stream ended without a reply');
+      throw new Error('Sankalp stream ended without a reply');
     }
 
     return final;

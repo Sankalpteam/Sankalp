@@ -2,12 +2,12 @@
 //
 // The app draws one row and one note:
 //
-//   DangerRow("Delete Indoone account",
-//             "Permanently delete your Indoone account, cloud data and local files",
+//   DangerRow("Delete Sankalp account",
+//             "Permanently delete your Sankalp account, cloud data and local files",
 //             onDeleteAccount)
 //
-//   "This permanently removes your Indoone account, your cloud data, and
-//    everything Indoone keeps on this device. Continue only when you are sure."
+//   "This permanently removes your Sankalp account, your cloud data, and
+//    everything Sankalp keeps on this device. Continue only when you are sure."
 //
 // The web used to draw a second row, "Delete local data", which the app has
 // never had. It is gone, and the note and the subtitle are now the app's own
@@ -25,16 +25,16 @@ window.initMenuDangerZone = function () {
     '</button>' +
     '</div>' +
     '<p class="menu-feature-note">' +
-    'This permanently removes your Indoone account, your cloud data, and ' +
-    'everything Indoone keeps on this device. Continue only when you are sure.' +
+    'This permanently removes your Sankalp account, your cloud data, and ' +
+    'everything Sankalp keeps on this device. Continue only when you are sure.' +
     '</p>' +
     '<div class="menu-feature-list">' +
     '<button type="button" class="settings-row danger menu-feature-row" ' +
     'data-open-nested="danger-zone/delete-account">' +
     '<span>' +
-    'Delete Indoone account' +
+    'Delete Sankalp account' +
     '<small>' +
-    'Permanently delete your Indoone account, cloud data and local files' +
+    'Permanently delete your Sankalp account, cloud data and local files' +
     '</small>' +
     '</span>' +
     '<b>' +

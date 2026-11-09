@@ -25,7 +25,7 @@
     const db = firebase()?.firestore;
 
     if (!db) {
-      throw new Error('Indoone storage is unavailable.');
+      throw new Error('Sankalp storage is unavailable.');
     }
 
     return db;
@@ -85,7 +85,7 @@
     try {
       await indexRef(conversationId).set(true);
     } catch (error) {
-      console.warn('Indoone chat index update failed:', error);
+      console.warn('Sankalp chat index update failed:', error);
     }
   }
 
@@ -149,7 +149,7 @@
     try {
       await indexRef(conversationId).remove();
     } catch (error) {
-      console.warn('Indoone chat index remove failed:', error);
+      console.warn('Sankalp chat index remove failed:', error);
     }
   }
 

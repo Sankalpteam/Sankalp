@@ -58,7 +58,7 @@
         return true;
       }
     } catch (error) {
-      console.error('Indoone login UI error:', error);
+      console.error('Sankalp login UI error:', error);
     }
 
     return false;
@@ -445,7 +445,7 @@
         startDemoTimers();
       }
     } catch (error) {
-      console.error('Indoone auth gate error:', error);
+      console.error('Sankalp auth gate error:', error);
       renderLoginNow();
     } finally {
       authGateRunning = false;
@@ -469,7 +469,7 @@
       );
     } catch (error) {
       console.warn(
-        'Indoone Firebase persistence initialization failed:',
+        'Sankalp Firebase persistence initialization failed:',
         error
       );
     }

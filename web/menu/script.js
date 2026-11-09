@@ -46,7 +46,7 @@
     logout: 'settings/logout',
     // About is NOT listed, for the same reason as profile: the drawer's About
     // is android/menu/about/MenuAboutScreen.kt, and getFeatureBase resolves
-    // 'about' to menu/about, which draws it in full - About Indoone, Sync, OTP
+    // 'about' to menu/about, which draws it in full - About Sankalp, Sync, OTP
     // Standard, Account Storage, Legal, Licenses. The Settings row's About is
     // android/settings/about/AboutScreen.kt, a different screen, and it is
     // listed below under 'settings-about'.
@@ -60,7 +60,7 @@
     // own, and both scripts defined the same initMenuProfile, so one silently
     // overwrote the other.
     account: 'settings/profile',
-    // The Settings row's About Indoone is android/settings/about/AboutScreen.kt
+    // The Settings row's About Sankalp is android/settings/about/AboutScreen.kt
     // - the sheet with Version and Updates - which is a different screen from
     // the drawer's About (android/menu/about/MenuAboutScreen.kt). getFeatureBase
     // resolves 'about' to menu/about, so the settings screen needs its own key.

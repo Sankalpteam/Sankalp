@@ -70,7 +70,7 @@ fun ProfileMenuScreen(onBack: () -> Unit) {
             .onFailure { status = it.message ?: "Could not load profile." }
     }
 
-    val displayName = name.trim().ifBlank { nickname.trim() }.ifBlank { "Indoone User" }
+    val displayName = name.trim().ifBlank { nickname.trim() }.ifBlank { "Sankalp User" }
     val initials = displayName
         .split(Regex("\\s+"))
         .filter { it.isNotBlank() }
@@ -159,7 +159,7 @@ fun ProfileMenuScreen(onBack: () -> Unit) {
                     Text(
                         FirebaseAuth.getInstance().currentUser?.email
                             ?.takeIf { it.isNotBlank() }
-                            ?: "Your Indoone profile",
+                            ?: "Your Sankalp profile",
                         modifier = Modifier.padding(top = 3.dp),
                         color = LabelColor,
                         fontSize = 12.sp,

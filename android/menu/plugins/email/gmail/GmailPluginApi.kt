@@ -203,25 +203,25 @@ object GmailPluginApi {
 
     private fun requireBackendUrl(): String {
         val value = BuildConfig.INDOONE_BACKEND_URL.trimEnd('/')
-        if (value.isBlank()) throw GmailPluginException("Indoone backend URL is not configured.")
+        if (value.isBlank()) throw GmailPluginException("Sankalp backend URL is not configured.")
         return value
     }
 
     private fun requireUserId(): String =
         FirebaseAuth.getInstance().currentUser?.uid?.takeIf { it.isNotBlank() }
-            ?: throw GmailPluginException("Please sign in to Indoone first.")
+            ?: throw GmailPluginException("Please sign in to Sankalp first.")
 
     private fun requireAuthToken(): String {
         val user = FirebaseAuth.getInstance().currentUser
-            ?: throw GmailPluginException("Please sign in to Indoone first.")
+            ?: throw GmailPluginException("Please sign in to Sankalp first.")
         return try {
             Tasks.await(user.getIdToken(false)).token
                 ?.takeIf { it.isNotBlank() }
-                ?: throw GmailPluginException("Could not get your Indoone authentication token.")
+                ?: throw GmailPluginException("Could not get your Sankalp authentication token.")
         } catch (error: GmailPluginException) {
             throw error
         } catch (error: Exception) {
-            throw GmailPluginException("Could not refresh your Indoone authentication session.", error)
+            throw GmailPluginException("Could not refresh your Sankalp authentication session.", error)
         }
     }
 
@@ -262,7 +262,7 @@ object GmailPluginApi {
                 }.getOrDefault("").trim()
                 throw GmailPluginException(
                     message.takeIf { it.isNotBlank() }
-                        ?: "Indoone backend returned HTTP $responseCode.",
+                        ?: "Sankalp backend returned HTTP $responseCode.",
                 )
             }
             return body
@@ -270,7 +270,7 @@ object GmailPluginApi {
             throw error
         } catch (error: Exception) {
             throw GmailPluginException(
-                "Could not reach Indoone backend. Check your internet connection.",
+                "Could not reach Sankalp backend. Check your internet connection.",
                 error,
             )
         }

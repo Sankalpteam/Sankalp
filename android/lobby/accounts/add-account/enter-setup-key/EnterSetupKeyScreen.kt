@@ -122,7 +122,7 @@ fun EnterSetupKeyScreen(
                         .padding(top = 6.dp),
                     shape = RoundedCornerShape(13.dp),
                     contentPadding = PaddingValues(vertical = 0.dp),
-                    // Indoone's own purple, as the Edit screen's Save now is.
+                    // Sankalp's own purple, as the Edit screen's Save now is.
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF703BE2)),
                 ) {
                     Text(

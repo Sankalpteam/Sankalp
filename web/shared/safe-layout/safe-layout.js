@@ -1,5 +1,5 @@
 /*
- * Indoone Safe Layout runtime hook.
+ * Sankalp Safe Layout runtime hook.
  *
  * Android publishes measured inset values through CSS custom properties.
  * This module keeps component geometry in CSS and identifies the taller

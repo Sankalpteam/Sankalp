@@ -167,7 +167,7 @@ fun AccountDetailsScreen(
                             .background(Color(0xFFF2ECFF)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        // The real Indoone mark. This tile used to build its own
+                        // The real Sankalp mark. This tile used to build its own
                         // approximation out of a "✦" character, which did not match the
                         // logo the rest of the app shows.
                         IndooneTopBarLogo(modifier = Modifier.size(34.dp))

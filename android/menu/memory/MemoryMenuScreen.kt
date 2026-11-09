@@ -147,7 +147,7 @@ fun MemoryMenuScreen(onBack: () -> Unit) {
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            "Manage the information you want Indoone to remember.",
+                            "Manage the information you want Sankalp to remember.",
                             modifier = Modifier.padding(top = 3.dp),
                             color = Color(0xFF6E6777),
                             fontSize = 12.sp,

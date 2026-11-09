@@ -32,7 +32,7 @@ data class VibeSessionState(
 )
 
 /**
- * Owns the Indoone Vibe conversation.
+ * Owns the Sankalp Vibe conversation.
  *
  * Android only lets a foreground service keep the microphone and keep running
  * once the app leaves the screen, so the socket and the audio engine live here
@@ -49,7 +49,7 @@ class VibeSessionService : Service() {
 
         private const val CHANNEL_ID = "vibe_session"
         private const val NOTIFICATION_ID = 4201
-        private const val WAKE_LOCK_TAG = "Indoone:VibeSession"
+        private const val WAKE_LOCK_TAG = "Sankalp:VibeSession"
 
         private val _state = MutableStateFlow(VibeSessionState())
         val state: StateFlow<VibeSessionState> = _state.asStateFlow()
@@ -188,7 +188,7 @@ class VibeSessionService : Service() {
                 if (text.isNotBlank()) {
                     val line = when (event.optString("role")) {
                         "user" -> "You: $text"
-                        "assistant" -> "Indoone: $text"
+                        "assistant" -> "Sankalp: $text"
                         else -> text
                     }
                     _state.value = _state.value.copy(transcript = line)
@@ -247,7 +247,7 @@ class VibeSessionService : Service() {
         val manager = getSystemService(NotificationManager::class.java)
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Indoone Vibe",
+            "Sankalp Vibe",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
             setSound(null, null)
@@ -300,14 +300,14 @@ class VibeSessionService : Service() {
         val content = RemoteViews(packageName, R.layout.notification_vibe_session)
         content.setImageViewResource(R.id.vibe_notification_icon, R.drawable.ic_indoone_notification)
         content.setImageViewResource(R.id.vibe_notification_close, R.drawable.ic_indoone_close)
-        content.setTextViewText(R.id.vibe_notification_title, "Indoone AI")
+        content.setTextViewText(R.id.vibe_notification_title, "Sankalp")
         content.setTextViewText(R.id.vibe_notification_status, statusText())
         content.setOnClickPendingIntent(R.id.vibe_notification_icon, openPendingIntent)
         content.setOnClickPendingIntent(R.id.vibe_notification_close, stopPendingIntent)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_indoone_notification)
-                .setContentTitle("Indoone AI")
+                .setContentTitle("Sankalp")
                 .setContentText(statusText())
                 .setOngoing(true)
                 .setCategory(Notification.CATEGORY_SERVICE)
@@ -319,7 +319,7 @@ class VibeSessionService : Service() {
         } else {
             Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_indoone_notification)
-                .setContentTitle("Indoone AI")
+                .setContentTitle("Sankalp")
                 .setContentText(statusText())
                 .setOngoing(true)
                 .setCategory(Notification.CATEGORY_SERVICE)

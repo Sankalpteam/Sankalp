@@ -20,7 +20,7 @@
     const database = window.IndooneFirebase?.database;
 
     if (!database) {
-      throw new Error('Indoone storage is unavailable.');
+      throw new Error('Sankalp storage is unavailable.');
     }
 
     return database;

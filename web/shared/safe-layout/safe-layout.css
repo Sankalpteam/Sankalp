@@ -2,7 +2,7 @@
 @import url("./accounts-scroll.css");
 
 /*
- * Indoone Safe Layout Contract
+ * Sankalp Safe Layout Contract
  *
  * One device-agnostic contract owns the safe-area values used by the web UI.
  * Android supplies measured native insets when available. In browser/WebView
@@ -50,7 +50,7 @@
 
 /*
  * The WebView is edge-to-edge. The measured bottom inset belongs to the
- * system navigation/gesture region, not to the Indoone navigation controls.
+ * system navigation/gesture region, not to the Sankalp navigation controls.
  * Move the whole app navigation above that measured region while keeping
  * the app bar itself at its normal component height. No navigation-mode
  * detection or device-specific offset is used.

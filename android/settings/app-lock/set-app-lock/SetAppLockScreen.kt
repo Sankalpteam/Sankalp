@@ -52,7 +52,7 @@ fun SetAppLockScreen(
 ) {
     PinPadScaffold(
         title = "Create App PIN",
-        description = "Create a 4–12 digit PIN to protect Indoone.",
+        description = "Create a 4–12 digit PIN to protect Sankalp.",
         pin = pin,
         error = error,
         actionLabel = "Create App PIN",
@@ -116,7 +116,7 @@ internal fun PinPadScaffold(
                             ),
                         contentAlignment = Alignment.Center,
                     ) { Text("I", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black) }
-                    Text("Indoone", color = Color(0xFF5E2DD2), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text("Sankalp", color = Color(0xFF5E2DD2), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Text(title, fontSize = 27.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold, color = TextDark)

@@ -31,7 +31,7 @@
         video: { facingMode: 'environment' }
       });
     } catch (error) {
-      console.warn('Indoone camera unavailable, using the file input:', error);
+      console.warn('Sankalp camera unavailable, using the file input:', error);
       fallback();
       return;
     }

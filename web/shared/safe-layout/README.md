@@ -1,4 +1,4 @@
-# Indoone Safe Layout
+# Sankalp Safe Layout
 
 This folder is the single home for the device-agnostic safe-layout architecture.
 

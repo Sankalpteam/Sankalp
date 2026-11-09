@@ -56,7 +56,7 @@
         })
       );
     } catch (error) {
-      console.warn('Indoone in-flight turn could not be recorded:', error);
+      console.warn('Sankalp in-flight turn could not be recorded:', error);
     }
   }
 

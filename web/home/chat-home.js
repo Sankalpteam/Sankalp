@@ -22,7 +22,7 @@
 
   // The app alternates these two, every two seconds.
   // The panel's second line. The first
-  // line now says what Indoone can actually do; "How can I help you today?"
+  // line now says what Sankalp can actually do; "How can I help you today?"
   // was already implied by the panel asking what to do.
   const WELCOME_LINES = [
     'I can read a screenshot, plan a trip, draft a message or explain something dense.',
@@ -200,7 +200,7 @@
         );
       }
     } catch (error) {
-      console.warn('Indoone chat could not be opened:', error);
+      console.warn('Sankalp chat could not be opened:', error);
     }
 
     window.IndooneChatHome?.refresh?.();
@@ -355,7 +355,7 @@
       window.toast?.('Message restored - please re-attach your file');
     }
 
-    console.warn('Indoone: an unfinished message was restored to the composer.');
+    console.warn('Sankalp: an unfinished message was restored to the composer.');
   }
 
   async function init() {
@@ -370,7 +370,7 @@
     try {
       await loadModules();
     } catch (error) {
-      console.error('Indoone chat home could not load:', error);
+      console.error('Sankalp chat home could not load:', error);
       // Even then the composer must be in the right state: no account "+" left
       // on screen.
       syncComposer();

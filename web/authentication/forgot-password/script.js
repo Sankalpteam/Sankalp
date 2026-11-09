@@ -21,7 +21,7 @@ window.IndooneForgotPassword = (() => {
   function errorMessage(error) {
     const map = {
       'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Indoone account was found.',
+      'auth/user-not-found': 'No Sankalp account was found.',
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/network-request-failed': 'Network error. Check your connection and try again.',
       'auth/weak-password': 'Password should be at least 6 characters.'

@@ -51,7 +51,7 @@ fun MenuAboutScreen(
     val facts = listOf(
         AboutFact("Sync", "Secure cloud sync across your signed-in devices"),
         AboutFact("OTP standard", "TOTP • 6/8 digits • SHA-1 / SHA-256 / SHA-512"),
-        AboutFact("Account storage", "Cloud synced with your Indoone account"),
+        AboutFact("Account storage", "Cloud synced with your Sankalp account"),
         AboutFact("Legal", "Privacy Policy • Terms of Service"),
         AboutFact("Licenses", "Open Source Licenses"),
     )
@@ -70,7 +70,7 @@ fun MenuAboutScreen(
                     )
                 }
                 Text(
-                    "About Indoone",
+                    "About Sankalp",
                     modifier = Modifier.padding(start = 4.dp),
                     color = Color(0xFF2C2733),
                     fontSize = 21.sp,
@@ -97,12 +97,12 @@ fun MenuAboutScreen(
                     ) {
                         Image(
                             painter = painterResource(R.drawable.sankalp_logo),
-                            contentDescription = "Indoone logo",
+                            contentDescription = "Sankalp logo",
                             modifier = Modifier.size(52.dp),
                         )
                         Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
                             Text(
-                                text = "Indoone",
+                                text = "Sankalp",
                                 color = AboutInk,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,

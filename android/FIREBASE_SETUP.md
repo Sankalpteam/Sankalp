@@ -2,7 +2,7 @@
 
 The Android module now contains Firebase Authentication and Cloud Firestore dependencies plus a Firebase account repository.
 
-The remaining project-specific Firebase step is to add the real `google-services.json` for the Indoone Android app to the module root:
+The remaining project-specific Firebase step is to add the real `google-services.json` for the Sankalp Android app to the module root:
 
 ```text
 android/google-services.json
@@ -21,4 +21,4 @@ The Firestore repository stores accounts under the authenticated user's document
 users/{uid}/accounts/{accountId}
 ```
 
-Do not invent Firebase project IDs, package registrations, API keys, or Firestore rules in source code. Those values must come from the actual Indoone Firebase project.
+Do not invent Firebase project IDs, package registrations, API keys, or Firestore rules in source code. Those values must come from the actual Sankalp Firebase project.

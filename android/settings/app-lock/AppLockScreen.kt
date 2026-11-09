@@ -85,7 +85,7 @@ fun AppLockScreen(
                 }
 
                 Text(
-                    text = if (hasPin) "Manage your Indoone App PIN." else "Protect Indoone with a 4–12 digit App PIN.",
+                    text = if (hasPin) "Manage your Sankalp app PIN." else "Protect Sankalp with a 4–12 digit App PIN.",
                     modifier = Modifier.padding(top = 7.dp),
                     fontSize = 14.sp,
                     lineHeight = 21.sp,

@@ -262,7 +262,7 @@ class IndooneAuthService(
             val uid = node["uid"]?.toString().orEmpty()
             if (email.isNotBlank()) return MobileIdentity(email, uid)
         }
-        throw AuthException("No Indoone account is linked to this mobile number.")
+        throw AuthException("No Sankalp account is linked to this mobile number.")
     }
 
     private fun normalizeMobile(value: String): String {
@@ -311,12 +311,12 @@ class IndooneAuthService(
         val message = error.message.orEmpty()
         return when {
             message.contains("INVALID_EMAIL", true) -> AuthException("Enter a valid email address.")
-            message.contains("USER_NOT_FOUND", true) -> AuthException("No Indoone account was found.")
+            message.contains("USER_NOT_FOUND", true) -> AuthException("No Sankalp account was found.")
             message.contains("WRONG_PASSWORD", true) || message.contains("INVALID_CREDENTIAL", true) -> AuthException("Email or password is incorrect.")
             message.contains("TOO_MANY_REQUESTS", true) -> AuthException("Too many attempts. Please try again later.")
             message.contains("NETWORK_REQUEST_FAILED", true) -> AuthException("Network error. Check your connection and try again.")
             message.contains("PERMISSION_DENIED", true) || message.contains("Permission denied", true) ->
-                AuthException("Indoone account data is temporarily unavailable. Please try again or use your email address.")
+                AuthException("Sankalp account data is temporarily unavailable. Please try again or use your email address.")
             message.contains("INVALID_LOGIN_CREDENTIALS", true) -> AuthException("Email or password is incorrect.")
             message.contains("EMAIL_ALREADY_IN_USE", true) -> AuthException("An account already exists with this email.")
             message.contains("WEAK_PASSWORD", true) -> AuthException("Password should be at least 6 characters.")

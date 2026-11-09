@@ -80,7 +80,7 @@ fun ProfileScreen(
                 gmailConnectionSummary = when {
                     status.connected && !status.emailAddress.isNullOrBlank() ->
                         "Gmail linked · ${status.emailAddress}"
-                    status.connected -> "Gmail linked to this Indoone profile"
+                    status.connected -> "Gmail linked to this Sankalp profile"
                     else -> "Connect Gmail and manage your plugin connections"
                 }
             }
@@ -291,7 +291,7 @@ private fun ChangeMobileSheet(
 ) {
     ProfileFormSheet(
         title = "Change mobile number",
-        description = "The number on your Indoone account is shown below. Enter the new number and your current password to confirm.",
+        description = "The number on your Sankalp account is shown below. Enter the new number and your current password to confirm.",
         onClose = onClose,
     ) {
         SheetReadOnlyValue("CURRENT MOBILE NUMBER", currentMobile)
@@ -322,7 +322,7 @@ private fun ChangeEmailSheet(
 ) {
     ProfileFormSheet(
         title = "Change email",
-        description = "The email on your Indoone account is shown below. Enter the new email and your current password to confirm.",
+        description = "The email on your Sankalp account is shown below. Enter the new email and your current password to confirm.",
         onClose = onClose,
     ) {
         SheetReadOnlyValue("CURRENT EMAIL", currentEmail)

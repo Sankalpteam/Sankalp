@@ -114,7 +114,7 @@
 
         return true;
       } catch (error) {
-        console.warn('Indoone Home account load failed:', error);
+        console.warn('Sankalp Home account load failed:', error);
         return false;
       } finally {
         accountLoadPromise = null;
@@ -284,7 +284,7 @@
       `;
 
       console.error(
-        'Indoone Add Account feature failed:',
+        'Sankalp Add Account feature failed:',
         error
       );
 
@@ -320,7 +320,7 @@
       .then(() => window.IndooneHomeScreenshot?.sync?.())
       .catch(error => {
         console.warn(
-          'Indoone Home screenshot protection unavailable:',
+          'Sankalp Home screenshot protection unavailable:',
           error
         );
       });
