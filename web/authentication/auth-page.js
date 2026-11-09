@@ -471,6 +471,13 @@
     // place to not do it is here.
     if (window.IndooneFirebase?.auth?.currentUser) return;
 
+    // The landing page links to /app/login/ and /app/signup/, and those addresses hand the app
+    // ?screen=. Without this the app would always open on sign-in, so a person who clicked
+    // "Create an account" would be shown the sign-in form and have to find the link themselves.
+    const wanted = new URLSearchParams(location.search).get('screen');
+    if (wanted === 'signup') return showSignup();
+    if (wanted === 'forgot-password') return showForgotPassword();
+
     showLogin();
   }
 

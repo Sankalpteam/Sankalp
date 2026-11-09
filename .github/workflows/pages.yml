@@ -50,13 +50,21 @@ jobs:
           # Generated from web/menu/<slug>/index.html, which is the copy a person edits.
           python3 scripts/legal_pages.py
 
+      - name: Build the published tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          # site/ is what Pages serves: the landing page at the root, the app under /app/,
+          # the four legal documents at /legal/ where the company site links to them.
+          python3 scripts/build_site.py
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: web
+          path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
