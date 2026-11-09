@@ -192,3 +192,25 @@ html,body{overflow-x:hidden}
 @media(max-width:1120px){
   .nav__links a[href="#privacy"]{display:none}
 }
+
+
+/* Get in touch. Two cards, because there are two ways and no more: an inbox and an account.
+   Sankalp's address, not the company's - the company block directly below keeps its own. */
+.sec--contact{border-top:1px solid var(--border);padding-bottom:34px}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.contact-card{
+  display:block;text-decoration:none;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-sm);
+  transition:border-color .18s,transform .18s;
+}
+.contact-card:hover{border-color:var(--purple-line);transform:translateY(-2px)}
+.contact-label{
+  display:block;font-family:var(--font-mono);font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1.6px;color:var(--text-dim);margin-bottom:10px;
+}
+.contact-value{
+  display:block;font-family:var(--font-display);font-size:19px;font-weight:600;
+  color:var(--purple);margin-bottom:6px;overflow-wrap:anywhere;
+}
+.contact-note{display:block;font-size:13.5px;line-height:1.5;color:var(--text-2)}
+@media(max-width:620px){.contact-grid{grid-template-columns:1fr}}
