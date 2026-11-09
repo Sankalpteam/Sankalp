@@ -208,5 +208,9 @@ private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Mod
     }
 }
 
-private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "sankalpteam.github.io", "indooneteam.github.io")
+// The hosts a legal page may be loaded from. The old account's Pages host was still listed
+// here after the account was renamed to Sankalpteam, and a github.io subdomain is only held
+// while its account holds it: whoever took the old name next would have been trusted to serve
+// the policy this app shows. Only the current hosts are listed.
+private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "sankalpteam.github.io")
 private const val LEGAL_BASE_URL = "https://indoone.indoworkspace.in"
