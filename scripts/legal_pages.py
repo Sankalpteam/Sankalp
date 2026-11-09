@@ -60,6 +60,20 @@ PAGE = """<!doctype html>
   <meta property="og:title" content="{title} · Sankalp" />
   <meta property="og:description" content="{description}" />
   <meta property="og:url" content="https://sankalp.indoworkspace.in/legal/{slug}.html" />
+  <meta property="og:image" content="https://sankalp.indoworkspace.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{title} · Sankalp" />
+  <meta name="twitter:description" content="{description}" />
+  <meta name="twitter:image" content="https://sankalp.indoworkspace.in/assets/og-image.png" />
+
+  <!-- The mark, linked on every page. These four carried no icon at all, so a search result
+       for them showed a default globe beside the title while the landing page showed ours. -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/icon-48.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon-180.png" />
 
   <!-- These four pages were served with robots noindex while the sitemap listed them. That
        is a contradiction: the sitemap asked for an index and the page refused it, and a
