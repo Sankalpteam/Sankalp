@@ -223,7 +223,7 @@ object AppUpdateManager {
 
         for (attempt in 1..DOWNLOAD_ATTEMPTS) {
             try {
-                return@withContext downloadOnce(update, apkFile, onProgress)
+                return@withContext downloadOnce(context, update, apkFile, onProgress)
             } catch (error: DownloadFailure) {
                 lastFailure = error
 
@@ -240,15 +240,39 @@ object AppUpdateManager {
         throw lastFailure ?: error("APK download failed.")
     }
 
-    /** One attempt. A partial file is kept, so the next attempt resumes instead of restarting. */
+    /**
+     * One attempt. A partial file is kept, so the next attempt resumes instead of restarting -
+     * but only while those bytes belong to the same build.
+     *
+     * The cache holds one file name for every release, so a Range request could resume onto
+     * the tail of an older APK and produce a file of exactly the right length that no phone
+     * can parse: "Parsing failed. The system was unable to parse this APK file." The sidecar
+     * is what stops that, and the parser check at the end is what catches anything else.
+     */
     private suspend fun downloadOnce(
+        context: Context,
         update: UpdateInfo,
         apkFile: File,
         onProgress: suspend (downloadedBytes: Long, totalBytes: Long) -> Unit,
     ): File {
-        val alreadyHave = if (apkFile.exists()) apkFile.length() else 0L
-        if (alreadyHave >= update.sizeBytes && update.sizeBytes > 0L) {
-            return apkFile
+        val sidecar = versionSidecar(apkFile)
+        if (recordedVersion(sidecar) != update.versionCode) {
+            // Whatever is on disk is another build's bytes, or nobody's. Never resume onto them.
+            apkFile.delete()
+            sidecar.delete()
+        }
+
+        var alreadyHave = if (apkFile.exists()) apkFile.length() else 0L
+
+        // A file that is already the right size is not necessarily the right file: it may be
+        // a finished download of an older build, or a corrupt one. Only trust it if the phone
+        // itself can read it as the version we asked for.
+        if (alreadyHave > 0L && update.sizeBytes > 0L && alreadyHave >= update.sizeBytes) {
+            if (isInstallable(context, apkFile, update)) return apkFile
+
+            apkFile.delete()
+            sidecar.delete()
+            alreadyHave = 0L
         }
 
         val request = Request.Builder()
@@ -318,6 +342,49 @@ object AppUpdateManager {
             throw DownloadFailure("Downloaded APK is empty.", true)
         }
 
+        // The phone refuses a package it cannot parse, and it says so only after the person
+        // has waited through the download and opened the installer. Ask the same parser here.
+        if (!isInstallable(context, apkFile, update)) {
+            apkFile.delete()
+            sidecar.delete()
+            throw DownloadFailure(
+                "The downloaded update could not be read. Starting the download again.",
+                worthRetrying = true,
+            )
+        }
+
+        runCatching { sidecar.writeText(update.versionCode.toString()) }
+
         return apkFile
+    }
+
+    /** Which build the bytes in the cache belong to, kept beside the file. */
+    private fun versionSidecar(apkFile: File): File =
+        File(apkFile.parentFile, "${apkFile.name}.version")
+
+    private fun recordedVersion(sidecar: File): Long? =
+        runCatching { sidecar.readText().trim().toLongOrNull() }.getOrNull()
+
+    /**
+     * Whether the platform can parse this file as an APK of the version we asked for.
+     *
+     * getPackageArchiveInfo runs the same parser the installer runs, which is the only opinion
+     * that counts: a file can be exactly the advertised size and still be unreadable.
+     */
+    private fun isInstallable(context: Context, apkFile: File, update: UpdateInfo): Boolean {
+        if (!apkFile.exists() || apkFile.length() == 0L) return false
+        if (update.sizeBytes > 0L && apkFile.length() != update.sizeBytes) return false
+
+        val archive = context.packageManager.getPackageArchiveInfo(apkFile.absolutePath, 0)
+            ?: return false
+
+        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            archive.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            archive.versionCode.toLong()
+        }
+
+        return versionCode == update.versionCode
     }
 }
