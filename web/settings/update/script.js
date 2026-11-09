@@ -7,9 +7,12 @@
  * not touch #overlay any more.
  *
  * The app reads the same place this does - the repository's releases, looking
- * for a terminal-build-* tag with indoone-terminal.apk attached. A browser
- * cannot install an APK, so this screen reports what is published and hands
- * over the download link instead of installing anything.
+ * for a terminal-build-* tag with the APK attached. The asset is named
+ * sankalp-terminal.apk; releases published before the rename also carry a copy
+ * under the old name, and both are accepted so this screen keeps working while
+ * those are still around. A browser cannot install an APK, so this screen
+ * reports what is published and hands over the download link instead of
+ * installing anything.
  *
  * data-close on the × and on Done is handled once, globally, by
  * shared/events.js.
@@ -75,9 +78,11 @@
       return null;
     }
 
-    const apk = (build.assets || []).find(asset =>
-      String(asset.name || '') === 'indoone-terminal.apk'
-    );
+    // New name first, then the copy older releases carry under the previous one.
+    const assets = build.assets || [];
+    const apk =
+      assets.find(asset => String(asset.name || '') === 'sankalp-terminal.apk') ||
+      assets.find(asset => String(asset.name || '') === 'indoone-terminal.apk');
 
     return {
       tag: String(build.tag_name),
