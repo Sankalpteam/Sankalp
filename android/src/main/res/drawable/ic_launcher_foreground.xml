@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The mark, from the one PNG every icon in this app is generated from.
+<!-- The mark for the launcher, at 58% of the 108dp box.
 
-     It was a vector of a rotated diamond before. A brush stroke cannot be a vector without
-     losing the edge that makes it a brush stroke, so the art is a bitmap and the shape lives
-     in one file: change sankalp_mark.png and the launcher, the splash, the in-app logo and the
-     notification icon all change with it. -->
+     A launcher masks this to a shape - round, squircle, teardrop - and only the middle 66dp is
+     guaranteed to survive. The splash can use a bigger copy because nothing masks it; this one
+     cannot, or the outer loops of the stroke disappear on a round icon. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_mark"
+    android:src="@drawable/sankalp_launcher"
     android:gravity="center"
     android:filter="true" />

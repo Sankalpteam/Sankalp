@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The mark, from the one file every icon in this app is drawn from. A large source because
+     this one is used at screen sizes, not at launcher size. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_mark"
+    android:src="@drawable/sankalp_logo"
     android:gravity="center"
     android:filter="true" />
