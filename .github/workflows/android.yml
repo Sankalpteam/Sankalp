@@ -88,6 +88,53 @@ jobs:
           INDOONE_BACKEND_URL: ${{ github.ref == 'refs/heads/terminal' && 'https://52.62.244.79' || '' }}
           INDOONE_BUILD_VERSION_CODE: ${{ github.run_number }}
         run: gradle assembleDebug --stacktrace
+      # An APK has to be zip-aligned, and this build does not do it: every release so far
+      # shipped whatever layout the packager produced, so resources.arsc landed on a 4-byte
+      # boundary by luck, roughly one build in four. Android 11 and up refuse to parse an APK
+      # whose resources.arsc is not stored uncompressed and 4-byte aligned when targetSdk is
+      # 30 or more - INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED, which the installer shows
+      # as "Parsing failed. The system was unable to parse this APK file."
+      #
+      # zipalign rewrites the archive, which invalidates the signature, so it runs before
+      # apksigner and never after. The key is the one the build already used: the stable
+      # develop keystore on develop and terminal, the debug keystore everywhere else, so an
+      # installed app still updates in place.
+      - name: Align the APK and sign it again
+        shell: bash
+        env:
+          INDOONE_KEYSTORE_PATH: ${{ (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/terminal') && format('{0}/indoone-develop.keystore', runner.temp) || '' }}
+          INDOONE_KEYSTORE_PASSWORD: ${{ (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/terminal') && secrets.INDOONE_KEYSTORE_PASSWORD || '' }}
+          INDOONE_KEY_ALIAS: ${{ (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/terminal') && secrets.INDOONE_KEY_ALIAS || '' }}
+          INDOONE_KEY_PASSWORD: ${{ (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/terminal') && secrets.INDOONE_KEY_PASSWORD || '' }}
+        run: |
+          set -euo pipefail
+          apk="$(find android/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$apk"
+          build_tools="$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/* | sort -V | tail -1)"
+          echo "Build tools: $build_tools"
+          aligned="$RUNNER_TEMP/indoone-aligned.apk"
+
+          "$build_tools/zipalign" -p -f 4 "$apk" "$aligned"
+
+          if [ -n "${INDOONE_KEYSTORE_PATH:-}" ]; then
+            "$build_tools/apksigner" sign \
+              --ks "$INDOONE_KEYSTORE_PATH" \
+              --ks-key-alias "$INDOONE_KEY_ALIAS" \
+              --ks-pass "pass:$INDOONE_KEYSTORE_PASSWORD" \
+              --key-pass "pass:$INDOONE_KEY_PASSWORD" \
+              "$aligned"
+          else
+            "$build_tools/apksigner" sign \
+              --ks "$HOME/.android/debug.keystore" \
+              --ks-key-alias androiddebugkey \
+              --ks-pass pass:android \
+              --key-pass pass:android \
+              "$aligned"
+          fi
+
+          cp "$aligned" "$apk"
+          "$build_tools/apksigner" verify --print-certs "$apk" | head -3
+
       - name: Verify APK output
         shell: bash
         run: |
@@ -100,6 +147,24 @@ jobs:
             exit 1
           fi
           echo "Found APK: $apk"
+
+          # The check Android itself performs, so a misaligned build fails here instead of on
+          # someone's phone.
+          python3 - "$apk" <<'PY'
+          import sys
+          import zipfile
+
+          entry = zipfile.ZipFile(sys.argv[1]).getinfo("resources.arsc")
+          offset = entry.header_offset + 30 + len(entry.filename.encode()) + len(entry.extra)
+
+          if entry.compress_type != zipfile.ZIP_STORED:
+              raise SystemExit("resources.arsc is compressed; Android 11+ will not install this")
+          if offset % 4:
+              raise SystemExit(
+                  f"resources.arsc sits at {offset}, not a 4-byte boundary; Android 11+ will not install this"
+              )
+          print(f"resources.arsc stored uncompressed at {offset}, 4-byte aligned")
+          PY
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
