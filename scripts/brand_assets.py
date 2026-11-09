@@ -130,13 +130,10 @@ def silhouette(mark: Image.Image, canvas: tuple[int, int], width_fraction: float
     Android draws a small icon from its alpha channel only and tints it, so a
     photograph of a purple brush stroke shows up as a solid white block.
     """
-    placed = place(mark, canvas, width_fraction, background=(255, 255, 255, 255))
-    out = Image.new("RGBA", canvas, (255, 255, 255, 0))
-    alpha = placed.split()[3]
+    placed = place(mark, canvas, width_fraction, background=None)
     white = Image.new("RGBA", canvas, (255, 255, 255, 255))
-    white.putalpha(alpha)
-    out.alpha_composite(white)
-    return out
+    white.putalpha(placed.split()[3])
+    return white
 
 
 def write(image: Image.Image, path: str, opaque: bool = False) -> None:
