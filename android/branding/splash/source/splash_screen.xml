@@ -1,1 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@color/indoone_splash_background" /><item android:width="144dp" android:height="144dp" android:gravity="center" android:drawable="@drawable/indoone_splash_glow" /><item android:width="108dp" android:height="108dp" android:gravity="center" android:drawable="@drawable/indoone_splash_logo" /></layer-list>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The splash is the mark on white. The purple diamond glow that used to sit behind it
+     is gone: on a white field a violet glow reads as a smudge, not as light. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/indoone_splash_background" />
+    <item
+        android:width="108dp"
+        android:height="108dp"
+        android:gravity="center"
+        android:drawable="@drawable/indoone_splash_logo" />
+</layer-list>
