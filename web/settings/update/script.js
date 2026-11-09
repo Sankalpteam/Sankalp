@@ -16,9 +16,9 @@
  */
 (() => {
   const RELEASES_URL =
-    'https://api.github.com/repos/indooneteam/indoone/releases';
+    'https://api.github.com/repos/Sankalpteam/Sankalp/releases';
   const DOWNLOAD_URL =
-    'https://github.com/indooneteam/indoone/releases/latest';
+    'https://github.com/Sankalpteam/Sankalp/releases/latest';
 
   function setStatus(node, text, kind) {
     if (!node) {
