@@ -85,6 +85,15 @@ window.initMenuChatHistory = function () {
       // deleteConversation drops the conversation, its messages and the index -
       // the whole of it, which is what the app's delete does.
       await window.IndooneCloudChat?.deleteConversation?.(id);
+
+      // If the conversation being deleted is the one the chat screen is holding, the screen
+      // has to let go of it. Without this the next message is appended to a thread that no
+      // longer exists and sent with its id, so the assistant answers the deleted question.
+      if (window.IndooneChatStore?.getConversationId?.() === id) {
+        window.IndooneChatStore?.clear?.();
+        window.IndooneChatHome?.refresh?.();
+      }
+
       await load();
     } catch (error) {
       setStatus(error?.message || 'Chat could not be deleted.');

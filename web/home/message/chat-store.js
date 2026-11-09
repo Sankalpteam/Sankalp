@@ -52,6 +52,13 @@
           cache();
           return;
         }
+
+        // Signed in, and the account has no conversations. A cache entry here is not a
+        // conversation to restore - it is one that was deleted, and restoring it reopens the
+        // thread the person just removed. The cache is for being offline, not for overriding
+        // an account that has answered.
+        clear();
+        return;
       } catch (error) {
         console.warn('Sankalp chat could not be read from the account:', error);
       }
@@ -88,7 +95,15 @@
   function clear() {
     conversationId = null;
     messages = [];
-    cache();
+
+    // Delete the cache rather than write an empty record over it. An empty record still
+    // answers readCache() with a truthy object, which is how a deleted conversation kept
+    // coming back: the store cleared itself, and the next load() restored it from storage.
+    try {
+      localStorage.removeItem(KEY);
+    } catch (error) {
+      console.warn('Sankalp chat thread could not be cleared:', error);
+    }
   }
 
   function ensureConversationId() {

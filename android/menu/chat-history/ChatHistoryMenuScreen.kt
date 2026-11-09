@@ -1,5 +1,6 @@
 package com.indoone.menu.chathistory
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import com.indoone.MainActivity
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,6 +105,7 @@ fun ChatHistoryMenuScreen(
     onOpenChat: (String) -> Unit,
 ) {
     val repository = remember { CloudChatRepository() }
+    val context = LocalContext.current
     var conversations by remember { mutableStateOf<List<CloudChatConversation>>(emptyList()) }
     var status by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -268,6 +272,23 @@ fun ChatHistoryMenuScreen(
                                             .onSuccess {
                                                 conversations = conversations.filterNot { it.id == chat.id }
                                                 status = null
+
+                                                // The chat screen may still be holding the conversation
+                                                // that was just deleted - its id lives in that screen,
+                                                // not here. Sending the next message with that id is
+                                                // what made the assistant answer the deleted question.
+                                                // Starting a new chat is the same reset the drawer's
+                                                // "New Chat" already performs, so it is one behaviour,
+                                                // not two.
+                                                context.startActivity(
+                                                    Intent(context, MainActivity::class.java).apply {
+                                                        putExtra("start_new_chat", true)
+                                                        addFlags(
+                                                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                                                Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                        )
+                                                    },
+                                                )
                                             }
                                             .onFailure {
                                                 status = it.message ?: "Chat could not be deleted."
