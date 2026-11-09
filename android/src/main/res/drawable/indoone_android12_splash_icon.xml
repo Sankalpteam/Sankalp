@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The Android 12+ splash icon: the mark, centred on white, in the same 160dp box the
-     pre-12 window background uses so the two versions look identical. -->
+<!-- Android 12 and up draws the splash icon inside a circle and cuts anything outside it.
+
+     The mark is 1.83:1, so a version that filled the box lost both outer loops to that
+     circle - the "X" on the phone. The image is rendered with the stroke at 66% of the box,
+     which keeps every part of it inside the circle, and the same image is used for the
+     pre-12 window background so the two look identical. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/indoone_splash_background" />
     <item
         android:width="160dp"
         android:height="160dp"
         android:gravity="center"
-        android:drawable="@drawable/indoone_splash_logo" />
+        android:drawable="@drawable/sankalp_splash" />
 </layer-list>

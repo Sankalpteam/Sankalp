@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The pre-Android-12 splash: the mark, centred on white. The purple diamond glow that
-     used to sit behind it is gone - on a white field a violet glow reads as a smudge,
-     not as light. -->
+<!-- The pre-Android-12 splash: the mark, centred on white.
+
+     The image is named directly rather than wrapped in a <bitmap>: a wrapper in an
+     unqualified drawable folder is treated as mdpi, and the density it is stretched from
+     is then not the density it was drawn at. A bitmap drawable fills the bounds it is
+     given, so this is the whole story - 160dp box, mark at two thirds of it. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/indoone_splash_background" />
     <item
         android:width="160dp"
         android:height="160dp"
         android:gravity="center"
-        android:drawable="@drawable/indoone_splash_logo" />
+        android:drawable="@drawable/sankalp_splash" />
 </layer-list>

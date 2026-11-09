@@ -54,11 +54,16 @@ DENSITIES = {
 # only the centre 66dp of its 108dp box survives, so a wide mark has to stay inside it.
 LAUNCHER_LEGACY_WIDTH = 0.78
 LAUNCHER_FOREGROUND_WIDTH = 58 / 108
-# The splash box, in dp. Bigger than the launcher's 108dp: nothing masks the splash, and
-# on a 360dp-wide phone a 108dp box left the mark reading as a speck.
+# The splash box, in dp. Bigger than the launcher's 108dp: on a 360dp-wide phone a 108dp
+# box left the mark reading as a speck.
 SPLASH_BOX_DP = 160
-SPLASH_WIDTH = 1.0
-IN_APP_WIDTH = 1.0
+
+# How much of that box the mark may fill. Android 12 draws the splash icon inside a circle
+# and cuts whatever falls outside it, and the mark is 1.83:1 - so at full width both outer
+# loops were sliced off on the phone. 0.66 of the box keeps the whole stroke inside the
+# circle with room to spare; a wide mark has to be measured against the circle, not the box.
+SPLASH_WIDTH = 0.66
+IN_APP_WIDTH = 0.94
 NOTIFICATION_WIDTH = 0.92
 WEB_ICON_WIDTH = 0.78
 
