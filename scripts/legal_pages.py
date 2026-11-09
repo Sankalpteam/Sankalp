@@ -217,6 +217,10 @@ def nav_links(slug: str) -> str:
         if other != slug
     ]
     parts.append('<a href="/">Sankalp app</a>')
+    # The company's own site, linked rather than only named in structured data. Two sites that
+    # never link to each other are two unrelated sites, whatever the JSON says, and the app is
+    # published by the company.
+    parts.append('<a href="https://indoworkspace.in/">Indo Workspace</a>')
     return "\n".join(f"  {part}" for part in parts)
 
 
