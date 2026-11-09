@@ -1,99 +1,36 @@
 (() => {
-  const BRAND_VERSION = '20260906-logo-06-spark';
-  let logoInstance = 0;
+  const BRAND_VERSION = '20261109-logo-real-artwork';
 
-  function createLogo(className, alt = 'Indoone logo') {
-    logoInstance += 1;
+  // The mark is the artwork itself, not a shape redrawn in SVG. assets/mark.png is the
+  // supplied image with its pale background removed, so it sits on the white header, on
+  // the lilac account tile and on the auth screens without a square behind it.
+  // The path is taken from this script's own URL, so it resolves the same whether the
+  // mark is drawn on a root page or three folders deep.
+  const scriptUrl = (document.currentScript && document.currentScript.src) || '';
+  const MARK_SRC =
+    scriptUrl.replace(/shared\/branding\.js.*$/, '') + 'assets/mark.png';
 
-    const svg = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'svg'
-    );
+  function createLogo(className, alt = 'Sankalp logo') {
+    const image = document.createElement('img');
 
-    const gradientId = `indooneLogoGradient${logoInstance}`;
+    image.className = `${className} branding-image`;
+    image.src = MARK_SRC;
+    image.alt = alt;
+    image.draggable = false;
+    image.decoding = 'async';
+    image.dataset.indooneBranding = 'true';
 
-    svg.setAttribute('class', `${className} branding-image`);
-    svg.setAttribute('viewBox', '0 0 48 48');
-    svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', alt);
-    svg.setAttribute('focusable', 'false');
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    svg.dataset.indooneBranding = 'true';
-    svg.draggable = false;
-
-    svg.innerHTML = `
-      <defs>
-        <linearGradient id="${gradientId}" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#C15CFF"></stop>
-          <stop offset="0.48" stop-color="#7C3AED"></stop>
-          <stop offset="1" stop-color="#22C7FF"></stop>
-        </linearGradient>
-      </defs>
-      <g transform="rotate(45 24 24)">
-        <rect
-          x="11"
-          y="11"
-          width="26"
-          height="26"
-          rx="6"
-          fill="url(#${gradientId})"
-        ></rect>
-      </g>
-      <path
-        d="M24 14 L27.2 20.8 L34 24 L27.2 27.2 L24 34 L20.8 27.2 L14 24 L20.8 20.8 Z"
-        fill="#0A0A18"
-      ></path>
-      <path
-        d="M24 20.8 L25.2 22.8 L27.2 24 L25.2 25.2 L24 27.2 L22.8 25.2 L20.8 24 L22.8 22.8 Z"
-        fill="#60A5FA"
-      ></path>
-    `;
-
-    return svg;
+    return image;
   }
 
   function installFavicon() {
-    const faviconSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-        <defs>
-          <linearGradient id="indooneFaviconGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#C15CFF"></stop>
-            <stop offset="0.48" stop-color="#7C3AED"></stop>
-            <stop offset="1" stop-color="#22C7FF"></stop>
-          </linearGradient>
-        </defs>
-        <g transform="rotate(45 24 24)">
-          <rect
-            x="11"
-            y="11"
-            width="26"
-            height="26"
-            rx="6"
-            fill="url(#indooneFaviconGradient)"
-          ></rect>
-        </g>
-        <path
-          d="M24 14 L27.2 20.8 L34 24 L27.2 27.2 L24 34 L20.8 27.2 L14 24 L20.8 20.8 Z"
-          fill="#0A0A18"
-        ></path>
-        <path
-          d="M24 20.8 L25.2 22.8 L27.2 24 L25.2 25.2 L24 27.2 L22.8 25.2 L20.8 24 L22.8 22.8 Z"
-          fill="#60A5FA"
-        ></path>
-      </svg>
-    `;
-
-    let icon = document.querySelector('link[data-indoone-favicon="true"]');
-
-    if (!icon) {
-      icon = document.createElement('link');
-      icon.rel = 'icon';
-      icon.type = 'image/svg+xml';
-      icon.dataset.indooneFavicon = 'true';
-      document.head.appendChild(icon);
-    }
-
-    icon.href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(faviconSvg)}`;
+    // The icons are static files linked from index.html: 48/96/192 png, a 180 apple touch
+    // icon and favicon.ico. Nothing is drawn at runtime, because a crawler reads the HTML
+    // it is served and never runs this script - which is how the site ended up with no
+    // icon at all in a search result.
+    document
+      .querySelectorAll('link[data-indoone-favicon="true"]')
+      .forEach(link => link.remove());
   }
 
   function wire(root = document) {
@@ -220,7 +157,7 @@
 
   window.IndooneBranding = {
     init,
-    logoSource: 'inline-svg',
+    logoSource: 'assets/mark.png',
     version: BRAND_VERSION
   };
 

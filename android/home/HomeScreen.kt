@@ -113,6 +113,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.indoone.menu.AppBottomNav
 import com.indoone.menu.AppTab
 import com.indoone.menu.AppTopBar
+import com.indoone.menu.IndooneTopBarLogo
 import com.indoone.menu.data.UserDataRepository
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -661,40 +662,8 @@ private fun RowScope.QuickPromptChip(
 
 @Composable
 private fun IndooneHomeLogo(modifier: Modifier = Modifier) {
-    androidx.compose.foundation.Canvas(modifier = modifier) {
-        val scaleFactor = size.minDimension / 48f
-        scale(scaleFactor) {
-            rotate(
-                45f,
-                pivot = androidx.compose.ui.geometry.Offset(24f, 24f),
-            ) {
-                drawRoundRect(
-                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                        colors = listOf(
-                            androidx.compose.ui.graphics.Color(0xFFC15CFF),
-                            androidx.compose.ui.graphics.Color(0xFF7C3AED),
-                            androidx.compose.ui.graphics.Color(0xFF22C7FF),
-                        ),
-                        start = androidx.compose.ui.geometry.Offset(11f, 11f),
-                        end = androidx.compose.ui.geometry.Offset(37f, 37f),
-                    ),
-                    topLeft = androidx.compose.ui.geometry.Offset(11f, 11f),
-                    size = androidx.compose.ui.geometry.Size(26f, 26f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f),
-                )
-            }
-            val outer = androidx.compose.ui.graphics.Path().apply {
-                moveTo(24f, 14f); lineTo(27.2f, 20.8f); lineTo(34f, 24f); lineTo(27.2f, 27.2f)
-                lineTo(24f, 34f); lineTo(20.8f, 27.2f); lineTo(14f, 24f); lineTo(20.8f, 20.8f); close()
-            }
-            drawPath(outer, color = androidx.compose.ui.graphics.Color(0xFF0A0A18))
-            val inner = androidx.compose.ui.graphics.Path().apply {
-                moveTo(24f, 20.8f); lineTo(25.2f, 22.8f); lineTo(27.2f, 24f); lineTo(25.2f, 25.2f)
-                lineTo(24f, 27.2f); lineTo(22.8f, 25.2f); lineTo(20.8f, 24f); lineTo(22.8f, 22.8f); close()
-            }
-            drawPath(inner, color = androidx.compose.ui.graphics.Color(0xFF60A5FA))
-        }
-    }
+    // One logo, one definition: this used to be a second copy of the old diamond.
+    IndooneTopBarLogo(modifier = modifier)
 }
 
 @Composable

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The mark, from the one file every icon in this app is drawn from. A large source because
-     this one is used at screen sizes, not at launcher size. -->
+<!-- The mark in the app's own screens: the artwork on transparent, a 108dp square from
+     drawable-<density>/. Compose draws it at 72dp and 52dp, so a square that is already
+     transparent composites cleanly on the light tiles those screens use. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@drawable/sankalp_logo"
-    android:gravity="center"
+    android:gravity="fill"
     android:filter="true" />

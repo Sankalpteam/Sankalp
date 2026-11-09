@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 108 by 108 pixels in nodpi, which is 108dp on every screen: exactly the box a splash icon
-     and an adaptive-icon foreground are given. The mark was a wide PNG before, and a bitmap
-     drawable is placed at its own size rather than shrunk to fit - so the splash showed the
-     middle of the stroke with both loops cut off. -->
+<!-- The splash mark: the artwork on transparent, 160dp square, from drawable-<density>/.
+
+     Nothing masks a splash icon, so this box is larger than the launcher's and the mark
+     reads at about a third of a phone's width. `fill` keeps the image inside the box
+     instead of drawing it at its own size, which is what cropped the loops before. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_mark"
-    android:gravity="center"
+    android:src="@drawable/sankalp_splash"
+    android:gravity="fill"
     android:filter="true" />
