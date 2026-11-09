@@ -62,12 +62,9 @@
   />
   <meta name="twitter:image" content="https://sankalp.indoworkspace.in/assets/og-image.png" />
 
-  <!-- Two entities, not one. Indo Workspace is the company and lives at its own address;
-       Sankalp is the app, is a SoftwareApplication, and names the company as its publisher.
-       The company @id used to sit on this domain, which told a crawler that the company and
-       the app were the same thing. The company logo is deliberately absent: the only artwork
-       here is the app mark, and handing it over as the company logo is how the two get
-       conflated again. Add it when there is a company logo to point at. -->
+  <!-- Two entities, not one: Indo Workspace is the company at its own address, Sankalp
+       is the app, and the app names the company as its publisher. The @id here is the
+       same one the company site publishes, which is what makes them one company. -->
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -98,6 +95,7 @@
       "@id": "https://sankalp.indoworkspace.in/#app",
       "name": "Sankalp",
       "url": "https://sankalp.indoworkspace.in/app/",
+      "image": "https://sankalp.indoworkspace.in/assets/logo-1024.png",
       "applicationCategory": "ProductivityApplication",
       "operatingSystem": "Android, Web",
       "publisher": {
@@ -106,16 +104,739 @@
       "isPartOf": {
         "@id": "https://sankalp.indoworkspace.in/#website"
       },
-      "description": "Sankalp answers in any of 22 Indian languages, keeps one-time passwords in one place, and works with GitHub and Zoho Mail.",
-      "image": "https://sankalp.indoworkspace.in/assets/logo-1024.png"
+      "description": "Sankalp answers in any of 22 Indian languages, keeps one-time passwords in one place, and works with GitHub and Zoho Mail."
     }
   ]
 }
   </script>
-  <!-- The one heading a crawler can read without running the app. The interface is built by
-       JavaScript, so the served page had no h1 at all and there was nothing for a search
-       result to take a heading from. The noscript line is for the crawler that does not run
-       scripts either - the same two sentences a person would read in the description. -->
+
+  <link rel="stylesheet" href="style.css?v=20261109a" />
+  <link rel="stylesheet" href="home/home.css?v=20261109a" />
+  <link rel="stylesheet" href="home/message/message.css?v=20261109a" />
+  <link rel="stylesheet" href="home/plus/plus.css?v=20261109a" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" />
+  <link rel="stylesheet" href="vibe/vibe.css?v=20261109a" />
+  <link rel="stylesheet" href="shared/safe-layout/safe-layout.css?v=20261109a" />
+  <link rel="stylesheet" href="bottom-nav-svg.css?v=20261109a" />
+  <link rel="stylesheet" href="shared/app-icons.css?v=20261109a" />
+  <link rel="stylesheet" href="menu/style.css?v=20261109a" />
+  <link rel="stylesheet" href="settings/settings.css?v=20261109a" />
+  <link rel="stylesheet" href="settings/profile/style.css?v=20261109a" />
+  <link rel="stylesheet" href="settings/update/style.css?v=20261109a" />
+  <link rel="stylesheet" href="settings/profile/change-email/style.css?v=20261109a" />
+  <link rel="stylesheet" href="settings/profile/change-mobile-number/style.css?v=20261109a" />
+  <link rel="stylesheet" href="authentication/auth.css?v=20261109a" />
+  <link rel="stylesheet" href="authentication/forgot-password/style.css?v=20261109a" />
+</head>
+
+<body>
+  <main
+    class="phone-shell"
+    id="app"
+  >
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="brand"
+          id="brandBtn"
+          aria-label="Go to accounts"
+        >
+          <span class="brand-mark"></span>
+          <span>
+            <strong>Sankalp</strong>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn menu-top-btn"
+          id="menuBtn"
+          aria-label="Open menu"
+        >
+          <span data-app-icon="menu"></span>
+        </button>
+      </div>
+
+      <!-- The app's top bar carries a search control on the right
+           (AppPageChrome.kt AppTopBar, AppSearchIcon at 21dp). It is hidden
+           until the accounts screen is showing, because the app shows the
+           search field only on that screen. -->
+      <div class="top-actions">
+        <button
+          type="button"
+          class="icon-btn"
+          id="searchBtn"
+          aria-label="Search accounts"
+          hidden
+        >
+          <svg
+            class="top-search-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="M16 16 20 20"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section
+      class="search-wrap"
+      id="searchWrap"
+      hidden
+    >
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search accounts"
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          id="clearSearch"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </div>
+    </section>
+
+    <section
+      class="chat-page"
+      id="homeContent"
+      data-feature="home"
+    >
+      <div
+        class="chat-scroll"
+        id="chatScroll"
+      >
+        <div
+          class="chat-welcome"
+          id="chatWelcome"
+        >
+          <h2
+            class="welcome-title"
+            id="welcomeTitle"
+          >Hi! 👋</h2>
+          <p class="welcome-sub">Your Personal AI Assistant</p>
+
+          <div class="welcome-card">
+            <strong class="welcome-hi">What shall we do?</strong>
+            <p
+              class="welcome-line"
+              id="welcomeLine"
+            ></p>
+          </div>
+
+          <div class="quick-row">
+            <button
+              type="button"
+              class="quick-chip"
+              data-prompt="Explain this"
+            >
+              Explain this
+            </button>
+            <button
+              type="button"
+              class="quick-chip"
+              data-prompt="Create image"
+            >
+              Create image
+            </button>
+          </div>
+
+          <div class="quick-row">
+            <button
+              type="button"
+              class="quick-chip"
+              data-prompt="Help me plan"
+            >
+              Help me plan
+            </button>
+            <button
+              type="button"
+              class="quick-chip"
+              data-prompt="Tell me more"
+            >
+              More…
+            </button>
+          </div>
+
+          <div
+            class="welcome-resume"
+            id="welcomeResume"
+            hidden
+          >
+            <p class="welcome-resume-label">Pick up where you left off</p>
+            <div
+              class="welcome-resume-list"
+              id="welcomeResumeList"
+            ></div>
+          </div>
+        </div>
+
+        <div
+          class="chat-list"
+          id="chatList"
+        ></div>
+      </div>
+
+      <div
+        class="pending-attachments"
+        id="pendingAttachments"
+        hidden
+      ></div>
+
+      <div class="chat-composer">
+        <div class="composer-row">
+          <button
+            type="button"
+            class="composer-round composer-plus"
+            id="plusBtn"
+            aria-label="Add attachment"
+          >
+            +
+          </button>
+
+          <div class="composer-field">
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="Message Sankalp"
+              aria-label="Message Sankalp"
+            ></textarea>
+          </div>
+
+          <button
+            type="button"
+            class="composer-round composer-mic"
+            id="voiceBtn"
+            aria-label="Voice input"
+          >
+            <span
+              data-app-icon="mic"
+              data-app-icon-class="app-icon app-icon-lg"
+            ></span>
+          </button>
+
+          <button
+            type="button"
+            class="composer-round composer-send"
+            id="sendBtn"
+            aria-label="Send message"
+            hidden
+          >
+            <span class="send-arrow">➤</span>
+            <span class="send-spinner" hidden></span>
+          </button>
+
+        </div>
+
+        <p
+          class="voice-error"
+          id="voiceError"
+          hidden
+        ></p>
+
+        <div
+          class="listening-card"
+          id="listeningCard"
+          hidden
+        >
+          <span class="listening-mic" data-app-icon="mic" data-app-icon-class="app-icon app-icon-sm"></span>
+          <span>Listening… tap mic to stop</span>
+        </div>
+      </div>
+    </section>
+
+<section
+      class="content"
+      id="content"
+      hidden
+    >
+      <div class="page-heading">
+        <div>
+          <h1>Your accounts</h1>
+        </div>
+        <button
+          type="button"
+          class="small-btn"
+          id="sortBtn"
+        >
+          Sort ↕
+        </button>
+      </div>
+
+      <div
+        class="account-list"
+        id="accountList"
+      ></div>
+
+      <div
+        class="empty-state"
+        id="emptyState"
+        hidden
+      >
+        <div class="empty-icon">+</div>
+        <h3>No accounts found</h3>
+        <p>Add an account or try a different search.</p>
+        <button
+          type="button"
+          class="empty-add"
+          id="emptyAddBtn"
+        >
+          Add account
+        </button>
+      </div>
+    </section>
+
+
+    <!-- A menu feature is a page, not a pop-up. MenuDrawer.kt replaces the
+         whole screen, and the web was opening each item as a 430px card over a
+         dimmed page instead. The container keeps the id "modal" because the
+         feature scripts reach for it by that name. -->
+    <section
+      class="menu-content"
+      id="modal"
+      hidden
+    ></section>
+
+    <button
+      type="button"
+      class="fab"
+      id="addBtn"
+      aria-label="Add account"
+      hidden
+    >
+      +
+    </button>
+
+    <nav
+      class="bottom-nav"
+      aria-label="Main navigation"
+    >
+      <!-- The app's AppBottomNav draws three tabs in one neumorphic pill and
+           keeps Vibe apart: it keeps the exact button it has on Home, with
+           none of the navigation bar's background or styling. -->
+      <div class="nav-pill">
+        <button
+          type="button"
+          class="nav-btn active"
+          id="homeNav"
+          aria-label="Home"
+        >
+          <span
+            class="nav-icon"
+            aria-hidden="true"
+          ></span>
+          <span>Home</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-btn"
+          id="lobbyNav"
+          aria-label="Lobby"
+        >
+          <span
+            class="nav-icon"
+            aria-hidden="true"
+          ></span>
+          <span>Lobby</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-btn"
+          id="settingsNav"
+          aria-label="Settings"
+        >
+          <span
+            class="nav-icon"
+            aria-hidden="true"
+          ></span>
+          <span>Settings</span>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="nav-vibe"
+        id="vibeNav"
+        aria-label="Vibe"
+      >
+        <span
+          class="nav-vibe-core"
+          aria-hidden="true"
+        ></span>
+      </button>
+    </nav>
+  </main>
+
+  <div
+    class="drawer-hover-zone"
+    id="drawerHoverZone"
+  ></div>
+
+  <aside
+    class="drawer"
+    id="drawer"
+    aria-hidden="true"
+  >
+    <div
+      class="drawer-backdrop"
+      id="drawerBackdrop"
+    ></div>
+
+    <section class="drawer-panel">
+      <div class="drawer-brand">
+        <span class="brand-mark"></span>
+        <strong class="drawer-brand-name">Sankalp</strong>
+        <button
+          type="button"
+          class="drawer-close"
+          id="drawerClose"
+          aria-label="Close menu"
+        >
+          <span data-app-icon="close"></span>
+        </button>
+      </div>
+
+      <div class="drawer-divider"></div>
+
+      <button
+        type="button"
+        class="drawer-item drawer-item-new"
+        data-action="new-chat"
+      >
+        <span data-app-icon="addComment"></span>
+        <span>New Chat</span>
+      </button>
+
+      <p class="drawer-section-label">PERSONAL</p>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="profile"
+      >
+        <span data-app-icon="personOutline"></span>
+        <span>Profile</span>
+      </button>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="memory"
+      >
+        <span data-app-icon="memory"></span>
+        <span>Memory</span>
+      </button>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="plugins"
+      >
+        <span data-app-icon="apps"></span>
+        <span>Plugins</span>
+        <!-- The app draws a chevron on this row alone (MenuDrawer.kt
+             showChevron = true, 18dp, 0xFF8B9AB0). -->
+        <span
+          class="drawer-chevron"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m9 5 7 7-7 7"></path>
+          </svg>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="chat-history"
+      >
+        <span data-app-icon="history"></span>
+        <span>Chat History</span>
+      </button>
+
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
+        class="drawer-item"
+        href="/legal/data-privacy.html"
+        data-action="data-privacy"
+      >
+        <span data-app-icon="privacyTip"></span>
+        <span>Data &amp; Privacy</span>
+      </a>
+
+      <p class="drawer-section-label">ACCOUNTS</p>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="favorites"
+      >
+        <span data-app-icon="starBorder"></span>
+        <span>Favorites</span>
+      </button>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="trash"
+      >
+        <span data-app-icon="deleteOutline"></span>
+        <span>Trash</span>
+      </button>
+
+      <p class="drawer-section-label">SECURITY &amp; INFORMATION</p>
+
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
+        class="drawer-item"
+        href="/legal/security.html"
+        data-action="security"
+      >
+        <span data-app-icon="security"></span>
+        <span>Security</span>
+      </a>
+
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
+        class="drawer-item"
+        href="/legal/terms-of-use.html"
+        data-action="terms-of-use"
+      >
+        <span data-app-icon="description"></span>
+        <span>Terms of Use</span>
+      </a>
+
+      <!-- An anchor, not a button: the page behind this row has its own address, and a
+           crawler can only follow an href. The drawer handler still cancels the click and
+           opens the panel, so nothing about using it changed - but the link can be copied,
+           shared, and found. -->
+      <a
+        class="drawer-item"
+        href="/legal/privacy-policy.html"
+        data-action="privacy-policy"
+      >
+        <span data-app-icon="visibility"></span>
+        <span>Privacy Policy</span>
+      </a>
+
+      <button
+        type="button"
+        class="drawer-item"
+        data-action="about"
+      >
+        <span data-app-icon="info"></span>
+        <span>About Sankalp</span>
+      </button>
+
+      <button
+        type="button"
+        class="drawer-item lock-item"
+        data-action="lock"
+      >
+        <span data-app-icon="lock"></span>
+        <span>Lock App</span>
+      </button>
+      <p class="drawer-build">build 20261109a</p>
+    </section>
+  </aside>
+
+  <div
+    class="plus-sheet"
+    id="plusSheet"
+    hidden
+  >
+    <div class="plus-sheet-card">
+      <span class="plus-grip"></span>
+
+      <button
+        type="button"
+        class="plus-option"
+        data-plus="camera"
+      >
+        <span
+        class="plus-icon"
+        data-app-icon="photoCamera"
+        data-app-icon-class="app-icon"
+      ></span>
+        <span>
+          <b>Camera</b>
+          </span>
+      </button>
+
+      <button
+        type="button"
+        class="plus-option"
+        data-plus="photos"
+      >
+        <span
+        class="plus-icon"
+        data-app-icon="photo"
+        data-app-icon-class="app-icon"
+      ></span>
+        <span>
+          <b>Photos</b>
+          </span>
+      </button>
+
+      <button
+        type="button"
+        class="plus-option"
+        data-plus="files"
+      >
+        <span
+        class="plus-icon"
+        data-app-icon="attachFile"
+        data-app-icon-class="app-icon"
+      ></span>
+        <span>
+          <b>Files</b>
+          <small>PDFs, Docs, Videos, Audio, and more</small>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="vibe-screen"
+    id="vibeScreen"
+    hidden
+  >
+    <div class="vibe-head">
+      <span class="vibe-brand"><b>S</b><span>ankalp</span></span>
+      <span class="vibe-word">Vibe</span>
+    </div>
+
+    <div
+      class="vibe-stage"
+      id="vibeOrb"
+    >
+      <span class="vibe-glow"></span>
+      <span class="vibe-ring vibe-ring-pulse"></span>
+      <span class="vibe-ring vibe-ring-fixed"></span>
+      <span class="vibe-core"></span>
+      <span class="vibe-orbit">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </span>
+
+      <div class="vibe-center">
+        <span class="vibe-label">VIBE</span>
+        <span
+          class="vibe-state"
+          id="vibeState"
+        >Paused</span>
+        <span
+          class="vibe-hint"
+          id="vibeHint"
+        >Speak naturally</span>
+      </div>
+    </div>
+
+    <div class="vibe-transcript-box">
+      <span class="vibe-transcript-label">LIVE TRANSCRIPT</span>
+      <div
+        class="vibe-transcript"
+        id="vibeTranscript"
+      ></div>
+    </div>
+
+    <div class="vibe-controls">
+      <button
+        type="button"
+        class="vibe-control"
+        id="vibeMute"
+        aria-label="Microphone"
+      >
+        <span class="vibe-control-round">
+          <span
+            id="vibeMuteIcon"
+            data-app-icon="micOff"
+            data-app-icon-class="app-icon vibe-icon"
+          ></span>
+        </span>
+        <span id="vibeMuteLabel">Unmute</span>
+      </button>
+
+      <button
+        type="button"
+        class="vibe-end"
+        id="vibeEnd"
+        aria-label="End Vibe"
+      >
+        <span
+          data-app-icon="close"
+          data-app-icon-class="app-icon vibe-end-icon"
+        ></span>
+      </button>
+
+      <button
+        type="button"
+        class="vibe-control"
+        id="vibeSpeaker"
+        aria-label="Speaker"
+      >
+        <span class="vibe-control-round">
+          <span
+            id="vibeSpeakerIcon"
+            data-app-icon="volumeUp"
+            data-app-icon-class="app-icon vibe-icon"
+          ></span>
+        </span>
+        <span id="vibeSpeakerLabel">Speaker</span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="overlay hidden"
+    id="overlay"
+  >
+    <section
+      class="modal"
+      id="accountDialog"
+      role="dialog"
+      aria-modal="true"
+    ></section>
+  </div>
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+  ></div>
+
   <h1 class="visually-hidden">Sankalp — the assistant app by Indo Workspace</h1>
   <noscript>
     <p>
@@ -124,6 +845,7 @@
     </p>
   </noscript>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -172,8 +894,6 @@
   <script src="shared/navigation.js?v=20261109a"></script>
   <script src="shared/navigation-icons.js?v=20261109a"></script>
 
-  <!-- The company this app belongs to. A link, not only a JSON reference: a crawler follows
-       links, and the two sites should be visibly related to a person as well. -->
   <footer class="site-footer">
     <a href="https://indoworkspace.in/">Indo Workspace</a>
   </footer>
