@@ -38,7 +38,10 @@ def key_of() -> str:
 
 
 def urls() -> list[str]:
-    tree = ET.parse(ROOT / "web" / "sitemap.xml")
+    # The published sitemap is built into site/ now; web/sitemap.xml is the copy the app used
+    # to serve and would go stale. Prefer what is actually deployed.
+    published = ROOT / "site" / "sitemap.xml"
+    tree = ET.parse(published if published.exists() else ROOT / "web" / "sitemap.xml")
     return [node.text.strip() for node in tree.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
 
 

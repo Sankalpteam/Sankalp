@@ -13,7 +13,7 @@ them. So the published tree is built, not committed:
   site/assets/         logo and icons              (from web/assets/)
   site/update.json     the version manifest        (from web/)
   site/404.html        forwards old app paths to /app/
-  site/sitemap.xml, robots.txt, favicon.ico, CNAME
+  site/sitemap.xml, robots.txt, favicon.ico, CNAME, BingSiteAuth.xml, <indexnow-key>.txt
 
 `site/` is generated on every deploy and is not in the repository.
 """
@@ -142,6 +142,22 @@ def main() -> None:
         else:
             print(f"build_site: warning - web/assets/{name} is missing", file=sys.stderr)
     shutil.copy2(WEB / "favicon.ico", SITE / "favicon.ico")
+
+    # 5b. the two files that only work at the root. Both were left behind when the app moved
+    #     to /app/, and both fail silently if they are one folder too deep: the IndexNow key
+    #     is fetched at /<key>.txt to prove we control the host, and BingSiteAuth.xml is
+    #     fetched at /BingSiteAuth.xml to prove the same thing to Bing.
+    for item in WEB.glob("*.txt"):
+        if len(item.stem) == 32 and all(c in "0123456789abcdef" for c in item.stem):
+            shutil.copy2(item, SITE / item.name)
+    if (WEB / "BingSiteAuth.xml").exists():
+        shutil.copy2(WEB / "BingSiteAuth.xml", SITE / "BingSiteAuth.xml")
+
+    # 5c. the app's own copy of these two would be a second, stale answer to the same question
+    for stale in ("sitemap.xml", "robots.txt"):
+        path = SITE / "app" / stale
+        if path.exists():
+            path.unlink()
 
     # 6. the rest of the published root
     today = datetime.date.today().isoformat()
