@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The mark in the app's own screens: the artwork on transparent, a 108dp square from
-     drawable-<density>/. Compose draws it at 72dp and 52dp, so a square that is already
-     transparent composites cleanly on the light tiles those screens use. -->
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_logo"
-    android:gravity="fill"
-    android:filter="true" />

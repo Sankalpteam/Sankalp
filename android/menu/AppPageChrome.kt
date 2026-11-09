@@ -164,7 +164,7 @@ internal fun IndooneTopBarLogo(modifier: Modifier = Modifier) {
     // with a spark in it - the mark of the product this one replaced - and three screens
     // each redrew it independently, so it could drift in three directions at once.
     Image(
-        painter = painterResource(R.drawable.ic_indoone_logo),
+        painter = painterResource(R.drawable.sankalp_logo),
         contentDescription = "Sankalp logo",
         modifier = modifier,
         contentScale = ContentScale.Fit,

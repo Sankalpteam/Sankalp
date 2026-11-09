@@ -88,7 +88,7 @@ fun AutoLockUnlockScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_indoone_logo),
+                painter = painterResource(R.drawable.sankalp_logo),
                 contentDescription = "Indoone logo",
                 modifier = Modifier.size(76.dp),
             )

@@ -96,7 +96,7 @@ fun MenuAboutScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.ic_indoone_logo),
+                            painter = painterResource(R.drawable.sankalp_logo),
                             contentDescription = "Indoone logo",
                             modifier = Modifier.size(52.dp),
                         )

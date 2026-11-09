@@ -9,12 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -118,79 +112,8 @@ class MainActivity : ComponentActivity() {
         (application as? IndooneApplication)?.onUserInteraction(this)
     }
 
-    /**
-     * The last crash, on screen, in a view hierarchy that cannot itself crash the way the
-     * Compose tree just did: a scrollable text view and one button that clears the record and
-     * starts the app again.
-     */
-    private fun showCrashScreen(detail: String) {
-        val density = resources.displayMetrics.density
-        val padding = (16 * density).toInt()
-
-        val body = TextView(this).apply {
-            text = detail
-            textSize = 10f
-            setTextIsSelectable(true)
-            setPadding(padding, padding, padding, padding)
-        }
-
-        val scroll = ScrollView(this).apply {
-            addView(
-                body,
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                ),
-            )
-        }
-
-        val close = Button(this).apply {
-            text = "Clear and start the app"
-            setOnClickListener {
-                CrashLogStore.clear(this@MainActivity)
-                recreate()
-            }
-        }
-
-        setContentView(
-            LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setBackgroundColor(0xFFFFFFFF.toInt())
-                addView(
-                    scroll,
-                    LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        0,
-                        1f,
-                    ),
-                )
-                addView(
-                    close,
-                    LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ).apply {
-                        gravity = Gravity.CENTER_HORIZONTAL
-                        bottomMargin = padding
-                    },
-                )
-            },
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // A crash on a phone is silent: the app closes and nothing says why. The recorder in
-        // IndooneApplication writes the last one down, and this shows it before a single
-        // composable is built - so when the crash is in the startup path itself, the reason is
-        // still readable instead of the app simply vanishing again.
-        val previousCrash = CrashLogStore.last(this)
-        if (previousCrash != null) {
-            showCrashScreen(previousCrash)
-            return
-        }
-
         configureSystemBarsDirectly()
         setContent {
             MaterialTheme {
