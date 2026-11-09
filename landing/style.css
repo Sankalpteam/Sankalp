@@ -29,6 +29,16 @@
   --maxw:1140px;
 }
 *{box-sizing:border-box}
+
+/* Clicking a nav link used to jump: the page arrived instantly at the section, which reads as
+   a flash rather than a movement, and a person cannot tell whether anything happened. Smooth
+   scrolling makes the distance visible. The offset stops the sticky-less header from covering
+   the heading the reader just asked for. */
+html{scroll-behavior:smooth}
+section[id],[id="download"]{scroll-margin-top:24px}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+}
 body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:var(--font-body);-webkit-font-smoothing:antialiased;
@@ -174,3 +184,11 @@ html,body{overflow-x:hidden}
 .meta--links { margin-top: 8px; }
 .meta--links a { color: var(--purple); font-weight: 600; text-decoration: none; }
 .meta--links a:hover { text-decoration: underline; }
+
+
+/* The two entry points in the nav. Sign in is quiet, sign up is the one a new visitor wants. */
+.nav__up{color:var(--purple);font-weight:600}
+.nav__up:hover{text-decoration:underline}
+@media(max-width:1120px){
+  .nav__links a[href="#privacy"]{display:none}
+}
