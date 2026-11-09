@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The mark for the launcher, at 58% of the 108dp box.
+<!-- The launcher foreground, at 58% of the 108dp box.
 
-     A launcher masks this to a shape - round, squircle, teardrop - and only the middle 66dp is
-     guaranteed to survive. The splash can use a bigger copy because nothing masks it; this one
-     cannot, or the outer loops of the stroke disappear on a round icon. -->
+     A launcher masks this to a shape - round, squircle, teardrop - and only the middle
+     66dp is guaranteed to survive, so the wide mark has to sit inside that circle or
+     its outer loops are cut. The image itself comes from mipmap-<density>/ and is a
+     square whose content is already placed: it is never scaled by Android, only drawn.
+
+     `fill` rather than `center` is deliberate. With `center` a bitmap is placed at its
+     own pixel count inside the box, and anything larger than the box is cropped - the
+     clipped X that appeared on the splash screen. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_launcher"
-    android:gravity="center"
+    android:src="@mipmap/ic_launcher_foreground"
+    android:gravity="fill"
     android:filter="true" />

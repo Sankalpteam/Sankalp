@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 108 by 108 pixels in nodpi, which is 108dp on every screen: exactly the box a splash icon
-     and an adaptive-icon foreground are given. The mark was a wide PNG before, and a bitmap
-     drawable is placed at its own size rather than shrunk to fit - so the splash showed the
-     middle of the stroke with both loops cut off. -->
+<!-- A status-bar icon is drawn from its alpha channel and tinted by the system, so this
+     is the mark as a white silhouette, not the artwork. A photograph of a purple brush
+     stroke in the status bar is a solid white block. -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/sankalp_mark"
-    android:gravity="center"
+    android:src="@drawable/sankalp_notification"
+    android:gravity="fill"
     android:filter="true" />
