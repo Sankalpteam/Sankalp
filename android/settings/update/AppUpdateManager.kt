@@ -34,7 +34,7 @@ object AppUpdateManager {
     )
 
     private const val RELEASES_URL =
-        "https://api.github.com/repos/indooneteam/Sankalp/releases?per_page=20"
+        "https://api.github.com/repos/Sankalpteam/Sankalp/releases?per_page=20"
     private const val RELEASE_TAG_PREFIX = "terminal-build-"
     private const val APK_ASSET_NAME = "indoone-terminal.apk"
     private const val UPDATE_DIR = "updates"
@@ -206,7 +206,7 @@ object AppUpdateManager {
      * A CDN answering 504 is not something this app can fix, and a person who cannot install
      * an update has no way forward unless the app gives them one.
      */
-    const val RELEASE_PAGE_URL = "https://github.com/indooneteam/Sankalp/releases/latest"
+    const val RELEASE_PAGE_URL = "https://github.com/Sankalpteam/Sankalp/releases/latest"
 
     /** How many times a failed download is tried again before the person is told. */
     private const val DOWNLOAD_ATTEMPTS = 3

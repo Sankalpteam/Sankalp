@@ -208,5 +208,5 @@ private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Mod
     }
 }
 
-private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "indooneteam.github.io")
+private val LEGAL_HOSTS = setOf("indoone.indoworkspace.in", "sankalpteam.github.io", "indooneteam.github.io")
 private const val LEGAL_BASE_URL = "https://indoone.indoworkspace.in"
