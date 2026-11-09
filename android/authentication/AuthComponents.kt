@@ -134,14 +134,14 @@ fun AuthBrand() {
     ) {
         Image(
             painter = painterResource(R.drawable.sankalp_logo),
-            contentDescription = "Indoone logo",
+            contentDescription = "Sankalp logo",
             modifier = Modifier
                 .width(72.dp)
                 .height(72.dp),
         )
         Column {
             Text(
-                text = "Indoone",
+                text = "Sankalp",
                 color = IndoonePurpleDark,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,

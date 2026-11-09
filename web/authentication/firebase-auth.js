@@ -6,7 +6,7 @@
   function errorMessage(error) {
     const map = {
       'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Indoone account was found.',
+      'auth/user-not-found': 'No Sankalp account was found.',
       'auth/wrong-password': 'Email or password is incorrect.',
       'auth/invalid-credential': 'Email or password is incorrect.',
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
@@ -26,7 +26,7 @@
   async function emailForMobile(mobile) {
     const snapshot = await db().ref(`mobileIndex/${encodeURIComponent(mobile)}`).once('value');
     const value = snapshot.val();
-    if (!value?.email) throw new Error('No Indoone account is linked to this mobile number.');
+    if (!value?.email) throw new Error('No Sankalp account is linked to this mobile number.');
     return value.email;
   }
 

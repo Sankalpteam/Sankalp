@@ -253,7 +253,7 @@
   function fallbackLoginHtml() {
     return `
       <div class="auth-copy">
-        <h1>Welcome to your Indoone account</h1>
+        <h1>Welcome to your Sankalp account</h1>
         <p>The login screen could not be loaded.</p>
       </div>
     `;
@@ -262,7 +262,7 @@
   function fallbackSignupHtml() {
     return `
       <div class="auth-copy">
-        <h1>Get started with Indoone</h1>
+        <h1>Get started with Sankalp</h1>
         <p>The sign-up screen could not be loaded.</p>
       </div>
     `;

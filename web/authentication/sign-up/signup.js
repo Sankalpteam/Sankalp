@@ -11,11 +11,11 @@
     { text: 'Creating your account', purple: false }
   ];
   const DESCRIPTION =
-    'Securely create an Indoone account for your authenticator vault.';
+    'Securely create a Sankalp account for your authenticator vault.';
   const DESCRIPTION_MS = 2000;
 
   function logoMarkup() {
-    return '<span class="auth-mark" aria-label="Indoone logo"></span>';
+    return '<span class="auth-mark" aria-label="Sankalp logo"></span>';
   }
 
   function mobileField() {
@@ -67,7 +67,7 @@
       <div class="auth-brand">
         ${logoMarkup()}
         <div>
-          <strong>Indoone</strong>
+          <strong>Sankalp</strong>
           <small>Authenticator</small>
         </div>
       </div>

@@ -259,9 +259,9 @@ private fun LoginEntryPage(
                 ) {
                     append(
                         if (index == 0) {
-                            "Welcome to your Indoone account"
+                            "Welcome to your Sankalp account"
                         } else {
-                            "Continue with your Indoone account"
+                            "Continue with your Sankalp account"
                         }
                     )
                 }
@@ -438,7 +438,7 @@ private fun LoginPasswordPage(
                     ),
                 )
             ) {
-                append("Continue with your Indoone account")
+                append("Continue with your Sankalp account")
             }
         },
         fontSize = 14.sp,

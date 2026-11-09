@@ -79,7 +79,7 @@ fun SignUpScreen(
             }
 
             LaunchedEffect(Unit) {
-                val description = "Securely create an Indoone account for your authenticator vault."
+                val description = "Securely create a Sankalp account for your authenticator vault."
                 val delayPerCharacter = 2000L / description.length.coerceAtLeast(1)
                 for (index in 1..description.length) {
                     kotlinx.coroutines.delay(delayPerCharacter)
@@ -112,7 +112,7 @@ fun SignUpScreen(
                     )
                 }
             }
-            val description = "Securely create an Indoone account for your authenticator vault."
+            val description = "Securely create a Sankalp account for your authenticator vault."
             Text(
                 description.take(descriptionVisibleChars),
                 color = androidx.compose.ui.graphics.Color(0xFF77717F),

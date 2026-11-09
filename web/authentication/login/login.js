@@ -8,12 +8,12 @@
 // step changes, and nothing is lost.
 (() => {
   const WELCOME_LINES = [
-    { text: 'Welcome to your Indoone account', gradient: false },
-    { text: 'Continue with your Indoone account', gradient: true }
+    { text: 'Welcome to your Sankalp account', gradient: false },
+    { text: 'Continue with your Sankalp account', gradient: true }
   ];
 
   function logoMarkup() {
-    return '<span class="auth-mark" aria-label="Indoone logo"></span>';
+    return '<span class="auth-mark" aria-label="Sankalp logo"></span>';
   }
 
   function mobileField() {
@@ -65,7 +65,7 @@
       <div class="auth-brand">
         ${logoMarkup()}
         <div>
-          <strong>Indoone</strong>
+          <strong>Sankalp</strong>
           <small>Authenticator</small>
         </div>
       </div>
@@ -165,7 +165,7 @@
         <h1 class="auth-heading">Enter Password</h1>
 
         <p class="auth-note auth-note-gradient">
-          Continue with your Indoone account
+          Continue with your Sankalp account
         </p>
 
         <div class="field">

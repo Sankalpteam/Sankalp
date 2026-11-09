@@ -10,7 +10,7 @@
 // OTP service returns. Without it the OTP path could only ever work for someone
 // who had already typed their password, which is not how the app works.
 (() => {
-  const APP_NAME = 'Indoone user';
+  const APP_NAME = 'Sankalp user';
   const LOGIN_PENDING_KEY = 'indoone_login_pending';
   const SIGNUP_PENDING_KEY = 'indoone_signup_pending';
 
@@ -53,14 +53,14 @@
     // app's Firebase-database message.
     const map = {
       'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Indoone account was found.',
+      'auth/user-not-found': 'No Sankalp account was found.',
       'auth/wrong-password': 'Email or password is incorrect.',
       'auth/invalid-credential': 'Email or password is incorrect.',
       'auth/email-already-in-use': 'An account already exists with this email.',
       'auth/weak-password': 'Password should be at least 6 characters.',
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/network-request-failed': 'Network error. Check your connection and try again.',
-      'PERMISSION_DENIED': 'Indoone account data is temporarily unavailable. Please try again or use your email address.'
+      'PERMISSION_DENIED': 'Sankalp account data is temporarily unavailable. Please try again or use your email address.'
     };
 
     return map[error?.code] || error?.message || 'Authentication failed.';
@@ -112,7 +112,7 @@
       }
     }
 
-    throw new Error('No Indoone account was found for this mobile number.');
+    throw new Error('No Sankalp account was found for this mobile number.');
   }
 
   async function identityExists(email, mobile) {
@@ -142,7 +142,7 @@
       const methods = await auth().fetchSignInMethodsForEmail(email);
 
       if (!methods?.length) {
-        throw new Error('No Indoone account was found.');
+        throw new Error('No Sankalp account was found.');
       }
 
       return email;
@@ -151,7 +151,7 @@
     const identity = await mobileIdentity(raw);
 
     if (!identity.email) {
-      throw new Error('No Indoone account was found for this mobile number.');
+      throw new Error('No Sankalp account was found for this mobile number.');
     }
 
     return identity.email;
@@ -172,7 +172,7 @@
       const saved = normalizeMobile(profile.mobile || '');
 
       if (saved && saved !== expected) {
-        throw new Error('This mobile number is not linked to this Indoone account.');
+        throw new Error('This mobile number is not linked to this Sankalp account.');
       }
     }
   }
@@ -480,7 +480,7 @@
       const user = credential?.user;
 
       if (!user) {
-        throw new Error('Could not create the Indoone account.');
+        throw new Error('Could not create the Sankalp account.');
       }
 
       await syncProfile(user, {
@@ -551,7 +551,7 @@
       const user = credential?.user;
 
       if (!user) {
-        throw new Error('Could not create the Indoone account.');
+        throw new Error('Could not create the Sankalp account.');
       }
 
       await syncProfile(user, {

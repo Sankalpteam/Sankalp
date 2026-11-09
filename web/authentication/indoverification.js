@@ -1,7 +1,7 @@
 (() => {
   const API_BASE = 'https://indoverification-production.up.railway.app';
   const APP_ID = 'indoone';
-  const APP_NAME = 'Indoone';
+  const APP_NAME = 'Sankalp';
   // Give the shared SMTP -> Zoho fallback enough time to finish delivery.
   const REQUEST_TIMEOUT_MS = 45000;
   const REQUEST_DEDUPE_MS = 3000;
@@ -54,7 +54,7 @@
     return promise;
   }
 
-  function requestSignupOtp(email, name = 'Indoone user') {
+  function requestSignupOtp(email, name = 'Sankalp user') {
     return request('/api/auth/signup/request-otp', { email, name });
   }
 
@@ -62,11 +62,11 @@
     return request('/api/auth/signup/verify-otp', { email, challengeId, otp, name });
   }
 
-  function sendSignupWelcome({ email, welcomeToken, name = 'Indoone user' }) {
+  function sendSignupWelcome({ email, welcomeToken, name = 'Sankalp user' }) {
     return request('/api/auth/signup/welcome', { email, welcomeToken, name });
   }
 
-  function requestLoginOtp(email, name = 'Indoone user') {
+  function requestLoginOtp(email, name = 'Sankalp user') {
     return request('/api/auth/login/request-otp', { email, name });
   }
 

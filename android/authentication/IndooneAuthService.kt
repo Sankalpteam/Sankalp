@@ -34,7 +34,7 @@ class IndooneAuthService(
                 val user = await(auth.signInWithEmailAndPassword(email, password)).user
                     ?: throw AuthException("Login session expired. Please login again.")
                 if (mobileIdentity != null && mobileIdentity.uid.isNotBlank() && mobileIdentity.uid != user.uid) {
-                    throw AuthException("This mobile number is not linked to this Indoone account.")
+                    throw AuthException("This mobile number is not linked to this Sankalp account.")
                 }
                 user.uid
             } catch (error: Throwable) {
@@ -53,7 +53,7 @@ class IndooneAuthService(
                 val email = resolveLoginEmail(raw)
                 val result = post("/api/auth/login/request-otp", JSONObject().apply {
                     put("email", email)
-                    put("name", "Indoone user")
+                    put("name", "Sankalp user")
                 })
                 val challengeId = result.optString("challengeId")
                 if (challengeId.isBlank()) throw AuthException("OTP service did not return a challenge ID.")
@@ -76,7 +76,7 @@ class IndooneAuthService(
                     put("email", pending.email)
                     put("challengeId", pending.challengeId)
                     put("otp", code)
-                    put("name", "Indoone user")
+                    put("name", "Sankalp user")
                 })
                 if (!result.optBoolean("verified", false)) {
                     throw AuthException(result.optString("error").ifBlank { "OTP verification failed." })
@@ -140,7 +140,7 @@ class IndooneAuthService(
             if (identityExists(email, mobile)) throw AuthException("An account already exists with this email or mobile number.")
             val result = post("/api/auth/signup/request-otp", JSONObject().apply {
                 put("email", email)
-                put("name", "Indoone user")
+                put("name", "Sankalp user")
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a challenge ID.")
@@ -162,7 +162,7 @@ class IndooneAuthService(
                     throw AuthException("An account already exists with this email or mobile number.")
                 }
                 val user = await(auth.createUserWithEmailAndPassword(email, password)).user
-                    ?: throw AuthException("Could not create the Indoone account.")
+                    ?: throw AuthException("Could not create the Sankalp account.")
                 syncProfile(user.uid, email, mobile)
                 user.uid
             } catch (error: Throwable) {
@@ -197,7 +197,7 @@ class IndooneAuthService(
                     put("email", pending.email)
                     put("challengeId", pending.challengeId)
                     put("otp", code)
-                    put("name", "Indoone user")
+                    put("name", "Sankalp user")
                 })
                 if (!result.optBoolean("verified", false)) {
                     throw AuthException(result.optString("error").ifBlank { "OTP verification failed." })
@@ -206,14 +206,14 @@ class IndooneAuthService(
                     throw AuthException("An account already exists with this email or mobile number.")
                 }
                 val user = await(auth.createUserWithEmailAndPassword(pending.email, pending.password)).user
-                    ?: throw AuthException("Could not create the Indoone account.")
+                    ?: throw AuthException("Could not create the Sankalp account.")
                 syncProfile(user.uid, pending.email, pending.mobile)
                 result.optString("welcomeToken").takeIf { it.isNotBlank() }?.let { welcomeToken ->
                     runCatching {
                         post("/api/auth/signup/welcome", JSONObject().apply {
                             put("email", pending.email)
                             put("welcomeToken", welcomeToken)
-                            put("name", "Indoone user")
+                            put("name", "Sankalp user")
                         })
                     }
                 }
