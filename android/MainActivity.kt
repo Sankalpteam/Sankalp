@@ -801,7 +801,7 @@ class MainActivity : ComponentActivity() {
                                 else -> "Download size $sizeLine"
                             }
                             val permissionNote =
-                                if (canInstall) "" else "\n\nIndoone is not allowed to " +
+                                if (canInstall) "" else "\n\nSankalp is not allowed to " +
                                     "install updates yet."
                             Text(body + permissionNote)
                         },
