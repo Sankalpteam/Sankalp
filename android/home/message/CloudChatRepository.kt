@@ -155,12 +155,31 @@ class CloudChatRepository(
 
     suspend fun loadConversations(limit: Int = 50): List<CloudChatConversation> = withContext(Dispatchers.IO) {
         val userId = uid
-        val documents = Tasks.await(
-            firestore.collection("conversations")
-                .whereEqualTo("userId", userId)
-                .limit(limit.coerceIn(1, 100).toLong())
-                .get(),
-        ).documents.sortedByDescending {
+        // Newest first, from the database. Without orderBy, Firestore returns documents in id
+        // order and the limit takes an arbitrary page of them - so once a person had more than
+        // the limit, the list could miss their newest threads and show old ones instead. The
+        // sort below only ever reordered whichever page came back.
+        //
+        // orderBy on a second field needs a composite index; if it is missing the query throws,
+        // so this falls back to the old shape rather than showing an empty history.
+        val ordered = try {
+            Tasks.await(
+                firestore.collection("conversations")
+                    .whereEqualTo("userId", userId)
+                    .orderBy("updatedAt", Query.Direction.DESCENDING)
+                    .limit(limit.coerceIn(1, 100).toLong())
+                    .get(),
+            ).documents
+        } catch (error: Exception) {
+            Tasks.await(
+                firestore.collection("conversations")
+                    .whereEqualTo("userId", userId)
+                    .limit(limit.coerceIn(1, 100).toLong())
+                    .get(),
+            ).documents
+        }
+
+        val documents = ordered.sortedByDescending {
             it.getTimestamp("updatedAt")?.toDate()?.time ?: 0L
         }
 

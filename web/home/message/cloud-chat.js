@@ -183,10 +183,31 @@
   async function listConversations(limit = 50) {
     const db = firestore();
     const capped = Math.min(Math.max(Number(limit) || 50, 1), 100);
-    const snapshot = await db.collection(COLLECTION)
-      .where('userId', '==', uid())
-      .limit(capped)
-      .get();
+    // Newest first, from the database.
+    //
+    // The query used to take an arbitrary fifty - Firestore returns documents in id order when
+    // no orderBy is given - and only then sorted them here. So once a person had more than
+    // fifty threads, the fifty that came back were not the newest ones: recent conversations
+    // could be missing from the list while old ones showed up.
+    //
+    // orderBy on a second field needs a composite index. If the index has not been created yet
+    // the query throws, so it falls back to the old shape rather than leaving the user with an
+    // empty history.
+    let snapshot;
+
+    try {
+      snapshot = await db.collection(COLLECTION)
+        .where('userId', '==', uid())
+        .orderBy('updatedAt', 'desc')
+        .limit(capped)
+        .get();
+    } catch (error) {
+      console.warn('Sankalp ordered conversation query failed, falling back:', error?.message || error);
+      snapshot = await db.collection(COLLECTION)
+        .where('userId', '==', uid())
+        .limit(capped)
+        .get();
+    }
 
     return snapshot.docs
       .map(doc => ({ id: doc.id, data: doc.data() || {} }))
