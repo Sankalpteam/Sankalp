@@ -270,6 +270,29 @@
 
 /* Follow-ups under a reply. Wrapped, left-aligned with the bubble, and never full width:
    they are a suggestion attached to one message, not a toolbar for the thread. */
+/* The pages a research answer came from. Quieter than the answer and clearly a footnote: a
+   small label, the title in the reading colour, the URL in the copyable row the app uses. */
+.chat-sources {
+  margin-top: 10px;
+  max-width: 75%;
+}
+
+.chat-sources-label {
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #8b8698;
+  margin-bottom: 6px;
+}
+
+.chat-source-title {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #4a4459;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
 .chat-chips {
   display: flex;
   flex-wrap: wrap;

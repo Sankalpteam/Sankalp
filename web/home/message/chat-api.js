@@ -174,6 +174,11 @@
     return {
       conversationId: json.conversation_id,
       reply: json.reply,
+      // The pages a research answer used. The backend has always returned them and this page
+      // dropped them, so a web answer arrived with no citations while the same answer in the
+      // app carried its sources. A research answer without its sources is a claim without
+      // evidence.
+      sources: Array.isArray(json.sources) ? json.sources : [],
       // Follow-ups the backend offered with this reply. Empty for most answers; a held
       // write carries Confirm/Cancel so the user presses a button instead of typing a
       // word the reply had to spell out.
@@ -272,6 +277,7 @@
           final = {
             conversationId: conversation,
             reply: event.reply || text,
+            sources: Array.isArray(event.sources) ? event.sources : [],
             chips: Array.isArray(event.action_chips) ? event.action_chips : []
           };
         }

@@ -513,6 +513,38 @@
   // the one next step a list makes obvious. Pressing one sends exactly its action text -
   // for Confirm that is the word the reply used to ask the user to type, so a button and
   // typing cannot diverge.
+  // The pages the answer came from. One row per source, the title first because that is what a
+  // person reads, the URL under it in the same copyable row the app uses.
+  function sourcesBlock(sources) {
+    if (!Array.isArray(sources) || !sources.length) {
+      return null;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-sources';
+
+    const label = document.createElement('div');
+    label.className = 'chat-sources-label';
+    label.textContent = sources.length === 1 ? 'Source' : 'Sources';
+    wrap.appendChild(label);
+
+    sources.forEach((source, index) => {
+      const url = String(source?.url || '').trim();
+
+      if (!url) {
+        return;
+      }
+
+      const title = document.createElement('div');
+      title.className = index === 0 ? 'chat-source-title' : 'chat-source-title chat-gap';
+      title.textContent = String(source?.title || url);
+      wrap.appendChild(title);
+      wrap.appendChild(linkRow(url, index === 0));
+    });
+
+    return wrap.childElementCount > 1 ? wrap : null;
+  }
+
   function chipsRow(chips) {
     if (!Array.isArray(chips) || !chips.length) {
       return null;
@@ -604,6 +636,12 @@
 
     if (actions) {
       column.appendChild(actions);
+    }
+
+    const sources = sourcesBlock(message.sources);
+
+    if (sources) {
+      column.appendChild(sources);
     }
 
     const chips = chipsRow(message.chips);
