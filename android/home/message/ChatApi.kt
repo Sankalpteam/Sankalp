@@ -28,7 +28,54 @@ data class ChatResponse(
     val conversationId: String,
     val reply: String,
     val actionChips: List<ActionChip> = emptyList(),
+    val sources: List<ChatSource> = emptyList(),
 )
+
+// One page a research answer came from.
+data class ChatSource(val title: String, val url: String)
+
+// The backend returns the pages a research answer used, and this client ignored them: the
+// answer arrived as a claim with no evidence while the same answer in the browser carried its
+// sources. They are appended to the reply text rather than given a new component, because the
+// app already draws a URL in a reply as a link row with a copy button - the same control the
+// sources need, in the place the reader is already looking.
+internal fun withSources(reply: String, sources: List<ChatSource>): String {
+    val usable = sources.filter { it.url.isNotBlank() && !reply.contains(it.url) }
+
+    if (usable.isEmpty()) {
+        return reply
+    }
+
+    val label = if (usable.size == 1) "Source:" else "Sources:"
+    val lines = usable.joinToString("\n") { source ->
+        val title = source.title.ifBlank { source.url }
+        "$title\n${source.url}"
+    }
+
+    return reply.trimEnd() + "\n\n" + label + "\n" + lines
+}
+
+// A malformed entry is skipped rather than failing the whole reply.
+internal fun parseSources(array: JSONArray?): List<ChatSource> {
+    if (array == null) {
+        return emptyList()
+    }
+
+    val sources = mutableListOf<ChatSource>()
+
+    for (index in 0 until array.length()) {
+        val item = array.optJSONObject(index) ?: continue
+        val url = item.optString("url").trim()
+
+        if (url.isBlank()) {
+            continue
+        }
+
+        sources += ChatSource(title = item.optString("title").trim(), url = url)
+    }
+
+    return sources
+}
 
 // Follow-ups, if the backend sent any. A malformed entry is skipped rather than failing
 // the whole reply: the answer matters more than the buttons under it.
@@ -209,10 +256,12 @@ private const val READ_TIMEOUT_MS = 300_000
                     if (reply.isBlank()) {
                         throw ChatApiException("Sankalp backend returned an empty reply")
                     }
+                    val sources = parseSources(json.optJSONArray("sources"))
                     ChatResponse(
                         returnedConversationId,
-                        reply,
+                        withSources(reply, sources),
                         parseActionChips(json.optJSONArray("action_chips")),
+                        sources,
                     )
                 } finally {
                     connection.disconnect()
@@ -392,10 +441,13 @@ private const val READ_TIMEOUT_MS = 300_000
                             }
 
                             "done" -> {
+                                val streamed = event.optString("reply").ifBlank { text.toString() }
+                                val sources = parseSources(event.optJSONArray("sources"))
                                 final = ChatResponse(
                                     conversationId = conversation,
-                                    reply = event.optString("reply").ifBlank { text.toString() },
+                                    reply = withSources(streamed, sources),
                                     actionChips = parseActionChips(event.optJSONArray("action_chips")),
+                                    sources = sources,
                                 )
                             }
                         }
