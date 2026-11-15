@@ -166,6 +166,44 @@
     window.IndooneChatHome?.syncComposer?.();
   }
 
+  // The text node of the last reply on screen, so a streaming answer can be written into it
+  // without rebuilding the list.
+  //
+  // It looks at the last reply ROW, not the last text node: a reply that starts empty renders
+  // no text node at all, so searching for one finds the previous message's node and the new
+  // answer would be written over it.
+  function lastReplyTextNode() {
+    const list = document.getElementById('chatList');
+
+    if (!list) {
+      return null;
+    }
+
+    const rows = list.querySelectorAll('.chat-row.theirs');
+
+    if (!rows.length) {
+      return null;
+    }
+
+    const row = rows[rows.length - 1];
+    const existing = row.querySelector('.chat-text');
+
+    if (existing) {
+      return existing;
+    }
+
+    const bubble = row.querySelector('.chat-bubble');
+
+    if (!bubble) {
+      return null;
+    }
+
+    const node = document.createElement('span');
+    node.className = 'chat-text';
+    bubble.appendChild(node);
+    return node;
+  }
+
   async function send() {
     const input = document.getElementById('chatInput');
     const text = (input?.value || '').trim();
@@ -200,6 +238,7 @@
 
     const conversationId = store.ensureConversationId();
     const turnId = ++activeTurnId;
+    let streamedElement = null;
     const controller = new AbortController();
     activeAbortController = controller;
 
@@ -253,14 +292,32 @@
                 // First token: the wait is over.
                 setActivity(null);
                 streamedMessage = store.add({ text: '', mine: false });
+                window.IndooneMessages?.render(
+                  document.getElementById('chatList'),
+                  store.getMessages(),
+                  null
+                );
+                streamedElement = lastReplyTextNode();
               }
 
               streamedMessage.text = full;
-              window.IndooneMessages?.render(
-                document.getElementById('chatList'),
-                store.getMessages(),
-                null
-              );
+
+              // Only the bubble that is still being written is updated.
+              //
+              // This used to re-render the whole thread on every token: with a long answer
+              // and a long history that is thousands of DOM rebuilds, and it threw away the
+              // reader's scroll position, text selection and any button state with each one.
+              if (streamedElement) {
+                streamedElement.textContent = full;
+              } else {
+                window.IndooneMessages?.render(
+                  document.getElementById('chatList'),
+                  store.getMessages(),
+                  null
+                );
+                streamedElement = lastReplyTextNode();
+              }
+
               window.IndooneChatScroll?.toBottom?.();
             }
           });
