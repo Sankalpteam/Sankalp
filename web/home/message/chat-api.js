@@ -2,7 +2,8 @@
 // Firebase ID token as a bearer token; this does the same, so one account
 // works across the app and the web.
 (() => {
-  const BACKEND_URL = 'https://indooneai.duckdns.org';
+  // One place, not five: see /config.js. A page can override it before this loads.
+  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
   const READ_TIMEOUT_MS = 300000;
   const MAX_ATTACHMENTS = 10;
   const MAX_IMAGE_BYTES = 5000000;

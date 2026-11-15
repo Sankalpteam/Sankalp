@@ -1,10 +1,13 @@
 // The chat home, the web counterpart of android/home/HomeScreen.kt.
 (() => {
   const MODULES = [
+    // Where the backend lives, before anything that talks to it. Five files used to each
+    // hold their own copy of that address.
+    'config.js?v=20261115a',
     // chat-api.js was written but never listed here, so window.IndooneChatApi
     // was undefined and both the composer and Vibe threw the moment they tried
     // to send. It goes first, because the others call it.
-    'home/message/chat-api.js?v=20261020a',
+    'home/message/chat-api.js?v=20261115a',
     'home/message/cloud-chat.js?v=20261020b',
     'home/message/chat-store.js?v=20261018b',
     // The in-flight record. It has to load with the store, before anything can send.
@@ -43,9 +46,16 @@
     });
   }
 
+  // One at a time, in the order listed. Promise.all looks faster and is wrong: dynamically
+  // appended scripts run in the order they finish downloading, so on a slow connection
+  // message.js could run before chat-api.js - which is exactly the failure the note above
+  // describes as fixed, and it would come back on any slow network.
   function loadModules() {
     if (!ready) {
-      ready = Promise.all(MODULES.map(loadScript));
+      ready = MODULES.reduce(
+        (chain, src) => chain.then(() => loadScript(src)),
+        Promise.resolve()
+      );
     }
 
     return ready;

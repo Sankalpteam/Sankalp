@@ -6,7 +6,8 @@
 // The paths and the shapes of the answers are the ones the app's GitHubPluginApi,
 // ZohoMailPluginApi and GmailPluginApi call.
 (() => {
-  const BACKEND_URL = 'https://indooneai.duckdns.org';
+  // One place, not five: see /config.js. A page can override it before this loads.
+  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
 
   const PROVIDERS = [
     {

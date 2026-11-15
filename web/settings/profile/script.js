@@ -20,7 +20,8 @@
   // The same five strings are used here, from the same endpoint the plugins
   // screen reads: api/integrations/gmail/status.
 
-  const BACKEND_URL = 'https://indooneai.duckdns.org';
+  // One place, not five: see /config.js. A page can override it before this loads.
+  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
 
   function currentUser() {
     return window.IndooneFirebase?.auth?.currentUser || null;

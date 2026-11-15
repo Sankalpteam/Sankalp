@@ -11,7 +11,8 @@
 // backend accepts either.
 
 (() => {
-  const BACKEND_URL = 'https://indooneai.duckdns.org';
+  // One place, not five: see /config.js. A page can override it before this loads.
+  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
   const SESSION_PATH = '/api/vibe/session';
   const INPUT_RATE = 16000;
   const OUTPUT_RATE = 24000;
