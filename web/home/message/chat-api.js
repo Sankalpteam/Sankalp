@@ -3,7 +3,18 @@
 // works across the app and the web.
 (() => {
   // One place, not five: see /config.js. A page can override it before this loads.
-  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
+    // config.js owns the address, and this is read when a request is made rather than when the
+  // file loads: the modules load in a fixed order, and a copy captured at load time is how the
+  // old host survived in five files after the shared one was fixed.
+  function backendBase() {
+    const value = String(window.SANKALP_BACKEND || '').replace(/\/+$/, '');
+
+    if (!value) {
+      console.error('Sankalp: config.js did not load, so the backend address is unknown.');
+    }
+
+    return value;
+  }
   const READ_TIMEOUT_MS = 300000;
   const MAX_ATTACHMENTS = 10;
   const MAX_IMAGE_BYTES = 5000000;
@@ -107,7 +118,7 @@
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}${path}`, {
+      const response = await fetch(`${backendBase()}${path}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -211,7 +222,7 @@
   async function streamMessage({ message, conversationId, signal, onMeta, onDelta }) {
     const token = await authToken();
 
-    const response = await fetch(`${BACKEND_URL}/api/chat/stream`, {
+    const response = await fetch(`${backendBase()}/api/chat/stream`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -298,6 +309,6 @@
     send,
     streamMessage,
     uploadFile,
-    backendUrl: BACKEND_URL
+    backendUrl: backendBase()
   };
 })();

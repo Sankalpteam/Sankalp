@@ -7,7 +7,18 @@
 // ZohoMailPluginApi and GmailPluginApi call.
 (() => {
   // One place, not five: see /config.js. A page can override it before this loads.
-  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
+    // config.js owns the address, and this is read when a request is made rather than when the
+  // file loads: the modules load in a fixed order, and a copy captured at load time is how the
+  // old host survived in five files after the shared one was fixed.
+  function backendBase() {
+    const value = String(window.SANKALP_BACKEND || '').replace(/\/+$/, '');
+
+    if (!value) {
+      console.error('Sankalp: config.js did not load, so the backend address is unknown.');
+    }
+
+    return value;
+  }
 
   const PROVIDERS = [
     {
@@ -103,7 +114,7 @@
       headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(`${BACKEND_URL}/${path}`, {
+    const response = await fetch(`${backendBase()}/${path}`, {
       ...options,
       headers
     });
@@ -120,7 +131,7 @@
     return call(`${provider.status}?user_id=${id}`);
   }
 
-  window.IndoonePlugins = { PROVIDERS, call, statusOf, userId, baseUrl: BACKEND_URL };
+  window.IndoonePlugins = { PROVIDERS, call, statusOf, userId, baseUrl: backendBase() };
 })();
 
 // The providers' own marks. GitHub and Zoho Mail are brand marks with their own

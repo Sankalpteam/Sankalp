@@ -165,7 +165,7 @@
       if (user) {
         const token = await user.getIdToken(false);
         const response = await fetch(
-          `${window.SANKALP_BACKEND || 'https://indooneai.duckdns.org'}/api/chat/conversations/${encodeURIComponent(conversationId)}`,
+          `${String(window.SANKALP_BACKEND || '').replace(/\/+$/, '')}/api/chat/conversations/${encodeURIComponent(conversationId)}`,
           { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
         );
 

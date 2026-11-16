@@ -12,7 +12,18 @@
 
 (() => {
   // One place, not five: see /config.js. A page can override it before this loads.
-  const BACKEND_URL = window.SANKALP_BACKEND || 'https://indooneai.duckdns.org';
+    // config.js owns the address, and this is read when a request is made rather than when the
+  // file loads: the modules load in a fixed order, and a copy captured at load time is how the
+  // old host survived in five files after the shared one was fixed.
+  function backendBase() {
+    const value = String(window.SANKALP_BACKEND || '').replace(/\/+$/, '');
+
+    if (!value) {
+      console.error('Sankalp: config.js did not load, so the backend address is unknown.');
+    }
+
+    return value;
+  }
   const SESSION_PATH = '/api/vibe/session';
   const INPUT_RATE = 16000;
   const OUTPUT_RATE = 24000;
@@ -37,7 +48,7 @@
   let quietTimer = null;
 
   function backendBase() {
-    return (window.IndooneChatApi?.backendUrl || BACKEND_URL).replace(/\/+$/, '');
+    return window.IndooneChatApi?.backendUrl || backendBase();
   }
 
   function sessionUrl() {
