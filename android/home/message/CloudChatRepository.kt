@@ -95,8 +95,6 @@ class CloudChatRepository(
             throw SecurityException("Conversation does not belong to this account.")
         }
 
-        val existingCount = snapshot.getLong("messageCount")?.toInt() ?: 0
-
         val messageRef = conversation.collection("messages").document(UUID.randomUUID().toString())
         val batch = firestore.batch()
         batch.set(
@@ -108,7 +106,11 @@ class CloudChatRepository(
             ),
         )
 
-        val newCount = existingCount + 1
+        // Incremented by the database, not read-and-written here.
+        //
+        // The user's turn and the answer to it are saved without waiting for each other, so
+        // both reads saw the same number and both wrote it plus one - a two-message thread
+        // could be recorded as one.
         batch.set(
             conversation,
             mapOf(
@@ -117,7 +119,7 @@ class CloudChatRepository(
                     if (role == "user") content.trim().take(60) else "New chat"
                 },
                 "updatedAt" to now,
-                "messageCount" to newCount,
+                "messageCount" to FieldValue.increment(1),
                 "closed" to false,
                 "closedAt" to null,
             ),

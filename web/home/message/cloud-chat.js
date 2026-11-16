@@ -64,17 +64,21 @@
     const existing = snapshot.exists ? snapshot.data() || {} : {};
     const title = String(existing.title || '').trim() ||
       (role === 'user' ? text.slice(0, 60) : 'New chat');
-    const messageCount = Number(existing.messageCount || 0) + 1;
 
     const messageRef = conversation.collection('messages').doc();
     const batch = db.batch();
 
     batch.set(messageRef, { role, content: text, createdAt: now });
+    // The count is incremented by the database, not by us.
+    //
+    // Reading it, adding one and writing it back is a race: the user's turn and the answer to
+    // it are appended without waiting for each other, so both reads saw the same number and
+    // both wrote it plus one. A two-message thread could end up recorded as one.
     batch.set(conversation, {
       userId: user,
       title,
       updatedAt: now,
-      messageCount,
+      messageCount: firebase().fieldValue.increment(1),
       closed: false,
       closedAt: null
     }, { merge: true });
