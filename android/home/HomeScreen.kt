@@ -531,6 +531,13 @@ private data class ChatMessage(
     // Follow-ups the backend offered with this reply: Confirm/Cancel for a held write, or
     // the obvious next step after a list. Empty for most answers.
     val chips: List<ActionChip> = emptyList(),
+    // What the list is keyed by.
+    //
+    // Without a key, Compose identifies an item by its position, so removing the partial reply
+    // when the worker takes over - or inserting anything above it - made every message below
+    // look like a brand-new item: all of them recomposed, and anything remembered inside them
+    // was thrown away. The identity travels with the message now.
+    val id: String = java.util.UUID.randomUUID().toString(),
 )
 
 private enum class ChatActivityState {
@@ -1808,7 +1815,7 @@ fun HomeScreen(
                     }
                 }
 
-                itemsIndexed(messages) { index, message ->
+                itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
                     if (message.fromUser) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
