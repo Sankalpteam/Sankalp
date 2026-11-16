@@ -132,6 +132,7 @@ import com.indoone.home.message.PendingTurnStore
 import com.indoone.home.message.SendTurnWorker
 import com.indoone.home.plus.PlusAttachmentSheet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1151,12 +1152,21 @@ fun HomeScreen(
                             bytes = bytes,
                         )
                     }
-                    ChatApi.sendMessage(
-                        message = messageToBackend,
-                        conversationId = requestConversationId,
-                        fileIds = fileIds,
-                        mediaAttachments = mediaPayloads,
-                    )
+                    // NonCancellable, because this turn has an attachment and so cannot be
+                    // handed to the worker (its input is capped and a photo does not fit).
+                    // It runs in the composition scope, which is cancelled the moment the
+                    // screen goes away - so backgrounding the app used to drop the request
+                    // and the reply with it, the exact failure that was fixed for text-only
+                    // turns. The call finishes now even if the screen is gone; the answer is
+                    // already on the server, and the thread reloads from it.
+                    withContext(NonCancellable) {
+                        ChatApi.sendMessage(
+                            message = messageToBackend,
+                            conversationId = requestConversationId,
+                            fileIds = fileIds,
+                            mediaAttachments = mediaPayloads,
+                        )
+                    }
                 }
             }
 
