@@ -936,7 +936,14 @@ fun HomeScreen(
         }
         isLoadingHistory = true
         runCatching {
-            cloudChatRepository.cleanupExpiredConversations()
+            // No automatic expiry here.
+            //
+            // Opening the history used to delete every conversation that had been closed more
+            // than seven days ago - silently, on every load, and only in the app: the web keeps
+            // them. So a user could see a chat in the browser and find it gone on the phone.
+            // The published policy says automatic closing and expiry will be described before
+            // they are switched on, and they have not been. Expiry stays off until it is
+            // documented and runs on the server for every client at once.
             if (!openConversationId.isNullOrBlank()) {
                 cloudChatRepository.loadConversation(openConversationId)
             } else {

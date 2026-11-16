@@ -28,6 +28,9 @@ data class CloudChatConversation(
     val updatedAtMillis: Long,
 )
 
+// Automatic expiry is not switched on. See cleanupExpiredConversations.
+private const val AUTO_EXPIRY_ENABLED = false
+
 class CloudChatRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
@@ -297,6 +300,21 @@ class CloudChatRepository(
 
     suspend fun cleanupExpiredConversations(maxAgeDays: Long = 7L) = withContext(Dispatchers.IO) {
         require(maxAgeDays > 0) { "maxAgeDays must be greater than zero" }
+
+        // Off, deliberately.
+        //
+        // This deletes every conversation closed more than seven days ago. It ran from the chat
+        // screen, the history screen and a periodic worker - so it fired silently on open - and
+        // only in the app: the web keeps those chats. A user could see a thread in the browser
+        // and find it gone on the phone.
+        //
+        // The published policy says automatic closing and expiry will be described before they
+        // are switched on, and they have not been. When they are, this belongs on the server so
+        // every client agrees, and the policy says so first.
+        if (!AUTO_EXPIRY_ENABLED) {
+            return@withContext
+        }
+
         val cutoff = System.currentTimeMillis() - maxAgeDays * 24L * 60L * 60L * 1000L
         val userId = uid
         val documents = Tasks.await(
