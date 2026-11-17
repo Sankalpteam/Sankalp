@@ -624,3 +624,24 @@ class ChatApiException(
     val statusCode: Int? = null,
     val retryAfterMs: Long? = null,
 ) : Exception(message, cause)
+
+/**
+ * A failure as a sentence a person can read.
+ *
+ * The chat screen put `error.message` into a reply bubble, so a dead network appeared in the
+ * conversation as "java.net.SocketTimeoutException: timeout" - Sankalp apparently saying the
+ * name of an exception. Our own exceptions already carry a written sentence; everything else
+ * gets one from here, and the detail goes to the log where it is useful.
+ */
+fun friendlyChatError(error: Throwable?): String = when (error) {
+    null -> "Sankalp could not complete the request. Please try again."
+    is ChatApiException -> error.message ?: "Sankalp could not complete the request. Please try again."
+    is java.net.SocketTimeoutException ->
+        "Sankalp took too long to answer. Check your connection and try again."
+    is java.net.UnknownHostException ->
+        "Sankalp could not reach the server. Check your connection and try again."
+    is java.io.IOException ->
+        "The connection dropped before the answer arrived. Please try again."
+    is SecurityException -> "This account is not allowed to do that."
+    else -> "Something went wrong. Please try again."
+}

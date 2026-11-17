@@ -124,6 +124,7 @@ import com.indoone.home.message.parseActionChips
 import org.json.JSONArray
 import com.indoone.home.message.ChatApi
 import com.indoone.home.message.ChatApiException
+import com.indoone.home.message.friendlyChatError
 import com.indoone.home.message.ChatMediaAttachment
 import com.indoone.home.message.CloudChatConversation
 import com.indoone.home.message.CloudChatRepository
@@ -1249,7 +1250,9 @@ fun HomeScreen(
                     )
                 }
                 if (input.isBlank()) input = typed
-                val failureReply = error.message ?: "Sankalp could not complete the request."
+                // Not error.message: that is where "java.net.SocketTimeoutException" came
+                // from, shown inside a reply bubble as if Sankalp had said it.
+                val failureReply = friendlyChatError(error)
                 messages = messages + ChatMessage(failureReply, false)
                 // A reply the backend actually sent is part of the conversation, so
                 // save it: refreshing the chat then shows what was said at the time.
