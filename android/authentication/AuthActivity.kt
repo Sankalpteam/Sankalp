@@ -132,12 +132,46 @@ class AuthActivity : ComponentActivity() {
                                 busyAction = null
                             }
                         },
+                        onVerifyOtp = { otp ->
+                            busyAction = AuthBusyAction.VERIFY_OTP
+                            error = ""
+                            scope.launch {
+                                runCatching { service.verifyLoginOtp(otp) }
+                                    .onSuccess {
+                                        // verifyLoginOtp signs in and returns nothing; the uid
+                                        // is the Firebase user it just established.
+                                        auth.currentUser?.uid?.let { uid ->
+                                            session.setVerified(uid)
+                                            openMain()
+                                        } ?: run {
+                                            error = "Login session expired. Please login again."
+                                        }
+                                    }
+                                    .onFailure { error = it.message ?: "OTP verification failed." }
+                                busyAction = null
+                            }
+                        },
+                        onResendOtp = {
+                            busyAction = AuthBusyAction.RESEND_OTP
+                            error = ""
+                            scope.launch {
+                                runCatching { service.resendLoginOtp() }
+                                    .onSuccess { destination ->
+                                        otpEmail = destination
+                                        status = "New OTP sent to your email."
+                                        Toast.makeText(this@AuthActivity, "New OTP sent to your email.", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .onFailure { error = it.message ?: "Could not resend OTP." }
+                                busyAction = null
+                            }
+                        },
                         onBackToLogin = {
                             otpVisible = false
                             otpEmail = ""
                             status = ""
                             error = ""
                         },
+                        onCreateAccount = { showingSignup = true },
                     )
                 }
             }
