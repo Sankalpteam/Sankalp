@@ -197,9 +197,30 @@ window.initMenuPlugins = function () {
   // and takes it away when the answers are in
   let loading = true;
 
-  function setStatus(text) {
+  function setStatus(text, withRetry) {
     statusMessage = text || '';
-    if (statusLine) statusLine.textContent = statusMessage;
+
+    if (!statusLine) {
+      return;
+    }
+
+    statusLine.textContent = statusMessage;
+    statusLine.hidden = !statusMessage;
+
+    if (!withRetry) {
+      return;
+    }
+
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'plugins-retry';
+    retry.textContent = 'Retry';
+    retry.addEventListener('click', () => {
+      setStatus('');
+      void refresh();
+    });
+    statusLine.appendChild(document.createTextNode(' '));
+    statusLine.appendChild(retry);
   }
 
   function connectedColour() {
@@ -309,9 +330,10 @@ window.initMenuPlugins = function () {
     } else if (current.connected === false) {
       note.textContent = provider.offNote;
     } else {
-      note.textContent = current.reason
-        ? `Connection status unavailable · ${current.reason}`
-        : 'Connection status unavailable';
+      // Not "unavailable": the provider is available, we could not ask about it. The difference
+      // matters to the person reading it - one sounds like a missing feature, the other like a
+      // connection that will work in a moment.
+      note.textContent = 'Status unknown · tap + to try again';
     }
 
     text.appendChild(title);
@@ -449,7 +471,18 @@ window.initMenuPlugins = function () {
       }
     }));
 
-    if (firstProblem && !statusMessage) setStatus(firstProblem);
+    // When nothing could be asked, the problem is between this page and the server - not three
+    // integrations that do not exist. Say that once, at the top, with the one action that helps.
+    const failed = window.IndoonePlugins.PROVIDERS.filter(provider =>
+      provider.available !== false && state[provider.id].connected === null
+    ).length;
+    const asked = window.IndoonePlugins.PROVIDERS.filter(provider => provider.available !== false).length;
+
+    if (failed && failed === asked) {
+      setStatus('Sankalp could not reach its server, so the connection states are unknown. Check your connection, then Retry.', true);
+    } else if (firstProblem && !statusMessage) {
+      setStatus(firstProblem);
+    }
 
     loading = false;
     draw();

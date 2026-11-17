@@ -228,6 +228,19 @@
   line-height: 17px;
 }
 
+/* A failure the reader can act on: the sentence, then the one button that helps. */
+.plugins-retry {
+  margin-left: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #6330db;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .plugins-checking {
   display: flex;
   align-items: center;
