@@ -55,11 +55,6 @@
     {
       id: 'email',
       title: 'Gmail',
-      // There is no Gmail integration on the backend: app/ has no /integrations/gmail route at
-      // all, so every call below answers 404. Offering the card anyway made the page say
-      // "Connection status unavailable" for a provider that can never be connected, which reads
-      // like a network blip rather than a missing feature.
-      available: false,
       offNote: 'Connect your Gmail account',
       defaultAccount: 'Gmail account',
       status: 'api/integrations/gmail/status',
