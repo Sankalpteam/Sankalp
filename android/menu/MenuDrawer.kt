@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -272,7 +271,7 @@ fun MenuDrawer(
                 DrawerSectionLabel("PERSONAL")
                 DrawerItem(Icons.Outlined.PersonOutline, "Profile", null) { showProfile = true }
                 DrawerItem(Icons.Outlined.Memory, "Memory", null) { showMemory = true }
-                DrawerItem(Icons.Outlined.Apps, "Plugins", null, showChevron = true) { showPlugins = true }
+                DrawerItem(Icons.Outlined.Apps, "Plugins", null) { showPlugins = true }
                 DrawerItem(Icons.Outlined.History, "Chat History", null) { showChatHistory = true }
                 DrawerItem(Icons.Outlined.PrivacyTip, "Data & Privacy", null) { showDataPrivacy = true }
 
@@ -332,7 +331,6 @@ private fun DrawerItem(
     title: String,
     trailing: String?,
     highlighted: Boolean = false,
-    showChevron: Boolean = false,
     onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(15.dp)
@@ -399,13 +397,6 @@ private fun DrawerItem(
                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                 )
             }
-        } else if (showChevron) {
-            androidx.compose.material3.Icon(
-                imageVector = Icons.Outlined.ChevronRight,
-                contentDescription = "Open $title",
-                tint = Color(0xFF8B9AB0),
-                modifier = Modifier.size(18.dp),
-            )
         }
     }
 }
