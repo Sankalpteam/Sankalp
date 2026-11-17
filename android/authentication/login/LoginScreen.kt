@@ -360,6 +360,13 @@ private fun LoginOtpPage(
 }
 
 @Composable
+private fun LoginBackButton(onBack: () -> Unit) {
+    TextButton(onClick = onBack) {
+        Text("← Back", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
 private fun LoginPageIndicator(currentPage: LoginPage) {
     Row(
         modifier = Modifier.fillMaxWidth(),
