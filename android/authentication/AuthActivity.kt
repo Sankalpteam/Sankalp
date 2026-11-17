@@ -67,30 +67,17 @@ class AuthActivity : ComponentActivity() {
                         error = error,
                         otpVisible = otpVisible,
                         otpEmail = otpEmail,
-                        onSendOtp = { email, mobile, password ->
+                        onSendOtp = { email, mobile ->
                             busyAction = AuthBusyAction.SEND_OTP
                             error = ""
                             scope.launch {
-                                runCatching { service.startSignup(email, mobile, password) }
+                                runCatching { service.startSignup(email, mobile) }
                                     .onSuccess { destination ->
                                         otpEmail = destination
                                         otpVisible = true
                                         status = ""
                                     }
                                     .onFailure { error = it.message ?: "Could not start signup." }
-                                busyAction = null
-                            }
-                        },
-                        onCreateWithPassword = { email, mobile, password ->
-                            busyAction = AuthBusyAction.CREATE_ACCOUNT
-                            error = ""
-                            scope.launch {
-                                runCatching { service.createSignupWithPassword(email, mobile, password) }
-                                    .onSuccess { uid ->
-                                        session.setVerified(uid)
-                                        openMain()
-                                    }
-                                    .onFailure { error = it.message ?: "Could not create account." }
                                 busyAction = null
                             }
                         },
@@ -151,47 +138,6 @@ class AuthActivity : ComponentActivity() {
                             status = ""
                             error = ""
                         },
-                        onPasswordLogin = { identifier, password ->
-                            busyAction = AuthBusyAction.PASSWORD_LOGIN
-                            error = ""
-                            scope.launch {
-                                runCatching { service.loginWithPassword(identifier, password) }
-                                    .onSuccess { uid ->
-                                        session.setVerified(uid)
-                                        openMain()
-                                    }
-                                    .onFailure { error = it.message ?: "Login failed." }
-                                busyAction = null
-                            }
-                        },
-                        onVerifyOtp = { otp ->
-                            busyAction = AuthBusyAction.VERIFY_OTP
-                            error = ""
-                            scope.launch {
-                                runCatching { service.verifyLoginOtp(otp) }
-                                    .onSuccess {
-                                        auth.currentUser?.uid?.let(session::setVerified)
-                                        openMain()
-                                    }
-                                    .onFailure { error = it.message ?: "Login failed." }
-                                busyAction = null
-                            }
-                        },
-                        onResendOtp = {
-                            busyAction = AuthBusyAction.RESEND_OTP
-                            error = ""
-                            scope.launch {
-                                runCatching { service.resendLoginOtp() }
-                                    .onSuccess { destination ->
-                                        otpEmail = destination
-                                        status = "New OTP sent to your email."
-                                        Toast.makeText(this@AuthActivity, "New OTP sent to your email.", Toast.LENGTH_SHORT).show()
-                                    }
-                                    .onFailure { error = it.message ?: "Could not resend OTP." }
-                                busyAction = null
-                            }
-                        },
-                        onCreateAccount = { showingSignup = true },
                     )
                 }
             }

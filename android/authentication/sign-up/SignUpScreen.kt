@@ -20,7 +20,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -44,21 +43,18 @@ fun SignUpScreen(
     error: String,
     otpVisible: Boolean,
     otpEmail: String,
-    onSendOtp: (email: String, mobile: String, password: String) -> Unit,
-    onCreateWithPassword: (email: String, mobile: String, password: String) -> Unit,
+    onSendOtp: (email: String, mobile: String) -> Unit,
     onVerifyOtp: (otp: String) -> Unit,
     onResendOtp: () -> Unit,
     onLogin: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var mobile by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
     var otp by rememberSaveable { mutableStateOf("") }
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val otpFocusRequester = FocusRequester()
 
     val hasMobile = mobile.filter(Char::isDigit).isNotEmpty()
-    val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else email.isNotBlank() && mobile.isNotBlank() && password.length >= 6
+    val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else email.isNotBlank() && mobile.isNotBlank()
 
     LaunchedEffect(otpVisible) {
         if (otpVisible) otpFocusRequester.requestFocus()
@@ -144,34 +140,12 @@ fun SignUpScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
         )
 
-        Spacer(Modifier.height(14.dp))
-        AuthFieldLabel("PASSWORD")
-        AuthTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = "Create a strong password",
-            enabled = !busy,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingContent = {
-                TextButton(onClick = { passwordVisible = !passwordVisible }, enabled = !busy) {
-                    Text(if (passwordVisible) "◌" else "◉", fontSize = 17.sp)
-                }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        )
-
         Spacer(Modifier.height(20.dp))
         if (!otpVisible) {
             AuthPrimaryButton(
                 text = if (busyAction == AuthBusyAction.SEND_OTP) "Sending OTP…" else "Continue with OTP",
                 enabled = actionEnabled,
-                onClick = { onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password) },
-            )
-            Spacer(Modifier.height(8.dp))
-            AuthPrimaryButton(
-                text = if (busyAction == AuthBusyAction.CREATE_ACCOUNT) "Creating account…" else "Continue with Password",
-                enabled = actionEnabled,
-                onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password) },
+                onClick = { onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}") },
             )
         } else {
             AuthPrimaryButton(
@@ -219,7 +193,7 @@ fun SignUpScreen(
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            "Continue with OTP verifies your email. Continue with Password creates the account directly using your password.",
+            "We verify your email with a six-digit code. There is no password to remember.",
             color = androidx.compose.ui.graphics.Color(0xFF76717D),
             fontSize = 12.sp,
             lineHeight = 18.sp,
