@@ -139,10 +139,20 @@
 // icon set. Both are traced from the app's drawables - github_logo.xml and
 // zoho_mail_logo.xml - at the same viewBox the app uses.
 window.IndoonePluginMarks = {
-  email: '<svg viewBox="0 0 24 24" fill="none" stroke="#5E2DD2" stroke-width="1.7" ' +
-    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<rect x="3" y="5" width="18" height="14" rx="2.5"></rect>' +
-    '<path d="m3.6 7 8.4 6 8.4-6"></path></svg>',
+  // The Gmail mark itself, traced from the app's own drawable
+  // (android/src/main/res/drawable/gmail_logo.xml) path for path, at the same 24x24 viewBox.
+  //
+  // This was a violet envelope - a generic mail icon - so the two clients showed different
+  // logos for the same provider, and the one on the web was not Gmail at all.
+  email: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path fill="#4285F4" d="M1.636 20.182H5.455V10.909L0 7.182v11.363' +
+    'c0 .904.732 1.637 1.636 1.637Z"></path>' +
+    '<path fill="#34A853" d="M18.545 20.182h3.819c.904 0 1.636-.733 1.636-1.637V7.182' +
+    'l-5.455 3.727Z"></path>' +
+    '<path fill="#FBBC04" d="M18.545 4.364v6.545L24 7.182V5.182c0-2.023-2.309-3.178-3.927-1.964Z"></path>' +
+    '<path fill="#EA4335" d="M5.455 10.909V4.364L12 9.273l6.545-4.909v6.545L12 15.818Z"></path>' +
+    '<path fill="#C5221F" d="M0 5.182v2L5.455 10.909V4.364L3.927 3.218C2.309 2.004 0 3.159 0 5.182Z"></path>' +
+    '</svg>',
 
   github: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
     '<path fill="#181717" d="M12 0.297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 ' +
@@ -303,6 +313,10 @@ window.initMenuPlugins = function () {
 
     const tile = document.createElement('span');
     tile.className = 'plugins-tile';
+    // Which mark this is, so its size comes from the mark and not from where the card sits.
+    // The sizes used to be nth-child rules, and reordering the cards to Zoho, GitHub, Gmail
+    // silently gave each one the previous card's size.
+    tile.dataset.provider = provider.id;
     tile.innerHTML = mark(provider);
 
     const text = document.createElement('span');

@@ -79,13 +79,17 @@
   height: 29px;
 }
 
-/* the GitHub mark is drawn at 24 and shown at 34; the Zoho one at 16 shown at 40 */
-.plugins-card:nth-child(3) .plugins-tile svg {
+/* The size belongs to the mark, not to the card's position.
+   These were nth-child rules, so reordering the cards to Zoho, GitHub, Gmail handed each mark
+   the size of the card that used to sit there - the Gmail mark came out at GitHub's size and
+   the Zoho mark at the default. Each mark keeps its own viewBox: GitHub and Gmail are drawn at
+   24, the Zoho mark at 16. */
+.plugins-tile[data-provider="github"] svg {
   width: 34px;
   height: 34px;
 }
 
-.plugins-card:nth-child(2) .plugins-tile svg {
+.plugins-tile[data-provider="zoho-mail"] svg {
   width: 40px;
   height: 40px;
 }
