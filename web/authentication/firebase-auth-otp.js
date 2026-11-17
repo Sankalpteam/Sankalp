@@ -63,7 +63,7 @@
       'PERMISSION_DENIED': 'Sankalp account data is temporarily unavailable. Please try again or use your email address.'
     };
 
-    return map[error?.code] || error?.message || 'Authentication failed.';
+    return map[error?.code] || window.sankalpError?.fromError(error) || 'Authentication failed.';
   }
 
   function db() {

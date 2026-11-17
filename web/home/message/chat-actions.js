@@ -47,7 +47,8 @@
     });
 
     if (!response.ok) {
-      throw new Error(`Sankalp backend returned ${response.status}`);
+      window.sankalpError?.report(new Error(`${response.status} from ${path}`), 'chat action');
+      throw new Error(window.sankalpError?.fromStatus(response.status) || 'Something went wrong.');
     }
 
     return response.status === 204 ? null : response.json();
@@ -77,7 +78,9 @@
     const url = String(body?.share_url || '').trim();
 
     if (!url) {
-      throw new Error('Sankalp backend returned no share link');
+      // The backend answered but not with a link. That is our fault, not the user's, and the
+      // sentence should say so rather than describing the shape of a response they never saw.
+      throw new Error('The share link could not be made just now. Please try again.');
     }
 
     if (await copy(url)) {

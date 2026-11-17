@@ -27,7 +27,7 @@ window.IndooneForgotPassword = (() => {
       'auth/weak-password': 'Password should be at least 6 characters.'
     };
 
-    return map[error?.code] || error?.message || 'Unable to continue password recovery.';
+    return map[error?.code] || window.sankalpError?.fromError(error) || 'Unable to continue password recovery.';
   }
 
   function setBusy(button, text) {

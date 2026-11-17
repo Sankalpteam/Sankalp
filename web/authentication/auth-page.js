@@ -397,10 +397,13 @@
         setStatus('New OTP sent to your email.');
       }
     } catch (error) {
+      // The shared mapper first: a Firebase error object carries a code, and the code has a
+      // sentence written for it. Falling back to error.message shows the raw text the SDK
+      // threw, which reads like a crash rather than a wrong password.
       const message =
         typeof auth.errorMessage === 'function'
           ? auth.errorMessage(error)
-          : error?.message || 'Authentication failed.';
+          : window.sankalpError?.fromError(error) || 'Authentication failed.';
 
       setStatus(message, true);
       console.error('Sankalp auth action failed:', error);

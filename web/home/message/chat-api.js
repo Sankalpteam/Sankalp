@@ -129,12 +129,15 @@
       });
 
       if (!response.ok) {
+        // The body is for the console, not for the person waiting for an answer.
         const detail = await response.text().catch(() => '');
 
-        throw new Error(
-          `Sankalp backend returned ${response.status}` +
-            (detail ? `: ${detail.slice(0, 200)}` : '')
+        window.sankalpError?.report(
+          new Error(`${response.status}: ${detail.slice(0, 300)}`),
+          'chat request'
         );
+
+        throw new Error(window.sankalpError?.fromStatus(response.status) || 'Something went wrong.');
       }
 
       return response.json();
@@ -145,8 +148,8 @@
       // anything. Say which it is.
       if (error instanceof TypeError) {
         throw new Error(
-          'The server did not accept the call from this page ' +
-            '(a cross-origin block, or no network).'
+          window.sankalpError?.fromError(error) ||
+            'Sankalp could not reach the server. Check your connection and try again.'
         );
       }
 
@@ -176,7 +179,7 @@
     const json = await postJson('/api/chat', payload);
 
     if (!json.conversation_id) {
-      throw new Error('Sankalp backend returned no conversation id.');
+      throw new Error('Sankalp could not start this chat just now. Please try again.');
     }
 
     if (!json.reply) {

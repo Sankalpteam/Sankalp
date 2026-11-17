@@ -75,7 +75,8 @@
       );
 
       if (!response.ok) {
-        throw new Error(`Sankalp backend returned ${response.status}`);
+        window.sankalpError?.report(new Error(`${response.status} from the profile request`), 'profile');
+        throw new Error(window.sankalpError?.fromStatus(response.status) || 'Something went wrong.');
       }
 
       const status = await response.json().catch(() => ({}));

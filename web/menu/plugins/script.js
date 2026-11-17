@@ -120,7 +120,8 @@
     });
 
     if (!response.ok) {
-      throw new Error(`Sankalp backend returned ${response.status}`);
+      window.sankalpError?.report(new Error(`${response.status} from ${path}`), 'plugin request');
+      throw new Error(window.sankalpError?.fromStatus(response.status) || 'Something went wrong.');
     }
 
     return response.json().catch(() => ({}));

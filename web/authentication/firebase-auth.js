@@ -14,7 +14,7 @@
       'auth/email-already-in-use': 'An account already exists with this email.',
       'auth/weak-password': 'Password should be at least 6 characters.'
     };
-    return map[error?.code] || error?.message || 'Authentication failed.';
+    return map[error?.code] || window.sankalpError?.fromError(error) || 'Authentication failed.';
   }
 
   function db() {
