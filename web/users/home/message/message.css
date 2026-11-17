@@ -215,7 +215,13 @@
   }
 }
 
+/* The circle beside the label, the same one the app draws.
+   display: inline-block is the whole fix: this is a <span>, and an inline box ignores width,
+   height and border-radius. The ring was there in the markup, styled, and zero-sized - which is
+   why the web showed the word and never the circle. */
 .chat-spinner {
+  display: inline-block;
+  flex: none;
   width: 14px;
   height: 14px;
   border-radius: 50%;
