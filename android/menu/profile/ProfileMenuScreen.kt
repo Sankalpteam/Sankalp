@@ -114,7 +114,10 @@ fun ProfileMenuScreen(onBack: () -> Unit) {
                 Text(
                     "Profile",
                     color = Color(0xFF211B29),
-                    fontSize = 20.sp,
+                    // 21, like every other menu title and like the web's own heading. These
+                    // two screens were a point smaller than their siblings, which is the kind
+                    // of difference nobody can name and everybody notices.
+                    fontSize = 21.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
