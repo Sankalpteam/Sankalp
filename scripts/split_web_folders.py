@@ -119,19 +119,6 @@ def patch_legal_pages() -> None:
     print("split_web_folders: legal_pages.py reads and writes inside web/users/")
 
 
-def patch_workflow() -> None:
-    path = ROOT / ".github" / "workflows" / "pages.yml"
-    s = path.read_text(encoding="utf-8")
-    if "web/users/index.html" in s:
-        return
-    s = s.replace(
-        "          test -f web/index.html\n          test -f web/update.json",
-        "          test -f web/users/index.html\n          test -f web/users/update.json\n"
-        "          test -d web/developers\n          test -d web/assets")
-    path.write_text(s, encoding="utf-8")
-    print("split_web_folders: the publish check looks in web/users/")
-
-
 def check() -> None:
     import subprocess
 
@@ -184,7 +171,6 @@ def main() -> None:
     repoint()
     patch_build_site()
     patch_legal_pages()
-    patch_workflow()
     check()
 
     print("web/ now holds: " + ", ".join(sorted(p.name for p in WEB.iterdir() if p.is_dir())))
