@@ -134,6 +134,56 @@
   height: 17px;
 }
 
+/* Open and Delete, shown in the row itself on a screen with room for them.
+   Hidden by default: on a phone the ellipsis is the right control, because a delete button
+   sitting next to every chat is a trap for a thumb. */
+.ch-actions {
+  display: none;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.ch-actions button {
+  border: 1px solid #ece4fa;
+  background: #faf8ff;
+  color: #4b21b3;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ch-actions button:hover {
+  background: #f3edff;
+}
+
+.ch-actions button.danger {
+  color: #b4232b;
+  border-color: #f3dada;
+  background: #fff8f8;
+}
+
+.ch-actions button.danger:hover {
+  background: #fdeeee;
+}
+
+/* A desktop has the width, so the two actions come out of the menu. */
+@media (min-width: 720px) {
+  .ch-actions {
+    display: flex;
+  }
+
+  .ch-more,
+  .ch-menu {
+    display: none;
+  }
+}
+
 /* Delete moved behind this, so it is no longer a peer of the row itself. */
 .ch-menu {
   position: absolute;

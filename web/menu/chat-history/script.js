@@ -132,25 +132,39 @@ window.initMenuChatHistory = function () {
     menu.className = 'ch-menu';
     menu.hidden = true;
 
-    const open = document.createElement('button');
-    open.type = 'button';
-    open.textContent = 'Open';
-    open.addEventListener('click', () => {
-      closeMenus();
-      void openChat(chat.id);
-    });
+    function actionButton(label, extraClass, handler) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
 
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'danger';
-    remove.textContent = 'Delete';
-    remove.addEventListener('click', () => {
-      closeMenus();
-      void removeChat(chat.id);
-    });
+      if (extraClass) {
+        button.className = extraClass;
+      }
 
-    menu.appendChild(open);
-    menu.appendChild(remove);
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        closeMenus();
+        handler();
+      });
+
+      return button;
+    }
+
+    const open = actionButton('Open', '', () => void openChat(chat.id));
+    const remove = actionButton('Delete', 'danger', () => void removeChat(chat.id));
+
+    menu.appendChild(actionButton('Open', '', () => void openChat(chat.id)));
+    menu.appendChild(actionButton('Delete', 'danger', () => void removeChat(chat.id)));
+
+    // The same two actions, out in the open, for a pointer that has room for them.
+    //
+    // On a phone the ellipsis is right: the row is narrow and a delete button next to every
+    // chat is a trap for a thumb. On a desktop there is room, and hiding two words behind a
+    // menu that only appears on click is a step nobody asked for.
+    const inline = document.createElement('span');
+    inline.className = 'ch-actions';
+    inline.appendChild(open);
+    inline.appendChild(remove);
 
     more.addEventListener('click', event => {
       event.stopPropagation();
@@ -160,6 +174,7 @@ window.initMenuChatHistory = function () {
     });
 
     wrap.appendChild(text);
+    wrap.appendChild(inline);
     wrap.appendChild(more);
     wrap.appendChild(menu);
     return wrap;
