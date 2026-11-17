@@ -187,6 +187,14 @@
     const savedPage =
       window.IndoonePageState?.get?.() || 'home';
 
+    // A menu page in the address wins. This restore runs after the auth gate, which is after
+    // the menu module has already reopened the page a reload was on - and its default branch
+    // called showHome, which closed that page again. That is why a refresh on Plugins always
+    // landed on the chat.
+    if (window.isMenuPath?.(hash)) {
+      return;
+    }
+
     if (hash.startsWith(ADD_ROUTE_PREFIX)) {
       if (savedPage === 'add-account') {
         try {

@@ -12,7 +12,9 @@
   // version from October while this constant had been bumped several times, so a returning
   // browser kept the old loader, which kept asking for the old section scripts - and the
   // plugins page went on showing a provider that had been removed weeks earlier.
-  const ASSET_VERSION = '20261109a';
+  // Bumped whenever a menu feature's own script or stylesheet changes: the browser keeps the
+  // old copy otherwise, and a fix can be deployed and still not be the code the page runs.
+  const ASSET_VERSION = '20261118a';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
@@ -236,12 +238,18 @@
   // That is why the menu page stayed on screen behind Home.
   function closeAllMenuPages() {
     const page = document.getElementById('modal');
+    const wasOpen = Boolean(page && !page.hasAttribute('hidden'));
 
     menuStack = [];
     pageBeforeMenu = null;
     page?.setAttribute('hidden', '');
-    // The address follows the screen: home is not a menu page, so nothing is remembered.
-    rememberPath('');
+
+    // The address follows the screen - but only when a screen was actually left. This runs
+    // during startup too, from showHome, and clearing the address there threw away the menu
+    // page the reload was about to restore.
+    if (wasOpen) {
+      rememberPath('');
+    }
   }
 
   window.closeAllMenuPages = closeAllMenuPages;
@@ -313,6 +321,10 @@
     if (nestedInitializers[path]) return { path, initializer: nestedInitializers[path] };
     return null;
   }
+
+  // Asked by the page restore in shared/events.js: if the address names a menu page, that page
+  // is what a reload should show, and the tab restore must not put Home over it.
+  window.isMenuPath = path => Boolean(knownPath(String(path || '').replace(/^#/, '').trim()));
 
   function rememberPath(path) {
     try {
