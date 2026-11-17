@@ -67,17 +67,30 @@ class AuthActivity : ComponentActivity() {
                         error = error,
                         otpVisible = otpVisible,
                         otpEmail = otpEmail,
-                        onSendOtp = { email, mobile ->
+                        onSendOtp = { email, mobile, password ->
                             busyAction = AuthBusyAction.SEND_OTP
                             error = ""
                             scope.launch {
-                                runCatching { service.startSignup(email, mobile) }
+                                runCatching { service.startSignup(email, mobile, password) }
                                     .onSuccess { destination ->
                                         otpEmail = destination
                                         otpVisible = true
                                         status = ""
                                     }
                                     .onFailure { error = it.message ?: "Could not start signup." }
+                                busyAction = null
+                            }
+                        },
+                        onCreateWithPassword = { email, mobile, password ->
+                            busyAction = AuthBusyAction.CREATE_ACCOUNT
+                            error = ""
+                            scope.launch {
+                                runCatching { service.createSignupWithPassword(email, mobile, password) }
+                                    .onSuccess { uid ->
+                                        session.setVerified(uid)
+                                        openMain()
+                                    }
+                                    .onFailure { error = it.message ?: "Could not create account." }
                                 busyAction = null
                             }
                         },
@@ -132,22 +145,35 @@ class AuthActivity : ComponentActivity() {
                                 busyAction = null
                             }
                         },
+                        onBackToLogin = {
+                            otpVisible = false
+                            otpEmail = ""
+                            status = ""
+                            error = ""
+                        },
+                        onPasswordLogin = { identifier, password ->
+                            busyAction = AuthBusyAction.PASSWORD_LOGIN
+                            error = ""
+                            scope.launch {
+                                runCatching { service.loginWithPassword(identifier, password) }
+                                    .onSuccess { uid ->
+                                        session.setVerified(uid)
+                                        openMain()
+                                    }
+                                    .onFailure { error = it.message ?: "Login failed." }
+                                busyAction = null
+                            }
+                        },
                         onVerifyOtp = { otp ->
                             busyAction = AuthBusyAction.VERIFY_OTP
                             error = ""
                             scope.launch {
                                 runCatching { service.verifyLoginOtp(otp) }
                                     .onSuccess {
-                                        // verifyLoginOtp signs in and returns nothing; the uid
-                                        // is the Firebase user it just established.
-                                        auth.currentUser?.uid?.let { uid ->
-                                            session.setVerified(uid)
-                                            openMain()
-                                        } ?: run {
-                                            error = "Login session expired. Please login again."
-                                        }
+                                        auth.currentUser?.uid?.let(session::setVerified)
+                                        openMain()
                                     }
-                                    .onFailure { error = it.message ?: "OTP verification failed." }
+                                    .onFailure { error = it.message ?: "Login failed." }
                                 busyAction = null
                             }
                         },
@@ -164,12 +190,6 @@ class AuthActivity : ComponentActivity() {
                                     .onFailure { error = it.message ?: "Could not resend OTP." }
                                 busyAction = null
                             }
-                        },
-                        onBackToLogin = {
-                            otpVisible = false
-                            otpEmail = ""
-                            status = ""
-                            error = ""
                         },
                         onCreateAccount = { showingSignup = true },
                     )

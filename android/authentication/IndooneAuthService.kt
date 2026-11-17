@@ -21,6 +21,29 @@ class IndooneAuthService(
     private var loginPending: LoginPending? = null
     private var signupPending: SignupPending? = null
 
+    suspend fun loginWithPassword(identifier: String, password: String): String {
+        val raw = identifier.trim()
+        if (raw.isBlank() || password.isBlank()) {
+            throw AuthException("Enter your email/mobile number and password.")
+        }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val mobileIdentity = if (raw.contains('@')) null else resolveMobile(raw)
+                val email = mobileIdentity?.email ?: raw.lowercase()
+                val user = await(auth.signInWithEmailAndPassword(email, password)).user
+                    ?: throw AuthException("Login session expired. Please login again.")
+                if (mobileIdentity != null && mobileIdentity.uid.isNotBlank() && mobileIdentity.uid != user.uid) {
+                    throw AuthException("This mobile number is not linked to this Sankalp account.")
+                }
+                user.uid
+            } catch (error: Throwable) {
+                auth.signOut()
+                throw normalizeError(error)
+            }
+        }
+    }
+
     suspend fun startLoginOtp(identifier: String): String {
         val raw = identifier.trim()
         if (raw.isBlank()) throw AuthException("Enter your email/mobile number.")
@@ -106,11 +129,12 @@ class IndooneAuthService(
         return pending.email
     }
 
-    suspend fun startSignup(emailValue: String, mobileValue: String): String {
+    suspend fun startSignup(emailValue: String, mobileValue: String, password: String): String {
         val email = emailValue.trim().lowercase()
         val mobile = normalizeMobile(mobileValue)
         if (!email.contains('@')) throw AuthException("Enter a valid email address.")
         if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
+        if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
 
         withContext(Dispatchers.IO) {
             if (identityExists(email, mobile)) throw AuthException("An account already exists with this email or mobile number.")
@@ -120,9 +144,32 @@ class IndooneAuthService(
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a challenge ID.")
-            signupPending = SignupPending(email, mobile, challengeId)
+            signupPending = SignupPending(email, mobile, password, challengeId)
         }
         return email
+    }
+
+    suspend fun createSignupWithPassword(emailValue: String, mobileValue: String, password: String): String {
+        val email = emailValue.trim().lowercase()
+        val mobile = normalizeMobile(mobileValue)
+        if (!email.contains('@')) throw AuthException("Enter a valid email address.")
+        if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
+        if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
+
+        return withContext(Dispatchers.IO) {
+            try {
+                if (identityExists(email, mobile)) {
+                    throw AuthException("An account already exists with this email or mobile number.")
+                }
+                val user = await(auth.createUserWithEmailAndPassword(email, password)).user
+                    ?: throw AuthException("Could not create the Sankalp account.")
+                syncProfile(user.uid, email, mobile)
+                user.uid
+            } catch (error: Throwable) {
+                auth.signOut()
+                throw normalizeError(error)
+            }
+        }
     }
 
     suspend fun resendSignupOtp(): String {
@@ -158,14 +205,7 @@ class IndooneAuthService(
                 if (identityExists(pending.email, pending.mobile)) {
                     throw AuthException("An account already exists with this email or mobile number.")
                 }
-                // A secret nobody is ever told.
-                //
-                // Firebase's email/password provider needs *a* password to create the user, and
-                // the account is never signed in with it: every login goes through the OTP
-                // service and its custom token. So it is random, generated here, and never
-                // stored or shown - nothing to remember, nothing to reset, and nothing anyone
-                // can guess their way into.
-                val user = await(auth.createUserWithEmailAndPassword(pending.email, randomSecret())).user
+                val user = await(auth.createUserWithEmailAndPassword(pending.email, pending.password)).user
                     ?: throw AuthException("Could not create the Sankalp account.")
                 syncProfile(user.uid, pending.email, pending.mobile)
                 result.optString("welcomeToken").takeIf { it.isNotBlank() }?.let { welcomeToken ->
@@ -289,12 +329,6 @@ class IndooneAuthService(
 
     data class AuthException(override val message: String) : Exception(message)
     private data class LoginPending(val email: String, val challengeId: String)
-    private fun randomSecret(): String {
-        val bytes = ByteArray(32)
-        java.security.SecureRandom().nextBytes(bytes)
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
-
-    private data class SignupPending(val email: String, val mobile: String, val challengeId: String)
+    private data class SignupPending(val email: String, val mobile: String, val password: String, val challengeId: String)
     private data class MobileIdentity(val email: String, val uid: String)
 }

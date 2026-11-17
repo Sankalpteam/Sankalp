@@ -43,6 +43,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,7 @@ import com.indoone.authentication.AuthTextField
 private enum class LoginPage {
     LOGIN,
     OTP,
+    PASSWORD,
 }
 
 @Composable
@@ -70,13 +72,16 @@ fun LoginScreen(
     otpVisible: Boolean,
     otpEmail: String,
     onSendOtp: (identifier: String) -> Unit,
+    onPasswordLogin: (identifier: String, password: String) -> Unit,
     onVerifyOtp: (otp: String) -> Unit,
     onResendOtp: () -> Unit,
     onBackToLogin: () -> Unit,
     onCreateAccount: () -> Unit,
 ) {
     var identifier by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     var otp by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var page by rememberSaveable { mutableStateOf(LoginPage.LOGIN) }
 
     val otpFocusRequester = FocusRequester()
@@ -105,6 +110,7 @@ fun LoginScreen(
                             actionEnabled = !busy && identifier.isNotBlank(),
                             onIdentifierChanged = { identifier = it },
                             onSendOtp = { onSendOtp(identifier) },
+                            onContinueWithPassword = { page = LoginPage.PASSWORD },
                             onCreateAccount = onCreateAccount,
                         )
                     }
@@ -125,6 +131,20 @@ fun LoginScreen(
                         )
                     }
 
+                    LoginPage.PASSWORD -> {
+                        LoginPasswordPage(
+                            identifier = identifier,
+                            password = password,
+                            busy = busy,
+                            busyAction = busyAction,
+                            passwordVisible = passwordVisible,
+                            onIdentifierChanged = { identifier = it },
+                            onPasswordChanged = { password = it },
+                            onPasswordVisibilityChanged = { passwordVisible = !passwordVisible },
+                            onCompleteLogin = { onPasswordLogin(identifier, password) },
+                            onBack = { page = LoginPage.LOGIN },
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(18.dp))
@@ -190,6 +210,7 @@ private fun LoginEntryPage(
     actionEnabled: Boolean,
     onIdentifierChanged: (String) -> Unit,
     onSendOtp: () -> Unit,
+    onContinueWithPassword: () -> Unit,
     onCreateAccount: () -> Unit,
 ) {
     var welcomeTextIndex by rememberSaveable { mutableStateOf(0) }
@@ -271,15 +292,35 @@ private fun LoginEntryPage(
     )
 
     Spacer(Modifier.height(18.dp))
-    // One button, full width. It used to share a row with "Continue with Password"; that
-    // button is gone and the row would have left this one squeezed into half the width.
-    AuthPrimaryButton(
-        text = if (busy && actionEnabled) "Sending…" else "Continue with OTP",
-        enabled = actionEnabled,
-        onClick = onSendOtp,
-        fontSize = 12.sp,
-        fillMaxWidth = true,
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.weight(1f),
+        ) {
+            AuthPrimaryButton(
+                text = if (busy && actionEnabled) "Sending…" else "Continue with OTP",
+                enabled = actionEnabled,
+                onClick = onSendOtp,
+                fontSize = 12.sp,
+                fillMaxWidth = true,
+            )
+        }
+
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.weight(1f),
+        ) {
+            AuthPrimaryButton(
+                text = "Continue with Password",
+                enabled = actionEnabled,
+                onClick = onContinueWithPassword,
+                fontSize = 12.sp,
+                fillMaxWidth = true,
+            )
+        }
+    }
 
     Spacer(Modifier.height(18.dp))
     AuthSecondaryButton(
@@ -360,6 +401,91 @@ private fun LoginOtpPage(
 }
 
 @Composable
+private fun LoginPasswordPage(
+    identifier: String,
+    password: String,
+    busy: Boolean,
+    busyAction: AuthBusyAction?,
+    passwordVisible: Boolean,
+    onIdentifierChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onPasswordVisibilityChanged: () -> Unit,
+    onCompleteLogin: () -> Unit,
+    onBack: () -> Unit,
+) {
+    LoginBackButton(onBack = onBack)
+
+    Spacer(Modifier.height(4.dp))
+    Text(
+        text = "Enter Password",
+        color = Color(0xFF17151D),
+        fontSize = 30.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.7).sp,
+        lineHeight = 36.sp,
+    )
+
+    Spacer(Modifier.height(6.dp))
+    Text(
+        text = buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF6330DB),
+                            Color(0xFF9147ED),
+                        ),
+                    ),
+                )
+            ) {
+                append("Continue with your Sankalp account")
+            }
+        },
+        fontSize = 14.sp,
+        lineHeight = 21.sp,
+    )
+
+    Spacer(Modifier.height(20.dp))
+    AuthFieldLabel("EMAIL OR MOBILE NUMBER")
+    AuthTextField(
+        value = identifier,
+        onValueChange = onIdentifierChanged,
+        placeholder = "you@example.com or 98765 43210",
+        enabled = !busy,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+    )
+
+    Spacer(Modifier.height(14.dp))
+    AuthFieldLabel("PASSWORD")
+    AuthTextField(
+        value = password,
+        onValueChange = onPasswordChanged,
+        placeholder = "Enter your password",
+        enabled = !busy,
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingContent = {
+            TextButton(
+                onClick = onPasswordVisibilityChanged,
+                enabled = !busy,
+            ) {
+                Text(if (passwordVisible) "◌" else "◉", fontSize = 17.sp)
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
+        ),
+    )
+
+    Spacer(Modifier.height(18.dp))
+    AuthPrimaryButton(
+        text = if (busyAction == AuthBusyAction.PASSWORD_LOGIN) "Logging in…" else "Complete Login",
+        enabled = !busy && password.isNotBlank() && identifier.isNotBlank(),
+        onClick = onCompleteLogin,
+    )
+}
+
+@Composable
 private fun LoginBackButton(onBack: () -> Unit) {
     TextButton(onClick = onBack) {
         Text("← Back", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
@@ -376,6 +502,8 @@ private fun LoginPageIndicator(currentPage: LoginPage) {
         LoginPageDot(active = currentPage == LoginPage.LOGIN)
         Spacer(Modifier.size(7.dp))
         LoginPageDot(active = currentPage == LoginPage.OTP)
+        Spacer(Modifier.size(7.dp))
+        LoginPageDot(active = currentPage == LoginPage.PASSWORD)
     }
 }
 
