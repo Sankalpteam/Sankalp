@@ -39,8 +39,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f web/index.html
-          test -f web/update.json
+          test -f web/users/index.html
+          test -f web/users/update.json
+          test -d web/developers
+          test -d web/assets
 
       - name: Check the old mark is not being drawn
         shell: bash
