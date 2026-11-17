@@ -695,6 +695,12 @@ fun HomeScreen(
     var messages by remember(userKey, startNewChat) { mutableStateOf(emptyList<ChatMessage>()) }
     var isSending by remember { mutableStateOf(false) }
     var chatActivityState by remember { mutableStateOf(ChatActivityState.IDLE) }
+    // The turn the foreground stream has already drawn on screen. The reconciliation below
+    // polls the durable store and cannot know that, so without this it treated a streamed
+    // turn as one that finished in the background: it raised Preparing over the answer that
+    // was already visible - the circle kept spinning beside the words - and appended the
+    // reply a second time.
+    var streamedTurnId by remember { mutableStateOf<String?>(null) }
     var conversationId by rememberSaveable(userKey, startNewChat) { mutableStateOf<String?>(null) }
 
     // The thread menu's rename dialog. The title is seeded from what the thread is called
@@ -843,6 +849,12 @@ fun HomeScreen(
             }
 
             for (turn in settled) {
+                // Drawn by the stream already: no Preparing, no second copy of the answer.
+                if (turn.id == streamedTurnId) {
+                    streamedTurnId = null
+                    continue
+                }
+
                 val reply = turn.reply
 
                 if (turn.status == PendingTurnStore.STATUS_DELIVERED && !reply.isNullOrBlank()) {
@@ -1028,7 +1040,9 @@ fun HomeScreen(
                         conversationId = requestConversationId,
                         onMeta = { id -> conversationId = id },
                         onDelta = { full ->
-                            // First token: the wait is over.
+                            // First token: the wait is over, and this turn is being drawn
+                            // here - so the poll below must leave it alone.
+                            streamedTurnId = turn.id
                             chatActivityState = ChatActivityState.IDLE
 
                             if (streamedIndex < 0) {
