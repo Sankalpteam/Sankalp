@@ -8,22 +8,27 @@
   let activeAbortController = null;
   let activeTurnId = 0;
 
-  function clearActivity() {
-    window.IndooneMessages?.render(
-      document.getElementById('chatList'),
-      window.IndooneChatStore?.getMessages?.() || [],
-      null
-    );
+  // The welcome panel belongs to an empty thread, and it is the sender's job to take it away.
+  //
+  // It used to be removed only by paintThread() in chat-home.js, which runs on a refresh or when
+  // the answer lands - so on the web the greeting stayed on screen over the message you had just
+  // sent, and disappeared when the reply arrived. The app removes it the moment you send. One
+  // product, two behaviours, and the web's was the wrong one.
+  function paint(activity) {
+    const messages = window.IndooneChatStore?.getMessages?.() || [];
+    const welcome = document.getElementById('chatWelcome');
+
+    window.IndooneMessages?.render(document.getElementById('chatList'), messages, activity ?? null);
+    welcome?.toggleAttribute('hidden', messages.length > 0);
     window.IndooneChatScroll?.toBottom?.();
   }
 
+  function clearActivity() {
+    paint(null);
+  }
+
   function setActivity(state) {
-    window.IndooneMessages?.render(
-      document.getElementById('chatList'),
-      window.IndooneChatStore?.getMessages?.() || [],
-      state
-    );
-    window.IndooneChatScroll?.toBottom?.();
+    paint(state);
   }
 
   function abortActiveRequest() {
@@ -126,6 +131,7 @@
         ],
         null
       );
+      window.IndooneChatScroll?.toBottom?.();
       return;
     }
 
@@ -292,11 +298,7 @@
                 // First token: the wait is over.
                 setActivity(null);
                 streamedMessage = store.add({ text: '', mine: false });
-                window.IndooneMessages?.render(
-                  document.getElementById('chatList'),
-                  store.getMessages(),
-                  null
-                );
+                paint(null);
                 streamedElement = lastReplyTextNode();
               }
 
@@ -310,11 +312,7 @@
               if (streamedElement) {
                 streamedElement.textContent = full;
               } else {
-                window.IndooneMessages?.render(
-                  document.getElementById('chatList'),
-                  store.getMessages(),
-                  null
-                );
+                paint(null);
                 streamedElement = lastReplyTextNode();
               }
 
@@ -362,12 +360,7 @@
         // reply offered.
         streamedMessage.text = result.reply;
         streamedMessage.chips = result.chips || [];
-        window.IndooneMessages?.render(
-          document.getElementById('chatList'),
-          store.getMessages(),
-          null
-        );
-        window.IndooneChatScroll?.toBottom?.();
+        paint(null);
       } else {
         store.add({ text: result.reply, mine: false, chips: result.chips || [] });
       }
