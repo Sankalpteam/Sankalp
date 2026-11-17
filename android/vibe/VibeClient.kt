@@ -134,12 +134,9 @@ class VibeClient(
     private fun buildWebSocketUrl(): String {
         val backend = BuildConfig.INDOONE_BACKEND_URL.trimEnd('/')
 
-        if (BuildConfig.INDOONE_CHANNEL == "terminal" &&
-            backend != "https://indooneai.duckdns.org" &&
-            backend != "https://52.62.244.79" &&
-            backend != "http://127.0.0.1:8000"
-        ) {
-            throw IllegalStateException("Terminal build is configured for an unsupported backend.")
+        // The same rule as ChatApi: a real host, not one of three remembered addresses.
+        if (!backend.startsWith("https://") && !backend.startsWith("http://")) {
+            throw IllegalStateException("Sankalp backend URL must use http:// or https://")
         }
 
         val websocketBase = when {

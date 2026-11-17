@@ -318,12 +318,14 @@ private const val READ_TIMEOUT_MS = 300_000
     private fun requireBackendUrl(): String {
         val backendUrl = BuildConfig.INDOONE_BACKEND_URL.trimEnd('/')
         if (backendUrl.isBlank()) throw ChatApiException("Sankalp backend URL is not configured")
-        if (BuildConfig.INDOONE_CHANNEL == "terminal" &&
-            backendUrl != "https://indooneai.duckdns.org" &&
-            backendUrl != "https://52.62.244.79" &&
-            backendUrl != "http://127.0.0.1:8000"
-        ) {
-            throw ChatApiException("Terminal build is configured for an unsupported backend")
+        // Any real host is accepted, and only a malformed one is refused.
+        //
+        // This used to be a hardcoded list of three addresses. The backend is due to move, and
+        // the day it does, every terminal build would have refused to talk to it with
+        // "unsupported backend" - a rename-sized change turned into an outage by a list nobody
+        // would remember was there.
+        if (!backendUrl.startsWith("https://") && !backendUrl.startsWith("http://")) {
+            throw ChatApiException("Sankalp backend URL must use http:// or https://")
         }
         return backendUrl
     }
