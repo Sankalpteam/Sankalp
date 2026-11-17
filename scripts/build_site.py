@@ -123,6 +123,15 @@ def main() -> None:
     for shared in SHARED:
         shutil.copytree(WEB / shared, SITE / "app" / shared)
 
+    # The same artwork, inside /app/ as well as at the root.
+    #
+    # The app's own scripts ask for it relatively: shared/branding.js builds
+    # <page>/assets/mark.png from its own script URL, so at /app/shared/branding.js that is
+    # /app/assets/mark.png. Publishing the files only at /assets/ left the logo a broken image
+    # on every screen that draws it. Two copies of five small files is the cheap side of that
+    # trade; the alternative is a path built in three places.
+    shutil.copytree(WEB / "assets", SITE / "app" / "assets")
+
     # 3. one copy of the legal documents, at the address the company site links to
     shutil.move(str(SITE / "app" / "legal"), str(SITE / "legal"))
 
