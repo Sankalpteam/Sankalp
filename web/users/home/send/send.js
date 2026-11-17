@@ -257,6 +257,16 @@
     }
     setActivity('thinking');
 
+    // Thinking stays on screen for at least a moment, the way it does on the phone.
+    //
+    // The two clients already run the same sequence - Received, Thinking, gone on the first
+    // word - but a desktop line returns the first token in a few hundred milliseconds, so
+    // Thinking was a flash and the screen looked like it had one label. The app is on a mobile
+    // connection and Thinking sits there for seconds. This is the web's wait brought up to the
+    // same floor, not a different sequence.
+    const thinkingShownAt = Date.now();
+    const THINKING_MIN_MS = 900;
+
     void window.IndooneCloudChat
       ?.appendMessage?.(conversationId, 'user', text || message)
       .catch(error => console.warn('Sankalp chat save failed:', error));
@@ -281,6 +291,8 @@
       // takes no attachments - a file sent to it would be silently dropped.
       let result = null;
       let streamedMessage = null;
+      let latestText = '';
+      let thinkingHold = false;
 
       if (!sentAttachments.length && typeof api.streamMessage === 'function') {
         try {
@@ -294,14 +306,42 @@
                 return;
               }
 
+              // While the floor is running, only the newest text is kept - one timer, not one
+              // per token.
+              if (thinkingHold) {
+                latestText = full;
+                return;
+              }
+
               if (!streamedMessage) {
-                // First token: the wait is over.
+                // First token: the wait is over - but not before Thinking has been readable.
+                const waited = Date.now() - thinkingShownAt;
+
+                if (waited < THINKING_MIN_MS) {
+                  thinkingHold = true;
+                  setTimeout(() => {
+                    if (activeTurnId !== turnId || streamedMessage) {
+                      return;
+                    }
+
+                    thinkingHold = false;
+                    setActivity(null);
+                    streamedMessage = store.add({ text: latestText, mine: false });
+                    paint(null);
+                    streamedElement = lastReplyTextNode();
+                    window.IndooneChatScroll?.toBottom?.();
+                  }, THINKING_MIN_MS - waited);
+                  latestText = full;
+                  return;
+                }
+
                 setActivity(null);
                 streamedMessage = store.add({ text: '', mine: false });
                 paint(null);
                 streamedElement = lastReplyTextNode();
               }
 
+              latestText = full;
               streamedMessage.text = full;
 
               // Only the bubble that is still being written is updated.
