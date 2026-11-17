@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - wallet</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="../../../assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+  <a class="toplink" href="../../../index.html?next=console">Sign in</a>
+</header>
+
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav">
+          <a class="" href=".././"><span class="dot"></span>Overview</a>
+          <a class="" href="../keys/"><span class="dot"></span>API keys</a>
+          <a class="" href="../usage/"><span class="dot"></span>Usage</a>
+          <a class="on" href="../wallet/"><span class="dot"></span>Wallet</a>
+        </div>
+      </div>
+      <div class="main">
+        <div class="grid2">
+          <div>
+            <div class="kpi" style="background:linear-gradient(180deg,#f7f1ff,#fbf9ff)">
+              <div class="k">balance</div>
+              <div class="v" style="font-size:34px">&#8377;460.20</div>
+              <div class="mini">enough for about 4,600 replies at today's rate</div>
+            </div>
+            <div class="btnrow" style="margin-top:12px">
+              <button class="btn primary">Add money</button>
+              <button class="btn ghost">Auto top-up: off</button>
+            </div>
+            <div class="note">Razorpay collects it and credits this wallet. Nothing is charged after
+              that &mdash; the balance is what stops the API, not a card.</div>
+          </div>
+          <div>
+            <table>
+              <thead><tr><th>When</th><th>What</th><th class="right">Amount</th></tr></thead>
+              <tbody>
+                <tr><td class="mini">18 Nov</td><td>Top-up</td><td class="right"><b>&#8377;500.00</b></td></tr>
+                <tr><td class="mini">18 Nov</td><td>Usage</td><td class="right" style="color:var(--bad)">&minus;&#8377;39.80</td></tr>
+                <tr><td class="mini">14 Nov</td><td>Top-up</td><td class="right"><b>&#8377;200.00</b></td></tr>
+                <tr><td class="mini">13 Nov</td><td>Usage</td><td class="right" style="color:var(--bad)">&minus;&#8377;200.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+</main>
+
+</body>
+</html>
