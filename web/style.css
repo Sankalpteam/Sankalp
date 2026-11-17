@@ -640,24 +640,6 @@ body {
   padding: 3px 7px;
 }
 
-/* The Plugins row carries a chevron the app draws itself: Icons.Outlined.
-   ChevronRight at 18dp, tinted 0xFF8B9AB0 (MenuDrawer.kt:464-470). It is not
-   AppChevron, which is 22dp and 0xFF7A6F8C. */
-.drawer-item .drawer-chevron {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  padding-left: 0;
-  display: grid;
-  place-items: center;
-  color: #8b9ab0;
-}
-
-.drawer-item .drawer-chevron svg {
-  width: 18px;
-  height: 18px;
-}
-
 .drawer-item:hover {
   background: #f4efff;
 }
