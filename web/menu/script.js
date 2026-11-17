@@ -14,7 +14,7 @@
   // plugins page went on showing a provider that had been removed weeks earlier.
   // Bumped whenever a menu feature's own script or stylesheet changes: the browser keeps the
   // old copy otherwise, and a fix can be deployed and still not be the code the page runs.
-  const ASSET_VERSION = '20261118e';
+  const ASSET_VERSION = '20261118f';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
@@ -45,6 +45,12 @@
   // to match the app, so the action name and the folder are no longer the same.
   const featurePaths = {
     'danger-zone': 'settings/danger-zone',
+    // The Delete-account screen lives INSIDE the danger-zone folder, and a nested path does not
+    // inherit its parent's prefix: getFeatureBase turned 'danger-zone/delete-account' into
+    // menu/danger-zone/delete-account, which does not exist. So pressing "Delete Sankalp
+    // account" failed to open the screen at all - the loader could not find the folder and the
+    // page showed "Could not open menu item".
+    'danger-zone/delete-account': 'settings/danger-zone/delete-account',
     logout: 'settings/logout',
     // About is NOT listed, for the same reason as profile: the drawer's About
     // is android/menu/about/MenuAboutScreen.kt, and getFeatureBase resolves
@@ -69,7 +75,10 @@
     'settings-about': 'settings/about',
     update: 'settings/update',
     'change-mobile-number': 'settings/profile/change-mobile-number',
-    'change-email': 'settings/profile/change-email'
+    'change-email': 'settings/profile/change-email',
+    // Same trap as the delete screen: this one lives inside settings/logout, and a nested
+    // path does not inherit its parent's prefix.
+    'logout/this-device': 'settings/logout/this-device'
   };
 
   const nestedInitializers = {

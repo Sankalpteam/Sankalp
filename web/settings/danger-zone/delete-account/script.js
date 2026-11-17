@@ -87,8 +87,6 @@ window.initMenuDeleteAccount = function () {
       window.IndoonePersistence?.clear?.();
     } catch (_) {}
 
-    try {
-    } catch (_) {}
   };
 
   document
@@ -152,6 +150,17 @@ window.initMenuDeleteAccount = function () {
 
         setStatus('Removing your Sankalp cloud data…');
 
+        // Only the paths this account is allowed to write.
+        //
+        // This used to gather every user node that carried the same email - a query over
+        // `users`, ordered by profile/email - and put all of them into one atomic update,
+        // together with their mobile-index entries. Firebase refuses a write to anybody
+        // else's node, and a single refused path fails the WHOLE update. So the delete never
+        // ran: the request was denied before it began, and the screen said "Firebase denied
+        // deletion of your cloud data".
+        //
+        // The app was fixed for exactly this, and says so in DangerZoneScreen.kt. The web
+        // kept the old shape.
         const profileSnapshot = await db
           .ref(`users/${liveUser.uid}/profile`)
           .once('value');
@@ -161,37 +170,40 @@ window.initMenuDeleteAccount = function () {
           .toLowerCase();
         const mobile = String(profile.mobile || '').trim();
 
-        const matchesSnapshot = await db
-          .ref('users')
-          .orderByChild('profile/email')
-          .equalTo(email)
-          .once('value');
-        const matches = matchesSnapshot.val() || {};
-        const updates = {};
-        const mobiles = new Set(mobile ? [mobile] : []);
+        const updates = { [`users/${liveUser.uid}`]: null };
 
-        Object.entries(matches).forEach(([uid, item]) => {
-          const matchedEmail = String(item?.profile?.email || '')
-            .trim()
-            .toLowerCase();
-
-          if (!matchedEmail || matchedEmail !== email) return;
-
-          updates[`users/${uid}`] = null;
-
-          const matchedMobile = String(item?.profile?.mobile || '').trim();
-          if (matchedMobile) {
-            mobiles.add(matchedMobile);
-          }
-        });
-
-        updates[`users/${liveUser.uid}`] = null;
-
-        mobiles.forEach(value => {
-          updates[`mobileIndex/${encodeURIComponent(value)}`] = null;
-        });
+        if (mobile) {
+          updates[`mobileIndex/${encodeURIComponent(mobile)}`] = null;
+        }
 
         await db.ref().update(updates);
+
+        // Best effort, and deliberately not awaited: any other node carrying this email is
+        // cleanup, and it must never be able to block the deletion itself. The app does the
+        // same, for the same reason.
+        if (email) {
+          try {
+            db.ref('users')
+              .orderByChild('profile/email')
+              .equalTo(email)
+              .once('value')
+              .then(snapshot => {
+                const duplicates = {};
+                snapshot.forEach(child => {
+                  if (child.key && child.key !== liveUser.uid) {
+                    duplicates[`users/${child.key}`] = null;
+                  }
+                });
+                if (Object.keys(duplicates).length) {
+                  return db.ref().update(duplicates);
+                }
+                return null;
+              })
+              .catch(() => {});
+          } catch (error) {
+            // An index that is not configured must not stop the deletion.
+          }
+        }
 
         setStatus('Deleting your Sankalp account…');
 

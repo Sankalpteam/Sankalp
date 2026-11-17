@@ -59,11 +59,16 @@
     const style = document.createElement('style');
     style.id = 'indoone-branding-styles';
     style.textContent = `
+      /* The mark is the supplied artwork, and it is wide - 399 by 218, roughly 1.8 to 1.
+         Every rule below used to force it into a SQUARE box, so object-fit: contain drew it
+         at full width and 55% of the height, with empty bands above and below: the mark
+         looked small and floated in its own space. A height and an auto width keeps the
+         drawing at the size it was made. */
       .branding-image {
         display: block !important;
         flex: 0 0 auto !important;
-        width: 38px !important;
-        height: 38px !important;
+        width: auto !important;
+        height: 30px !important;
         object-fit: contain !important;
         object-position: center !important;
         max-width: none !important;
@@ -80,14 +85,14 @@
       }
 
       .topbar-left .branding-image {
-        width: 34px !important;
-        height: 34px !important;
+        width: auto !important;
+        height: 30px !important;
         align-self: center !important;
       }
 
       .chat-logo.branding-image {
-        width: 24px !important;
-        height: 24px !important;
+        width: auto !important;
+        height: 20px !important;
         /* The rule above sets margin: 0 !important, which was silently wiping
            the 8px the chat mark keeps before a reply. HomeScreen.kt gives its
            mark padding(end = 8.dp), so the reply must start 8px clear of it -
@@ -97,18 +102,18 @@
       }
 
       .drawer-brand .branding-image {
-        width: 36px !important;
-        height: 36px !important;
+        width: auto !important;
+        height: 30px !important;
       }
 
       .auth-mark.branding-image {
-        width: 72px !important;
-        height: 72px !important;
+        width: auto !important;
+        height: 58px !important;
       }
 
       .about-mark.branding-image {
-        width: 48px !important;
-        height: 48px !important;
+        width: auto !important;
+        height: 44px !important;
         margin: 8px auto 12px !important;
       }
 
@@ -116,10 +121,12 @@
          0xFFF2ECFF, cornered 18dp, with IndooneTopBarLogo(34.dp) centred in it.
          The logo svg replaces the tile here, so without these it was a bare
          48px mark with no tile behind it - which is not what the app shows. */
+      /* The tile stays square - it is the tile the app draws - but the mark inside it keeps its
+         own ratio, so it fills the padding instead of shrinking to fit a square hole. */
       .token-icon.branding-image {
         width: 58px !important;
         height: 58px !important;
-        /* 58 - 2 x 12 = 34, the app's logo */
+        object-fit: contain !important;
         padding: 12px !important;
         box-sizing: border-box !important;
         border-radius: 18px !important;
