@@ -277,7 +277,9 @@
 .plugins-dialog h3 {
   margin: 0 0 10px;
   color: #272238;
-  font-size: 17px;
+  /* 20, which is the heading size the app's own dialog draws (Material's default title). At
+     17 the same confirmation read as a caption on the web and as a heading in the app. */
+  font-size: 20px;
   font-weight: 600;
 }
 

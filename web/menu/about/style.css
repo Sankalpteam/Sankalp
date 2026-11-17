@@ -13,7 +13,8 @@
 
 .menu-feature-note {
   margin: 8px 0 12px;
-  color: #8a8492;
+  /* #756F7F, the muted grey the app draws this note in (AboutMuted). */
+  color: #756f7f;
   font-size: 12px;
   line-height: 1.5;
 }

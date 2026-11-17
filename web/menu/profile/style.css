@@ -29,7 +29,9 @@
 
 .pf-title {
   margin: 0;
-  color: #272238;
+  /* #211B29: the app's own title colour (ProfileMenuScreen.kt). Two greys this close are not a
+     design difference, they are two people writing the same value from memory. */
+  color: #211b29;
   font-size: 21px;
   font-weight: 700;
 }
@@ -155,7 +157,7 @@
   flex-direction: column;
   gap: 5px;
   font-size: 12px;
-  color: #6f6b77;
+  color: #6e6777;
   font-weight: 600;
 }
 
@@ -165,7 +167,7 @@
   padding: 10px 12px;
   font: inherit;
   font-size: 14px;
-  color: #17151d;
+  color: #201b28;
   background: #fbfaff;
   outline: none;
 }
@@ -200,7 +202,7 @@
   margin: 10px 0 0;
   text-align: center;
   font-size: 12px;
-  color: #7a7482;
+  color: #6e6777;
 }
 
 .menu-feature-status.is-ok {
