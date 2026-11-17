@@ -22,29 +22,6 @@
 
   const PROVIDERS = [
     {
-      id: 'email',
-      title: 'Email',
-      // There is no Gmail integration on the backend: app/ has no /integrations/gmail route at
-      // all, so every call below answers 404. Offering the card anyway made the page say
-      // "Connection status unavailable" for a provider that can never be connected, which reads
-      // like a network blip rather than a missing feature.
-      available: false,
-      offNote: 'Connect your Gmail account',
-      defaultAccount: 'Gmail account',
-      status: 'api/integrations/gmail/status',
-      // GmailPluginApi.getGoogleServerClientId reads auth-config with a GET -
-      // it is not a connect endpoint, and posting to it is a 405. The rest of
-      // the Gmail flow is Google Sign-In on the device, which then posts a
-      // server auth code to gmail/server-auth-code.
-      config: 'api/integrations/gmail/auth-config',
-      disconnect: 'api/integrations/gmail/disconnect',
-      // the app reads the address from a probe, not from the status answer:
-      // GmailPluginApi.probeEmailAddress posts to gmail/probe and takes
-      // summary.email_address
-      probe: 'api/integrations/gmail/probe',
-      addressPath: ['summary', 'email_address']
-    },
-    {
       id: 'zoho-mail',
       title: 'Zoho Mail',
       offNote: 'Connect your Zoho Mail account',
@@ -74,6 +51,29 @@
       probe: 'api/integrations/github/probe',
       addressPath: ['summary', 'login'],
       healthPath: ['provider_ok'],
+    },
+    {
+      id: 'email',
+      title: 'Gmail',
+      // There is no Gmail integration on the backend: app/ has no /integrations/gmail route at
+      // all, so every call below answers 404. Offering the card anyway made the page say
+      // "Connection status unavailable" for a provider that can never be connected, which reads
+      // like a network blip rather than a missing feature.
+      available: false,
+      offNote: 'Connect your Gmail account',
+      defaultAccount: 'Gmail account',
+      status: 'api/integrations/gmail/status',
+      // GmailPluginApi.getGoogleServerClientId reads auth-config with a GET -
+      // it is not a connect endpoint, and posting to it is a 405. The rest of
+      // the Gmail flow is Google Sign-In on the device, which then posts a
+      // server auth code to gmail/server-auth-code.
+      config: 'api/integrations/gmail/auth-config',
+      disconnect: 'api/integrations/gmail/disconnect',
+      // the app reads the address from a probe, not from the status answer:
+      // GmailPluginApi.probeEmailAddress posts to gmail/probe and takes
+      // summary.email_address
+      probe: 'api/integrations/gmail/probe',
+      addressPath: ['summary', 'email_address']
     }
   ];
 
