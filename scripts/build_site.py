@@ -27,13 +27,17 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
+# web/ is split by who it is for: users/ is the app, developers/ is the console, and
+# assets/, authentication/ and branding/ are shared by both.
+APP = WEB / "users"
+SHARED = ("authentication", "branding", "developers")
 LANDING = ROOT / "landing"
 SITE = ROOT / "site"
 
 DOMAIN = "sankalp.indoworkspace.in"
 LEGAL = ["privacy-policy", "terms-of-use", "data-privacy", "security"]
 ICONS = ["icon-48.png", "icon-96.png", "icon-180.png", "icon-192.png", "icon-512.png"]
-LOGOS = ["logo-1024.png", "logo-1024-white.png"]
+LOGOS = ["logo-1024.png", "logo-1024-white.png", "mark.png"]
 
 SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -101,9 +105,9 @@ def require(paths: list[pathlib.Path]) -> None:
 
 def main() -> None:
     require(
-        [LANDING / "index.html", LANDING / "style.css", WEB / "index.html", WEB / "update.json"]
-        + [WEB / "legal" / f"{slug}.html" for slug in LEGAL]
-        + [WEB / "favicon.ico"]
+        [LANDING / "index.html", LANDING / "style.css", APP / "index.html", APP / "update.json"]
+        + [APP / "legal" / f"{slug}.html" for slug in LEGAL]
+        + [APP / "favicon.ico"]
     )
 
     if SITE.exists():
@@ -115,7 +119,9 @@ def main() -> None:
     shutil.copy2(LANDING / "style.css", SITE / "style.css")
 
     # 2. the app, whole, so every relative path inside it keeps working
-    shutil.copytree(WEB, SITE / "app")
+    shutil.copytree(APP, SITE / "app")
+    for shared in SHARED:
+        shutil.copytree(WEB / shared, SITE / "app" / shared)
 
     # 3. one copy of the legal documents, at the address the company site links to
     shutil.move(str(SITE / "app" / "legal"), str(SITE / "legal"))
@@ -141,17 +147,17 @@ def main() -> None:
             shutil.copy2(source, assets / name)
         else:
             print(f"build_site: warning - web/assets/{name} is missing", file=sys.stderr)
-    shutil.copy2(WEB / "favicon.ico", SITE / "favicon.ico")
+    shutil.copy2(APP / "favicon.ico", SITE / "favicon.ico")
 
     # 5b. the two files that only work at the root. Both were left behind when the app moved
     #     to /app/, and both fail silently if they are one folder too deep: the IndexNow key
     #     is fetched at /<key>.txt to prove we control the host, and BingSiteAuth.xml is
     #     fetched at /BingSiteAuth.xml to prove the same thing to Bing.
-    for item in WEB.glob("*.txt"):
+    for item in APP.glob("*.txt"):
         if len(item.stem) == 32 and all(c in "0123456789abcdef" for c in item.stem):
             shutil.copy2(item, SITE / item.name)
-    if (WEB / "BingSiteAuth.xml").exists():
-        shutil.copy2(WEB / "BingSiteAuth.xml", SITE / "BingSiteAuth.xml")
+    if (APP / "BingSiteAuth.xml").exists():
+        shutil.copy2(APP / "BingSiteAuth.xml", SITE / "BingSiteAuth.xml")
 
     # 5c. the app's own copy of these two would be a second, stale answer to the same question
     for stale in ("sitemap.xml", "robots.txt"):

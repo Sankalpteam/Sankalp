@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the standalone legal pages from the one copy that is written by hand.
 
-The policy and the terms live in `web/menu/<slug>/index.html` as a *fragment*: a shell with a
+The policy and the terms live in `web/users/menu/<slug>/index.html` as a *fragment*: a shell with a
 title, a close button and the content. That fragment is right inside the web app's menu modal,
 where the modal provides the frame - and wrong everywhere else, because a WebView gets the
 shell and the close button and no stylesheet at all. That is exactly how the app looked: the
@@ -10,7 +10,7 @@ title twice, a stray ×, and the text hugging the left edge.
 So this script takes the content out of the fragment and writes a complete page around it:
 properly styled, no duplicate title, no close button. Two outputs from one source:
 
-  web/legal/<slug>.html          what the app's WebView loads
+  web/users/legal/<slug>.html          what the app's WebView loads
   android/assets/legal/<slug>.html   the same page, bundled for offline
 
 Run it before a build. Nothing here should ever be edited by hand.
@@ -29,7 +29,7 @@ import sys
 #   data-privacy    what is stored and for how long   (product facts)
 #   security        how the account is protected      (product facts)
 #
-# All four are written once, in web/menu/<slug>/index.html, and everything else is generated.
+# All four are written once, in web/users/menu/<slug>/index.html, and everything else is generated.
 # The description is what a search engine shows under the title. One line each, written to
 # answer the question someone typed to get here, not to repeat the heading.
 DOCUMENTS = (
@@ -154,7 +154,7 @@ def stamp_of(slug: str) -> str:
     It sits in the fragment's header, outside the content, so extracting only the content
     dropped it - and a policy with no date is a policy a reader cannot judge.
     """
-    text = (ROOT / "web" / "menu" / slug / "index.html").read_text(encoding="utf-8")
+    text = (ROOT / "web" / "users" / "menu" / slug / "index.html").read_text(encoding="utf-8")
     match = re.search(r"Last [Uu]pdated[:\s]+([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})", text)
 
     if match is None:
@@ -164,7 +164,7 @@ def stamp_of(slug: str) -> str:
 
 
 def content_of(slug: str) -> str:
-    fragment = ROOT / "web" / "menu" / slug / "index.html"
+    fragment = ROOT / "web" / "users" / "menu" / slug / "index.html"
     text = fragment.read_text(encoding="utf-8")
 
     match = re.search(r'<div[^>]*class="[a-z-]*content"[^>]*>', text)
@@ -260,7 +260,7 @@ def main() -> int:
     for slug, title, description in DOCUMENTS:
         content = content_of(slug)
         stamp = stamp_of(slug)
-        write(ROOT / "web" / "legal" / f"{slug}.html", slug, title, description, content, stamp)
+        write(ROOT / "web" / "users" / "legal" / f"{slug}.html", slug, title, description, content, stamp)
         write(ROOT / "android" / "assets" / "legal" / f"{slug}.html", slug, title, description, content, stamp)
     return 0
 
