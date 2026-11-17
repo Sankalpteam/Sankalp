@@ -661,10 +661,6 @@ body {
   font-weight: 700;
 }
 
-.lock-item {
-  margin-top: auto;
-}
-
 /* Over the app, not over the window: the same width and the same centre, so
    the dimming and the sheet land on the phone and not on the empty space. */
 .overlay {

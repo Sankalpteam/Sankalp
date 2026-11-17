@@ -14,7 +14,7 @@
   // plugins page went on showing a provider that had been removed weeks earlier.
   // Bumped whenever a menu feature's own script or stylesheet changes: the browser keeps the
   // old copy otherwise, and a fix can be deployed and still not be the code the page runs.
-  const ASSET_VERSION = '20261118d';
+  const ASSET_VERSION = '20261118e';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
@@ -429,15 +429,6 @@
       window.IndooneChatStore?.clear?.();
       window.showHome?.();
       window.IndooneChatHome?.refresh?.();
-      return;
-    }
-
-    if (action === 'lock') {
-      // MenuDrawer.kt opens UnlockAppActivity when app lock is on and shows
-      // "App Lock is not enabled." otherwise. The web has no device app lock,
-      // so the message is what it shows; the row used to do nothing at all.
-      closeDrawer();
-      window.toast?.('App Lock is not enabled.');
       return;
     }
 

@@ -82,9 +82,6 @@ window.showSecurity = function () {
   `);
 };
 
-// Keep Lock App packed with the menu items instead of pinning it to the bottom.
-document.querySelector('.lock-item')?.style.setProperty('margin-top', '0');
-
 // Keep a clear, consistent space between the Sankalp brand and the menu button.
 function applyTopbarBrandSpacing() {
   const topbarLeft = document.querySelector('.topbar-left');
