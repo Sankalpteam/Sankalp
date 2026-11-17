@@ -394,9 +394,8 @@ fun PluginsMenuScreen(
             }
 
             // Three providers, in this order, on both clients: Zoho Mail, GitHub, Gmail.
-            // Gmail is last and marked unavailable because the backend has no Gmail routes -
-            // the same sentence the web shows. Offering a connect button here that can only
-            // 404 was the difference between the two screens.
+            // Gmail's routes exist on the backend now - auth-config, status, probe, disconnect
+            // and the two token hand-ins - so the card is connectable like the other two.
             MailProviderRow(
                 title = "Zoho Mail",
                 accountAddress = zohoAddress,
@@ -427,7 +426,6 @@ fun PluginsMenuScreen(
                 onAdd = { startGmailAuthorization() },
                 onReauthorize = { startGmailAuthorization() },
                 onDisconnect = { pendingDisconnect = "gmail" },
-                available = false,
             )
 
             if (githubStatusMessage.isNotBlank()) {
