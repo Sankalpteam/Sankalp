@@ -21,19 +21,12 @@
   // Notifications has no web push parity here. They are left out rather than
   // drawn as rows that open nothing.
   //
-  // The Version row IS drawn. It is the row the app has where it once had
-  // "About Sankalp": the terminal branch replaced SettingsMenuItem(InfoIcon,
-  // "About Sankalp") with SettingsMenuAction(InfoIcon, "Version", versionName,
-  // "Check for updates"), and the merge brought that into main - so main has no
-  // About row here and no android/settings/about/ any more. About Sankalp is
-  // still a drawer row, under SECURITY & INFORMATION, and this file does not
-  // draw one.
+  // The Version row is NOT drawn here.
   //
-  // The app reads the installed package version for that subtitle
-  // (installedVersionName). A browser tab has no installed package, so this
-  // reports what web/update.json publishes - the same file settings/update
-  // reads. The row's action opens the update screen, which is the app's
-  // onCheckForUpdates.
+  // The app has one, and it is right there: it reports the installed package version and opens
+  // the update check. A browser tab has no installed package, so the row could only report a
+  // number from a file - a version for something that is not installed, in a menu of things you
+  // can do. It is gone, and the update screen it opened is still reachable from About.
   //
   // Profile, Danger Zone and Log out are menu features whose folders live under
   // settings/ (see featurePaths in menu/script.js). They are opened through
@@ -49,14 +42,6 @@
       action: () => window.openMenuFeature?.('account')
     },
     {
-      id: 'version',
-      title: 'Version',
-      icon: 'info',
-      subtitle: () => webVersion,
-      trailing: 'Check for updates',
-      action: () => window.openMenuFeature?.('update')
-    },
-    {
       id: 'danger-zone',
       title: 'Danger Zone',
       icon: 'warning',
@@ -69,35 +54,6 @@
       action: () => window.openMenuFeature?.('logout')
     }
   ];
-
-  // The app's Version row reports the installed package version. A browser tab
-  // has none, so this reads web/update.json's versionName - the same value
-  // settings/update shows. Until it arrives the row draws its title alone,
-  // which is what the app does when the version cannot be read.
-  let webVersion = '';
-  let versionRequested = false;
-
-  function loadVersion() {
-    if (versionRequested) {
-      return;
-    }
-
-    versionRequested = true;
-
-    fetch('update.json', { cache: 'no-store' })
-      .then(response => (response.ok ? response.json() : null))
-      .then(metadata => {
-        webVersion = metadata?.versionName || '';
-
-        // Redraw only when the settings page is the one on screen.
-        const page = document.getElementById('settingsContent');
-
-        if (page && !page.hasAttribute('hidden')) {
-          renderSettingsPage();
-        }
-      })
-      .catch(() => {});
-  }
 
   const ICONS = {
     // Icons.Outlined.Person, the app's ProfileIcon
@@ -274,7 +230,6 @@
     closeModal?.();
     renderSettingsPage();
     showSettingsPage();
-    loadVersion();
   };
 
   document.addEventListener('click', event => {
