@@ -440,6 +440,21 @@
     $('overlay')?.classList.remove(AUTH_CLASS);
     $('overlay')?.classList.add('hidden');
 
+    // A developer who came in from the developers page goes to the console, not the chat.
+    //
+    // They arrived at index.html?next=console, so they are already signed in - there is nothing
+    // for them to do on the chat screen, and asking them to find a button afterwards would be a
+    // step nobody asked for. Read here, at the one place every successful sign-in passes
+    // through, so the password path and the OTP path both honour it.
+    try {
+      if (new URLSearchParams(window.location.search).get('next') === 'console') {
+        window.location.replace('developers/console/');
+        return;
+      }
+    } catch (error) {
+      // A blocked URL read must not leave the sign-in screen covering the app.
+    }
+
     // #modal must never carry the auth class. Clear it here as well, so a
     // session that was left over from an older build cannot keep painting the
     // menu and Settings pages beige.
