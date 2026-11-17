@@ -281,6 +281,9 @@
       // takes no attachments - a file sent to it would be silently dropped.
       let result = null;
       let streamedMessage = null;
+      let preparing = false;
+      let preparingText = '';
+      let finished = false;
 
       if (!sentAttachments.length && typeof api.streamMessage === 'function') {
         try {
@@ -294,8 +297,43 @@
                 return;
               }
 
+              // Preparing, held for 600ms before the first word is drawn.
+              //
+              // The app's sequence is Received, Thinking, Preparing, answer - the same three
+              // labels in the same order on both clients. The web used to jump from Thinking
+              // straight to the answer, because the first token arrived and was painted at
+              // once, so "Preparing your answer…" was a label it had and never showed.
+              //
+              // The tokens that arrive during those 600ms are not thrown away: the newest
+              // full text is kept and painted when the wait ends, so nothing is lost and the
+              // reveal still streams from there.
+              if (!streamedMessage && !preparing) {
+                preparing = true;
+                preparingText = full;
+                setActivity('preparing');
+
+                setTimeout(() => {
+                  if (activeTurnId !== turnId || finished) {
+                    return;
+                  }
+
+                  preparing = false;
+                  setActivity(null);
+                  streamedMessage = store.add({ text: preparingText, mine: false });
+                  paint(null);
+                  streamedElement = lastReplyTextNode();
+                  window.IndooneChatScroll?.toBottom?.();
+                }, 600);
+
+                return;
+              }
+
+              if (preparing) {
+                preparingText = full;
+                return;
+              }
+
               if (!streamedMessage) {
-                // First token: the wait is over.
                 setActivity(null);
                 streamedMessage = store.add({ text: '', mine: false });
                 paint(null);
@@ -352,6 +390,10 @@
       }
 
       store.setConversationId(result.conversationId);
+      // The answer has landed. If it landed inside the 600ms hold, the timer must not add a
+      // second bubble afterwards.
+      finished = true;
+      preparing = false;
       setActivity(null);
       window.IndooneInflight?.finish();
 
