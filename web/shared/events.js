@@ -532,6 +532,15 @@
   // Restored before the menu page restores, so a menu page that was open on Settings still
   // returns to Settings when it closes.
   function restoreTab() {
+    // Only for someone who is signed in.
+    //
+    // This ran for everyone, and both branches it can take call closeModal() - which hides
+    // #overlay, the element the sign-in screen is drawn in. So a refresh on a device with a
+    // remembered tab closed the sign-in screen and left the chat on display, signed in or not.
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      return;
+    }
+
     const page = String(window.IndoonePageState?.get?.() || '').trim();
 
     if (page === 'lobby') {

@@ -14,7 +14,7 @@
   // plugins page went on showing a provider that had been removed weeks earlier.
   // Bumped whenever a menu feature's own script or stylesheet changes: the browser keeps the
   // old copy otherwise, and a fix can be deployed and still not be the code the page runs.
-  const ASSET_VERSION = '20261118f';
+  const ASSET_VERSION = '20261118g';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {
@@ -465,8 +465,11 @@
     event.stopImmediatePropagation?.();
   }, true);
 
-  // A reload comes back to the screen it was on, not to Home.
-  const remembered = rememberedPath();
+  // A reload comes back to the screen it was on, not to Home - but only for someone who is
+  // signed in. A menu page opened over the sign-in screen is a page nobody asked to see, and
+  // closing it takes the sign-in screen with it.
+  const signedIn = Boolean(localStorage.getItem('indoone_otp_verified_uid'));
+  const remembered = signedIn ? rememberedPath() : null;
 
   if (remembered) {
     // After the first paint: the markup loader needs the page to exist, and the app shell
