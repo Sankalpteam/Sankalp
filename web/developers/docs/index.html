@@ -23,7 +23,14 @@
     <h2>The first call</h2>
     <p class="lede">One endpoint, OpenAI-shaped. The response says which model answered it and how
        many tokens were billed, so the bill and the answer always agree.</p>
-<!--SAMPLE-->
+<pre><span class="c"># one endpoint, OpenAI-shaped</span>
+c&#117;rl https://api.sankalp.in/v1/chat/completions \
+  &#45;H <span class="s">"A&#117;thorization: B&#101;arer sk&#45;live-..."</span> \
+  &#45;H <span class="s">"Content&#45;Type: application/json"</span> \
+  &#45;d <span class="s">'{
+    "model": "sankalp-1",
+    "messages": [{"role":"user","content":"hi"}]
+  }'</span></pre>
   </section>
 
   <section class="section">
