@@ -14,7 +14,7 @@
   // plugins page went on showing a provider that had been removed weeks earlier.
   // Bumped whenever a menu feature's own script or stylesheet changes: the browser keeps the
   // old copy otherwise, and a fix can be deployed and still not be the code the page runs.
-  const ASSET_VERSION = '20261118b';
+  const ASSET_VERSION = '20261118c';
   let suppressNextUnderlyingClick = false;
 
   const featureInitializers = {

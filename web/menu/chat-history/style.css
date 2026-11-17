@@ -80,18 +80,15 @@
   padding: 12px 10px 12px 14px;
   border: 1px solid #ece4fa;
   border-radius: 14px;
-  background: #fbf9ff;
-}
-
-.ch-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  border-radius: 14px 0 0 14px;
-  background: linear-gradient(180deg, #703be2, #b78bff);
+  /* The violet bar down the left edge, painted as a background layer rather than as a child
+     box. A box with square top and bottom corners poked out of the card's rounded corner, so it
+     read as a separate line lying next to the row instead of part of it - which is what it looks
+     like on the web and does not on the app, where Compose clips the surface to its shape.
+     A background is clipped to the radius for free, and it leaves the row's overflow alone, so
+     the actions menu can still hang outside it. */
+  background:
+    linear-gradient(180deg, #703be2, #b78bff) left / 3px 100% no-repeat,
+    #fbf9ff;
 }
 
 .ch-row-text {
