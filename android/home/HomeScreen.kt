@@ -1835,7 +1835,7 @@ fun HomeScreen(
                     }
                 }
 
-                val lastUserIndex = messages.indexOfLast { it.mine }
+                val lastUserIndex = messages.indexOfLast { it.fromUser }
                 itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
                     if (message.fromUser) {
                         Row(
