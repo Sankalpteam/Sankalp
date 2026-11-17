@@ -54,11 +54,8 @@
     // app's Firebase-database message.
     const map = {
       'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Sankalp account was found.',
-      'auth/wrong-password': 'Email or password is incorrect.',
-      'auth/invalid-credential': 'Email or password is incorrect.',
+      'auth/user-not-found': 'No Sankalp account was found for that email address.',
       'auth/email-already-in-use': 'An account already exists with this email.',
-      'auth/weak-password': 'Password should be at least 6 characters.',
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/network-request-failed': 'Network error. Check your connection and try again.',
       'PERMISSION_DENIED': 'Sankalp account data is temporarily unavailable. Please try again or use your email address.'

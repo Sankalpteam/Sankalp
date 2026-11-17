@@ -57,6 +57,19 @@
       return 'Sankalp could not reach the server. Check your connection and try again.';
     }
 
+    // A plain Error carries the sentence the code wrote for it - "No Sankalp account was found
+    // for this mobile number.", "Unable to reach the OTP service.", "OTP service request timed
+    // out.". Those were all being replaced with "Something went wrong. Please try again.", which
+    // tells the person nothing and hid the reason from us too.
+    //
+    // The Firebase SDK's own messages are excluded: they read like "Firebase: Error
+    // (auth/...)" and are a code, not a sentence.
+    const message = String(error?.message || '').trim();
+
+    if (message && message.length <= 200 && !/^Firebase:/i.test(message)) {
+      return message;
+    }
+
     return GENERIC;
   }
 
