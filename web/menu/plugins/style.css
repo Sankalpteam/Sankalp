@@ -122,18 +122,6 @@
   font-size: 11px;
 }
 
-/* GitHub's way into its own screen: a plain violet word */
-.plugins-browse {
-  flex: none;
-  border: 0;
-  background: none;
-  padding: 8px 6px;
-  color: #5e2dd2;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 /* the 42dp violet circle that starts a connection */
 .plugins-add {
   flex: none;

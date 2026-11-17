@@ -74,7 +74,6 @@
       probe: 'api/integrations/github/probe',
       addressPath: ['summary', 'login'],
       healthPath: ['provider_ok'],
-      browse: true
     }
   ];
 
@@ -342,16 +341,6 @@ window.initMenuPlugins = function () {
 
     card.appendChild(tile);
     card.appendChild(text);
-
-    // GitHub keeps a way into its own screen whether or not it is connected
-    if (provider.browse) {
-      const browse = document.createElement('button');
-      browse.type = 'button';
-      browse.className = 'plugins-browse';
-      browse.textContent = 'Browse';
-      browse.addEventListener('click', () => window.openMenuNested?.('plugins/github'));
-      card.appendChild(browse);
-    }
 
     if (provider.available === false) {
       // no + and no more menu: there is nothing behind either of them

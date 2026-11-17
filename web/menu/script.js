@@ -73,14 +73,15 @@
   const nestedInitializers = {
     'danger-zone/delete-account': 'initMenuDeleteAccount',
     'logout/this-device': 'initMenuLogoutThisDevice',
-    // the plugin screens sit under Plugins, as they do in the app: GitHub's
-    // Browse, and each provider's own screen
+    // the plugin screens sit under Plugins, as they do in the app: each provider's own screen.
+    // GitHub's used to be listed here too, behind a Browse button - a stub that only showed a
+    // toast saying to use the Plugins list. The app has no such screen, and the button was the
+    // only way in, so both are gone.
     // The paths have to be the folders' own names, because getFeatureBase turns
     // them into menu/<path>. The Zoho Mail folder is zoho_mail, not zoho-mail,
     // and the email screen sits under email/gmail, not email - so those two
     // used to resolve to folders with no index.html and the screens never
     // opened.
-    'plugins/github': 'initMenuPluginGitHub',
     'plugins/zoho_mail': 'initMenuPluginZohoMail',
     'plugins/email/gmail': 'initMenuPluginEmail'
   };
