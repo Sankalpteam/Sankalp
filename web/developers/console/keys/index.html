@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - API keys</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="../../../assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+  <a class="toplink" href="../../../index.html?next=console">Sign in</a>
+</header>
+
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav">
+          <a class="" href=".././"><span class="dot"></span>Overview</a>
+          <a class="on" href="../keys/"><span class="dot"></span>API keys</a>
+          <a class="" href="../usage/"><span class="dot"></span>Usage</a>
+          <a class="" href="../wallet/"><span class="dot"></span>Wallet</a>
+        </div>
+      </div>
+      <div class="main">
+        <div class="mainhead">
+          <div><h3>API keys</h3><small>Each key belongs to this account. Revoke one and it stops at once.</small></div>
+          <button class="btn primary" style="padding:10px 16px;font-size:12.5px">Create key</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th class="right">State</th></tr></thead>
+          <tbody>
+            <tr><td><b>Production</b></td><td><span class="key mono">sk-live-8f3a&bull;&bull;&bull;&bull;c21d</span></td>
+              <td class="mini">18 Nov 2026</td><td class="mini">2 minutes ago</td><td class="right"><span class="pill ok">active</span></td></tr>
+            <tr><td><b>Local test</b></td><td><span class="key mono">sk-test-2b71&bull;&bull;&bull;&bull;9ae0</span></td>
+              <td class="mini">14 Nov 2026</td><td class="mini">yesterday</td><td class="right"><span class="pill ok">active</span></td></tr>
+            <tr><td><b>Old laptop</b></td><td><span class="key mono">sk-live-77cd&bull;&bull;&bull;&bull;4f10</span></td>
+              <td class="mini">02 Nov 2026</td><td class="mini">9 days ago</td><td class="right"><span class="pill bad">revoked</span></td></tr>
+          </tbody>
+        </table>
+        <div class="note">The full key is shown once, when it is created. After that only the ends are kept,
+          so a stolen database cannot be used to call the API.</div>
+
+        <div class="dlg">
+          <div class="top"><h4>Your new API key</h4><p>Copy it now. It is not shown again.</p></div>
+          <div class="body">
+            <div class="secret"><code>sk-live-8f3a41c9d2e7b60a55fe&bull;&bull;&bull;&bull;&bull;&bull;c21d</code></div>
+            <div class="warnbox">This key can spend from your wallet. Keep it in a server, never in a
+              browser or an app bundle.</div>
+          </div>
+          <div class="foot2"><button class="btn ghost">Done</button><button class="btn primary">Copy key</button></div>
+        </div>
+      </div>
+    </div>
+</main>
+
+</body>
+</html>
