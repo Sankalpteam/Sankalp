@@ -252,6 +252,11 @@
   bindClick($('homeNav'), showHome);
   bindClick($('settingsNav'), showSettingsPanel);
   bindClick($('lobbyNav'), showLobbyPanel);
+
+  // Named, because a reload has to be able to put the tab back. These were local to this
+  // closure, so nothing outside could ask for them.
+  window.showSettingsPanel = showSettingsPanel;
+  window.showLobbyPanel = showLobbyPanel;
   // Vibe keeps the button it has on Home: same call, same screen.
   bindClick($('vibeNav'), () => window.IndooneVibe?.open?.());
   bindClick(
@@ -510,13 +515,38 @@
     }
   });
 
+  // ---- which tab a reload comes back to ---------------------------------------
+  //
+  // IndoonePageState was written on every tab change and read by nothing: set('settings'),
+  // set('lobby'), set('home') - and no .get() anywhere in the web tree. So the value was
+  // stored, and a refresh always landed on Home.
+  //
+  // Restored before the menu page restores, so a menu page that was open on Settings still
+  // returns to Settings when it closes.
+  function restoreTab() {
+    const page = String(window.IndoonePageState?.get?.() || '').trim();
+
+    if (page === 'lobby') {
+      showLobbyPanel({ remember: false });
+      return;
+    }
+
+    if (page === 'settings') {
+      showSettingsPanel({ remember: false });
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener(
       'DOMContentLoaded',
-      () => window.IndooneHome?.init?.(),
+      () => {
+        restoreTab();
+        window.IndooneHome?.init?.();
+      },
       { once: true }
     );
   } else {
+    restoreTab();
     window.IndooneHome?.init?.();
   }
 })();

@@ -204,6 +204,7 @@
 
     const back = pageBeforeMenu || 'homeContent';
     pageBeforeMenu = null;
+    rememberPath('');
 
     page.setAttribute('hidden', '');
     document.getElementById(back)?.removeAttribute('hidden');
@@ -239,6 +240,8 @@
     menuStack = [];
     pageBeforeMenu = null;
     page?.setAttribute('hidden', '');
+    // The address follows the screen: home is not a menu page, so nothing is remembered.
+    rememberPath('');
   }
 
   window.closeAllMenuPages = closeAllMenuPages;
@@ -295,6 +298,37 @@
     modal.innerHTML = await response.text();
   }
 
+  // ---- which screen a reload comes back to ------------------------------------
+  //
+  // A menu page used to exist only in memory. Refresh on Plugins, on Chat History, on any of
+  // them, and the page came back to Home - the screen was thrown away and the address bar had
+  // never been told about it.
+  //
+  // The open page is recorded in the address, with replaceState rather than a hash change: it
+  // must survive a reload without adding a history entry per menu, and without firing the
+  // events that would make a restore loop back into itself.
+  function knownPath(path) {
+    if (!path) return null;
+    if (featureInitializers[path]) return { path, initializer: featureInitializers[path] };
+    if (nestedInitializers[path]) return { path, initializer: nestedInitializers[path] };
+    return null;
+  }
+
+  function rememberPath(path) {
+    try {
+      const url = new URL(window.location.href);
+      url.hash = path ? `#${path}` : '';
+      window.history.replaceState(null, '', url);
+    } catch (error) {
+      // A blocked history call must not break navigation itself.
+    }
+  }
+
+  function rememberedPath() {
+    const raw = String(window.location.hash || '').replace(/^#/, '').trim();
+    return raw ? knownPath(decodeURIComponent(raw)) : null;
+  }
+
   async function openPath(path, initializerName) {
     closeDrawer();
 
@@ -320,6 +354,7 @@
           shown.dataset.menuInitializer = initializerName;
         }
         showMenuPage();
+        rememberPath(path);
       }
     } catch (error) {
       closeMenuPage();
@@ -417,4 +452,15 @@
     event.stopPropagation();
     event.stopImmediatePropagation?.();
   }, true);
+
+  // A reload comes back to the screen it was on, not to Home.
+  const remembered = rememberedPath();
+
+  if (remembered) {
+    // After the first paint: the markup loader needs the page to exist, and the app shell
+    // has to be in place before a menu page can cover it.
+    window.requestAnimationFrame(() => {
+      void openPath(remembered.path, remembered.initializer);
+    });
+  }
 })();
