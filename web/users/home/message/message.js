@@ -438,6 +438,16 @@
     row.className = 'chat-actions';
 
     if (message.mine) {
+      // Only the last thing the user sent can be edited.
+      //
+      // Every sent message used to carry a pencil, including ones answered long ago - and
+      // editing those cuts the thread back to that point, so a tap on an old message threw
+      // away everything after it. The newest prompt is the only one that is still "the one
+      // you might have got wrong"; the moment another is sent, it stops being that.
+      if (!options || !options.canEdit) {
+        return null;
+      }
+
       const edit = iconButton('edit', 'Edit this message');
       edit.addEventListener('click', () => (options && options.onEdit ? options.onEdit() : editPrompt(text)));
       row.appendChild(edit);
@@ -695,6 +705,12 @@
     const retryCount = Number(messages[lastQuestion]?.retryCount || 0);
     const retryAllowed = lastQuestion >= 0 && retryCount < 2;
 
+    // The newest prompt is the only one with a pencil.
+    const lastMine = messages.reduce(
+      (found, message, index) => (message.mine ? index : found),
+      -1
+    );
+
     messages.forEach((message, index) => {
       // Copy and share carry the question with the answer: an answer on its own is
       // usually meaningless out of context, and pasting a pair back into a chat is what
@@ -717,6 +733,7 @@
         bubble(message, {
           isLastAssistant: index === lastAssistant,
           retryAllowed,
+          canEdit: index === lastMine,
           pairText,
           onRetry: () => retryLast(messages),
           onEdit: () => editPrompt(answer, index, messages)

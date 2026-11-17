@@ -1835,6 +1835,7 @@ fun HomeScreen(
                     }
                 }
 
+                val lastUserIndex = messages.indexOfLast { it.mine }
                 itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
                     if (message.fromUser) {
                         Row(
@@ -1873,13 +1874,20 @@ fun HomeScreen(
                                     MessageActions(
                                         text = message.text,
                                         alignEnd = true,
-                                        // Editing replaces the message: the thread is cut
-                                        // back to just before it, so the old prompt and the
-                                        // answer it got are gone and the edited text takes
-                                        // their place instead of being appended below them.
-                                        onEdit = {
-                                            messages = messages.take(index)
-                                            input = message.text
+                                        // Only the newest prompt can be edited.
+                                        //
+                                        // Every sent message used to carry a pencil. Editing
+                                        // cuts the thread back to that point, so a tap on an
+                                        // old message threw away everything after it. The one
+                                        // still worth changing is the last one sent; the moment
+                                        // another goes out, it stops being that.
+                                        onEdit = if (index == lastUserIndex) {
+                                            {
+                                                messages = messages.take(index)
+                                                input = message.text
+                                            }
+                                        } else {
+                                            null
                                         },
                                     )
                                 }
@@ -2376,6 +2384,12 @@ private fun MessageActions(
     val value = text.trim()
 
     if (value.isEmpty()) {
+        return
+    }
+
+    // A sent message whose edit is gone has nothing left to show, so it draws no row at all
+    // rather than an empty one with its padding.
+    if (!assistant && onEdit == null) {
         return
     }
 
