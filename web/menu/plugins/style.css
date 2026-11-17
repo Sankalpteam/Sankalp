@@ -94,6 +94,14 @@
   height: 40px;
 }
 
+/* The app draws both mail logos at 40dp inside the same 52dp tile. The web was showing the
+   Gmail mark at the 29px default, so the same tile had a smaller logo in one client than the
+   other - the difference you notice without being able to name it. */
+.plugins-tile[data-provider="email"] svg {
+  width: 40px;
+  height: 40px;
+}
+
 .plugins-text {
   flex: 1 1 auto;
   min-width: 0;
