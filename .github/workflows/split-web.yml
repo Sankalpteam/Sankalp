@@ -1,0 +1,40 @@
+name: Split web folder
+
+# One-time job. web/ becomes five folders: assets, authentication, branding, users, developers.
+# The app moves into users/; the three shared folders stay at the top.
+#
+# It is a workflow and not a hand commit because it is 172 files: a move of that size cannot be
+# written through the contents API, and doing it by hand is how a path gets missed. The script
+# rebuilds the site and checks every reference in the built tree before it commits anything - if
+# one path does not resolve it exits non-zero and main is left alone.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Move the app into web/users and check the result
+        run: python3 scripts/split_web_folders.py
+
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Sankalp build"
+          git config user.email "build@sankalp.in"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit - the split is already in place."
+            exit 0
+          fi
+          git commit -m "refactor(web): users/ for the app, developers/ for the console"
+          git push origin HEAD:main
