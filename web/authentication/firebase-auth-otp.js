@@ -2,13 +2,14 @@
 //
 // Same endpoints, same payloads, same order of work:
 //   login by OTP      request-otp -> verify-otp -> sign in with the custom token
-//   login by password sign in with the password, then check the profile
 //   sign up by OTP    request-otp -> verify-otp -> create the account
-//   sign up by password create the account straight away
+//
+// There is no password path. Signing in is an identifier and a six-digit code, and a new
+// account is created with a secret nobody is told - see randomSecret below.
 //
 // The one thing the web did not do before is sign in with the custom token the
 // OTP service returns. Without it the OTP path could only ever work for someone
-// who had already typed their password, which is not how the app works.
+// who had already typed their details, which is not how the app works.
 (() => {
   const APP_NAME = 'Sankalp user';
   const LOGIN_PENDING_KEY = 'indoone_login_pending';
@@ -82,6 +83,22 @@
     }
 
     return api;
+  }
+
+  // 32 bytes of randomness as hex. crypto.getRandomValues is present in every browser this
+  // page supports; the fallback exists so an old WebView cannot stop a signup.
+  function randomSecret() {
+    const bytes = new Uint8Array(32);
+
+    if (window.crypto?.getRandomValues) {
+      window.crypto.getRandomValues(bytes);
+    } else {
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = Math.floor(Math.random() * 256);
+      }
+    }
+
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 
   function setAuthSession(uid) {
@@ -340,65 +357,15 @@
     return pending.email;
   }
 
-  // Step three. Password, straight in, no OTP - the same as the app.
-  async function loginWithPassword(identifier, password) {
-    const raw = String(identifier || '').trim();
-    const secret = String(password || '');
-
-    if (!raw || !secret) {
-      throw new Error('Enter your email/mobile number and password.');
-    }
-
-    const email = await resolveLoginEmail(raw);
-    clearAuthSession();
-    window.__indooneAuthPending = true;
-
-    try {
-      const credential = await auth().signInWithEmailAndPassword(email, secret);
-      const user = credential?.user;
-
-      if (!user) {
-        throw new Error('Login session expired. Please login again.');
-      }
-
-      await validateLoginProfile(user.uid, email, raw);
-      await syncProfile(user, { email });
-      setAuthSession(user.uid);
-      window.__indooneAuthPending = false;
-      window.IndooneAuthUI?.close?.();
-
-      if (typeof window.loadFirebaseAccounts === 'function') {
-        await window.loadFirebaseAccounts();
-      }
-
-      if (typeof renderAccounts === 'function') {
-        renderAccounts();
-      }
-    } catch (error) {
-      await auth().signOut().catch(() => {});
-      window.__indooneAuthPending = false;
-      clearAuthSession();
-      throw error;
-    }
-  }
-
-  // -------------------------------------------------------------- signup
-
-  async function startSignup({ email, mobile, password }) {
+  async function startSignup({ email, mobile }) {
     const cleanEmailValue = cleanEmail(email);
     const cleanMobile = normalizeMobile(mobile);
-    const secret = String(password || '');
-
     if (!cleanEmailValue.includes('@')) {
       throw new Error('Enter a valid email address.');
     }
 
     if (!/^\+91\d{10}$/.test(cleanMobile)) {
       throw new Error('Enter a valid 10-digit Indian mobile number.');
-    }
-
-    if (secret.length < 6) {
-      throw new Error('Password should be at least 6 characters.');
     }
 
     if (await identityExists(cleanEmailValue, cleanMobile)) {
@@ -414,7 +381,6 @@
     writePending(SIGNUP_PENDING_KEY, {
       email: cleanEmailValue,
       mobile: cleanMobile,
-      password: secret,
       challengeId: result.challengeId,
       requestedAt: Date.now()
     });
@@ -473,9 +439,16 @@
         throw new Error('An account already exists with this email or mobile number.');
       }
 
+      // The account is created with a secret nobody is ever told.
+      //
+      // Firebase's email/password provider needs *a* password to create the user, and the
+      // account is not signed in with it afterwards: every login goes through the OTP service
+      // and its custom token. So the password is random, generated here, and never stored,
+      // shown or asked for. Nothing to remember, nothing to reset, and no way for anyone to
+      // guess it into the account.
       const credential = await auth().createUserWithEmailAndPassword(
         pending.email,
-        pending.password
+        randomSecret()
       );
       const user = credential?.user;
 
@@ -519,73 +492,13 @@
     }
   }
 
-  // Sign up with the password directly, no OTP - the app's other signup path.
-  async function createSignupWithPassword({ email, mobile, password }) {
-    const cleanEmailValue = cleanEmail(email);
-    const cleanMobile = normalizeMobile(mobile);
-    const secret = String(password || '');
-
-    if (!cleanEmailValue.includes('@')) {
-      throw new Error('Enter a valid email address.');
-    }
-
-    if (!/^\+91\d{10}$/.test(cleanMobile)) {
-      throw new Error('Enter a valid 10-digit Indian mobile number.');
-    }
-
-    if (secret.length < 6) {
-      throw new Error('Password should be at least 6 characters.');
-    }
-
-    window.__indooneAuthPending = true;
-
-    try {
-      if (await identityExists(cleanEmailValue, cleanMobile)) {
-        throw new Error('An account already exists with this email or mobile number.');
-      }
-
-      const credential = await auth().createUserWithEmailAndPassword(
-        cleanEmailValue,
-        secret
-      );
-      const user = credential?.user;
-
-      if (!user) {
-        throw new Error('Could not create the Sankalp account.');
-      }
-
-      await syncProfile(user, {
-        email: cleanEmailValue,
-        mobile: cleanMobile
-      });
-      setAuthSession(user.uid);
-      window.__indooneAuthPending = false;
-      window.IndooneAuthUI?.close?.();
-
-      if (typeof window.loadFirebaseAccounts === 'function') {
-        await window.loadFirebaseAccounts();
-      }
-
-      if (typeof renderAccounts === 'function') {
-        renderAccounts();
-      }
-    } catch (error) {
-      await auth().signOut().catch(() => {});
-      window.__indooneAuthPending = false;
-      clearAuthSession();
-      throw error;
-    }
-  }
-
   window.IndooneFirebaseAuth = {
     startLoginOtp,
     verifyLoginOtp,
     resendLoginOtp,
-    loginWithPassword,
     startSignup,
     resendSignupOtp,
     finishSignupAfterOtp,
-    createSignupWithPassword,
     syncProfile,
     errorMessage
   };

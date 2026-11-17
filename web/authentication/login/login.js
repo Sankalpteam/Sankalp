@@ -1,11 +1,8 @@
 // The login screen, built from LoginScreen.kt.
 //
-// Three steps, one on screen at a time, with the app's own texts and motion.
-//
-// The identifier is ONE value in the app, shared by the entry step and the
-// password step. Here the two fields mirror each other, so whatever is typed on
-// one is already there on the other - nothing has to be copied across when the
-// step changes, and nothing is lost.
+// Two steps, one on screen at a time: the identifier, then the OTP. There is no password step -
+// signing in is an email or a mobile number and a six-digit code, nothing to remember and
+// nothing to reset.
 (() => {
   const WELCOME_LINES = [
     { text: 'Welcome to your Sankalp account', gradient: false },
@@ -39,27 +36,6 @@
     `;
   }
 
-  function passwordField() {
-    return `
-      <div class="password-wrap">
-        <input
-          id="loginPassword"
-          name="loginPassword"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Enter your password"
-        />
-        <button
-          type="button"
-          class="password-toggle"
-          data-password-toggle="loginPassword"
-          aria-label="Show password"
-          title="Show password"
-        >◉</button>
-      </div>
-    `;
-  }
-
   function html() {
     return `
       <div class="auth-brand">
@@ -88,14 +64,6 @@
             data-auth-action="login-continue-otp"
           >
             Continue with OTP
-          </button>
-
-          <button
-            type="button"
-            class="primary auth-action-button"
-            data-auth-action="login-continue-password"
-          >
-            Continue with Password
           </button>
         </div>
 
@@ -153,50 +121,6 @@
         </button>
       </div>
 
-      <div class="auth-step" data-login-step="password" hidden>
-        <button
-          type="button"
-          class="auth-back auth-action-button"
-          data-auth-action="login-back"
-        >
-          ← Back
-        </button>
-
-        <h1 class="auth-heading">Enter Password</h1>
-
-        <p class="auth-note auth-note-gradient">
-          Continue with your Sankalp account
-        </p>
-
-        <div class="field">
-          <label>EMAIL OR MOBILE NUMBER</label>
-          <input
-            id="loginPasswordIdentifier"
-            name="login-password-identifier"
-            type="text"
-            inputmode="text"
-            autocomplete="username"
-            autocapitalize="none"
-            spellcheck="false"
-            maxlength="320"
-            placeholder="you@example.com or 98765 43210"
-          />
-        </div>
-
-        <div class="field">
-          <label>PASSWORD</label>
-          ${passwordField()}
-        </div>
-
-        <button
-          type="button"
-          class="primary auth-action-button"
-          data-auth-action="login-complete"
-        >
-          Complete Login
-        </button>
-      </div>
-
       <div
         class="auth-dots"
         id="loginDots"
@@ -204,7 +128,6 @@
       >
         <span data-dot="identifier"></span>
         <span data-dot="otp"></span>
-        <span data-dot="password"></span>
       </div>
     `;
   }
@@ -215,33 +138,6 @@
     return root.querySelector(`[data-auth-action="${action}"]`);
   }
 
-  // The app keeps one identifier. These two fields are that one value.
-  function bindMirror(root) {
-    const stepOne = root.querySelector('#loginIdentifier');
-    const stepThree = root.querySelector('#loginPasswordIdentifier');
-
-    if (!stepOne || !stepThree) return;
-
-    if (stepOne.dataset.mirrorBound !== 'true') {
-      stepOne.dataset.mirrorBound = 'true';
-      stepThree.dataset.mirrorBound = 'true';
-
-      stepOne.addEventListener('input', () => {
-        stepThree.value = stepOne.value;
-        applyRules(root);
-      });
-
-      stepThree.addEventListener('input', () => {
-        stepOne.value = stepThree.value;
-        applyRules(root);
-      });
-    }
-  }
-
-  // The app only lets Verify & Login be pressed once six digits are in, and
-  // Complete Login once both fields have something in them. The two Continue
-  // buttons on the identifier step are gated on the identifier being filled in
-  // (LoginScreen.kt: actionEnabled = !busy && identifier.isNotBlank()).
   function applyRules(root) {
     const otp = root.querySelector('#loginOtp');
     const verify = buttonFor(root, 'login-verify');
@@ -251,42 +147,18 @@
     }
 
     const identifier = root.querySelector('#loginIdentifier');
-    const passwordIdentifier = root.querySelector('#loginPasswordIdentifier');
-    const password = root.querySelector('#loginPassword');
-    const complete = buttonFor(root, 'login-complete');
+    const identifierBlank = !(identifier?.value || '').trim();
+    const button = buttonFor(root, 'login-continue-otp');
 
-    if (complete) {
-      const identifierValue = (
-        passwordIdentifier?.value ||
-        identifier?.value ||
-        ''
-      ).trim();
-
-      complete.disabled = !identifierValue || !(password?.value || '');
+    if (button) {
+      button.disabled = identifierBlank;
     }
-
-    const identifierBlank = !(
-      passwordIdentifier?.value ||
-      identifier?.value ||
-      ''
-    ).trim();
-
-    ['login-continue-otp', 'login-continue-password'].forEach(action => {
-      const button = buttonFor(root, action);
-
-      if (button) {
-        button.disabled = identifierBlank;
-      }
-    });
   }
 
   function bind(root) {
     if (!root?.querySelector) return;
 
-    bindMirror(root);
-
-    ['#loginOtp', '#loginPassword', '#loginIdentifier',
-      '#loginPasswordIdentifier'].forEach(selector => {
+    ['#loginOtp', '#loginIdentifier'].forEach(selector => {
       const input = root.querySelector(selector);
 
       if (input && input.dataset.rulesBound !== 'true') {
@@ -348,8 +220,7 @@
 
     const focus = {
       identifier: '#loginIdentifier',
-      otp: '#loginOtp',
-      password: '#loginPassword'
+      otp: '#loginOtp'
     }[step];
 
     root.querySelector(focus)?.focus();

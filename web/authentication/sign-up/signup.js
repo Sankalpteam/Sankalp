@@ -1,10 +1,12 @@
 // The sign-up screen, built from SignUpScreen.kt.
 //
-// This is ONE page, not two steps. The email, mobile and password fields stay
-// on screen the whole time; when the OTP is sent, the two buttons are replaced
-// by a single Resend OTP and the OTP section appears below the fields. The web
-// used to hide the whole form and show the OTP on its own, which is not how the
-// app does it - and it threw away everything typed.
+// This is ONE page, not two steps. The email and mobile fields stay on screen the
+// whole time; when the OTP is sent, the button is replaced by a single Resend OTP and the OTP
+// section appears below the fields. The web used to hide the whole form and show the OTP on its
+// own, which is not how the app does it - and it threw away everything typed.
+//
+// There is no password field. The account is created after the email is verified, with a
+// secret the user never sees; signing in is the OTP every time.
 (() => {
   const TITLE_LINES = [
     { text: 'Get started with', purple: true },
@@ -37,27 +39,6 @@
           maxlength="13"
           placeholder="98765 43210"
         />
-      </div>
-    `;
-  }
-
-  function passwordField() {
-    return `
-      <div class="password-wrap">
-        <input
-          id="signupPassword"
-          name="signupPassword"
-          type="password"
-          autocomplete="new-password"
-          placeholder="Create a strong password"
-        />
-        <button
-          type="button"
-          class="password-toggle"
-          data-password-toggle="signupPassword"
-          aria-label="Show password"
-          title="Show password"
-        >◉</button>
       </div>
     `;
   }
@@ -102,11 +83,6 @@
         ${mobileField()}
       </div>
 
-      <div class="field">
-        <label>PASSWORD</label>
-        ${passwordField()}
-      </div>
-
       <div
         class="auth-step auth-signup-actions"
         data-signup-step="details"
@@ -117,14 +93,6 @@
           data-auth-action="signup-submit"
         >
           Continue with OTP
-        </button>
-
-        <button
-          type="button"
-          class="primary auth-action-button"
-          data-auth-action="signup-password"
-        >
-          Continue with Password
         </button>
       </div>
 
@@ -175,8 +143,7 @@
       </button>
 
       <p class="auth-footer">
-        Continue with OTP verifies your email. Continue with Password creates
-        the account directly using your password.
+        We verify your email with a six-digit code. There is no password to remember.
       </p>
     `;
   }
@@ -206,21 +173,16 @@
     });
   }
 
-  // The app enables both buttons only once the email and mobile are filled and
-  // the password is six characters or more; and Verify only at six digits.
+  // Continue is enabled once the email and the mobile are filled; Verify at six digits.
   function applyRules(root) {
     const email = (root.querySelector('#signupEmail')?.value || '').trim();
     const mobile = (root.querySelector('#signupMobile')?.value || '').trim();
-    const password = root.querySelector('#signupPassword')?.value || '';
-    const ready = Boolean(email) && Boolean(mobile) && password.length >= 6;
+    const ready = Boolean(email) && Boolean(mobile);
+    const button = buttonFor(root, 'signup-submit');
 
-    ['signup-submit', 'signup-password'].forEach(action => {
-      const button = buttonFor(root, action);
-
-      if (button) {
-        button.disabled = !ready;
-      }
-    });
+    if (button) {
+      button.disabled = !ready;
+    }
 
     const otp = root.querySelector('#signupOtp');
     const verify = buttonFor(root, 'signup-verify');
@@ -235,7 +197,7 @@
 
     bindMobileFilter(root);
 
-    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupOtp']
+    ['#signupEmail', '#signupMobile', '#signupOtp']
       .forEach(selector => {
         const input = root.querySelector(selector);
 
@@ -343,8 +305,7 @@
   function values(root = document) {
     return {
       email: root.querySelector('#signupEmail')?.value || '',
-      mobile: root.querySelector('#signupMobile')?.value || '',
-      password: root.querySelector('#signupPassword')?.value || ''
+      mobile: root.querySelector('#signupMobile')?.value || ''
     };
   }
 

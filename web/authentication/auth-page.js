@@ -6,8 +6,11 @@
 //
 // The screen is rendered ONCE. Moving between the app's steps only shows and
 // hides panels. It used to re-render the whole screen on every step change,
-// which wiped everything the user had typed - the identifier was empty by the
-// time the password step appeared, so Complete Login could never work.
+// which wiped everything the user had typed.
+//
+// There is no password anywhere on this screen. Signing in is an identifier and a
+// six-digit code, and creating an account is the same - so there is nothing to remember and
+// nothing to reset.
 (() => {
   const AUTH_CLASS = 'indoone-auth-screen';
   let busy = false;
@@ -69,7 +72,6 @@
 
     bindButtons(card);
     bindMobileDefaults(card);
-    bindPasswordToggles(card);
 
     return true;
   }
@@ -163,9 +165,7 @@
   }
 
   function bindMobileDefaults(scope) {
-    // The login identifier shows +91 while it looks like a number. The password
-    // step's identifier has no prefix in the app, so it is not bound here - it
-    // was, and it only pushed the text sideways with no prefix visible.
+    // The login identifier shows +91 while it looks like a number.
     bindMobileInput(
       scope.querySelector('#loginIdentifier'),
       scope.querySelector('#loginMobilePrefix')
@@ -175,57 +175,6 @@
       scope.querySelector('#signupMobile'),
       scope.querySelector('#signupMobilePrefix')
     );
-  }
-
-  function bindPasswordToggles(scope) {
-    scope
-      .querySelectorAll('button[data-password-toggle]')
-      .forEach(button => {
-        if (button.dataset.passwordToggleBound === 'true') return;
-
-        button.dataset.passwordToggleBound = 'true';
-
-        button.addEventListener('click', event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          const input = scope.querySelector(
-            `#${button.dataset.passwordToggle}`
-          );
-
-          if (!input) return;
-
-          const showing = input.type === 'text';
-          input.type = showing ? 'password' : 'text';
-          button.textContent = showing ? '◉' : '◌';
-          button.setAttribute(
-            'aria-label',
-            showing ? 'Show password' : 'Hide password'
-          );
-          input.focus();
-        });
-      });
-  }
-
-  function passwordField(id, autocomplete, placeholder) {
-    return `
-      <div class="password-wrap">
-        <input
-          id="${id}"
-          name="${id}"
-          type="password"
-          autocomplete="${autocomplete}"
-          placeholder="${placeholder}"
-        />
-        <button
-          type="button"
-          class="password-toggle"
-          data-password-toggle="${id}"
-          aria-label="Show password"
-          title="Show password"
-        >◉</button>
-      </div>
-    `;
   }
 
   function showLogin(step = 'identifier') {
@@ -357,8 +306,6 @@
         const email = await auth.startLoginOtp(readLoginIdentifier());
         window.IndooneLoginFeature?.otpEmail?.(email, scope);
         showLogin('otp');
-      } else if (action === 'login-continue-password') {
-        showLogin('password');
       } else if (action === 'login-verify') {
         button.textContent = 'Verifying…';
         await auth.verifyLoginOtp(scope.querySelector('#loginOtp')?.value);
@@ -367,12 +314,6 @@
         const email = await auth.resendLoginOtp();
         window.IndooneLoginFeature?.otpEmail?.(email, scope);
         setStatus('New OTP sent to your email.');
-      } else if (action === 'login-complete') {
-        button.textContent = 'Logging in…';
-        await auth.loginWithPassword(
-          readLoginIdentifier(),
-          scope.querySelector('#loginPassword')?.value
-        );
       } else if (action === 'signup-submit') {
         button.textContent = 'Sending OTP…';
         const email = await auth.startSignup(
@@ -380,11 +321,6 @@
         );
         window.IndooneSignupFeature?.otpEmail?.(email, scope);
         showSignup('otp');
-      } else if (action === 'signup-password') {
-        button.textContent = 'Creating account…';
-        await auth.createSignupWithPassword(
-          window.IndooneSignupFeature?.values?.(scope) || {}
-        );
       } else if (action === 'signup-verify') {
         button.textContent = 'Verifying…';
         await auth.finishSignupAfterOtp(
