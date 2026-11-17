@@ -155,14 +155,20 @@
   // a mobile number is looked up in the index.
   async function resolveLoginEmail(raw) {
     if (raw.includes('@')) {
-      const email = cleanEmail(raw);
-      const methods = await auth().fetchSignInMethodsForEmail(email);
-
-      if (!methods?.length) {
-        throw new Error('No Sankalp account was found.');
-      }
-
-      return email;
+      // Send the code. Do not ask Firebase first.
+      //
+      // This used to call fetchSignInMethodsForEmail and refuse to send anything unless it
+      // listed a provider - so on any account where that call returns an empty list, which is
+      // every account once Email Enumeration Protection is on (it is on by default for new
+      // projects), the request was never made and no code ever arrived. The screen said "No
+      // Sankalp account was found" for an account that exists.
+      //
+      // The app never did this: IndooneAuthService.resolveLoginEmail lowercases the address and
+      // posts the request. One product, two behaviours, and the web's stopped the send.
+      //
+      // It is also the safer shape: telling anyone who asks whether an email has an account is
+      // an enumeration leak. Whether the account exists is decided when the code is verified.
+      return cleanEmail(raw);
     }
 
     const identity = await mobileIdentity(raw);

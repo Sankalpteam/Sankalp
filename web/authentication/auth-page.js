@@ -265,14 +265,7 @@
   // Whichever identifier field is on screen. Both carry the same text because
   // login.js mirrors them, so either one is the right answer.
   function readLoginIdentifier() {
-    const scope = root();
-    const stepThree = scope.querySelector('#loginPasswordIdentifier');
-
-    if (stepThree && !stepThree.closest('[data-login-step]')?.hidden) {
-      return stepThree.value;
-    }
-
-    return scope.querySelector('#loginIdentifier')?.value || '';
+    return root().querySelector('#loginIdentifier')?.value || '';
   }
 
   async function run(button) {
