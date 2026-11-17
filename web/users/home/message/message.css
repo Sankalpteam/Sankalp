@@ -219,6 +219,16 @@
    display: inline-block is the whole fix: this is a <span>, and an inline box ignores width,
    height and border-radius. The ring was there in the markup, styled, and zero-sized - which is
    why the web showed the word and never the circle. */
+/* The ring and the word, 8dp apart.
+   HomeScreen.kt draws them in a Row with Arrangement.spacedBy(8.dp). On the web they were two
+   inline boxes side by side, so the label touched the ring. inline-flex gives the same 8px gap
+   and keeps the bubble shrink-wrapped around them. */
+.chat-bubble.chat-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .chat-spinner {
   display: inline-block;
   flex: none;
