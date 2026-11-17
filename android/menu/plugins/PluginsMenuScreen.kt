@@ -393,17 +393,10 @@ fun PluginsMenuScreen(
                 )
             }
 
-            MailProviderRow(
-                title = "Gmail",
-                accountAddress = gmailAddress,
-                connected = gmailConnected,
-                logoRes = R.drawable.gmail_logo,
-                busy = checking || gmailConnecting || disconnectingProvider == "gmail",
-                onAdd = { startGmailAuthorization() },
-                onReauthorize = { startGmailAuthorization() },
-                onDisconnect = { pendingDisconnect = "gmail" },
-            )
-
+            // Three providers, in this order, on both clients: Zoho Mail, GitHub, Gmail.
+            // Gmail is last and marked unavailable because the backend has no Gmail routes -
+            // the same sentence the web shows. Offering a connect button here that can only
+            // 404 was the difference between the two screens.
             MailProviderRow(
                 title = "Zoho Mail",
                 accountAddress = zohoAddress,
@@ -423,6 +416,18 @@ fun PluginsMenuScreen(
                 onAdd = { startGitHubAuthorization() },
                 onReauthorize = { startGitHubAuthorization() },
                 onDisconnect = { pendingDisconnect = "github" },
+            )
+
+            MailProviderRow(
+                title = "Gmail",
+                accountAddress = gmailAddress,
+                connected = gmailConnected,
+                logoRes = R.drawable.gmail_logo,
+                busy = checking || gmailConnecting || disconnectingProvider == "gmail",
+                onAdd = { startGmailAuthorization() },
+                onReauthorize = { startGmailAuthorization() },
+                onDisconnect = { pendingDisconnect = "gmail" },
+                available = false,
             )
 
             if (githubStatusMessage.isNotBlank()) {
@@ -523,6 +528,10 @@ private fun MailProviderRow(
     onAdd: () -> Unit,
     onReauthorize: () -> Unit,
     onDisconnect: () -> Unit,
+    // False for a provider the backend cannot serve yet. The card is still drawn - all three
+    // belong on this screen - but it offers no connect button, because a button that can only
+    // fail is worse than a sentence that is true.
+    available: Boolean = true,
 ) {
     var menuExpanded by remember(title) { mutableStateOf(false) }
 
@@ -564,8 +573,13 @@ private fun MailProviderRow(
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
-                when (connected) {
-                    true -> {
+                when {
+                    !available -> Text(
+                        text = "Not available yet",
+                        color = Muted,
+                        fontSize = 12.sp,
+                    )
+                    connected == true -> {
                         Text(
                             text = accountAddress.ifBlank { "$title account" },
                             color = Muted,
@@ -578,13 +592,13 @@ private fun MailProviderRow(
                             fontSize = 11.sp,
                         )
                     }
-                    false -> Text(
+                    connected == false -> Text(
                         text = "Connect your $title account",
                         color = Muted,
                         fontSize = 12.sp,
                     )
-                    null -> Text(
-                        text = "Connection status unavailable",
+                    else -> Text(
+                        text = "Status unknown · tap + to try again",
                         color = Muted,
                         fontSize = 11.sp,
                     )
@@ -630,7 +644,7 @@ private fun MailProviderRow(
                         )
                     }
                 }
-            } else {
+            } else if (available) {
                 Surface(
                     modifier = Modifier.size(42.dp),
                     shape = CircleShape,
