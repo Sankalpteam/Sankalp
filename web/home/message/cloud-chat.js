@@ -228,11 +228,26 @@
       }));
   }
 
+  async function renameConversation(conversationId, title) {
+    const value = String(title || '').trim().slice(0, 120);
+
+    if (!conversationId || !value) {
+      return;
+    }
+
+    // Only the title. The count, the timestamp and the owner belong to the messages.
+    await firestore().collection(COLLECTION).doc(conversationId).set(
+      { title: value },
+      { merge: true },
+    );
+  }
+
   window.IndooneCloudChat = {
     appendMessage,
     loadConversation,
     loadLatest,
     listConversations,
-    deleteConversation
+    deleteConversation,
+    renameConversation
   };
 })();

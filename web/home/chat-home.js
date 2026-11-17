@@ -14,6 +14,8 @@
     'home/message/inflight.js?v=20261026a',
     'home/message/message.js?v=20261023a',
     'home/send/send.js?v=20261020b',
+    // Share chat and rename chat: the two actions the app has and the web did not.
+    'home/message/chat-actions.js?v=20261117a',
     'home/voice/voice.js?v=20261019f',
     'home/plus/plus.js?v=20261018b',
     'home/plus/camera/camera.js?v=20261018b',

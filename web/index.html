@@ -164,6 +164,25 @@
            until the accounts screen is showing, because the app shows the
            search field only on that screen. -->
       <div class="top-actions">
+        <!-- The app's chat screen offers Share chat and Rename chat in its own menu
+             (HomeScreen.kt shareCurrentChat / renameCurrentChat). The web had neither. -->
+        <button
+          type="button"
+          class="icon-btn"
+          id="chatActionsBtn"
+          aria-label="Chat actions"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="5.5" cy="12" r="1.3"></circle>
+            <circle cx="12" cy="12" r="1.3"></circle>
+            <circle cx="18.5" cy="12" r="1.3"></circle>
+          </svg>
+        </button>
+        <div class="chat-actions-menu" id="chatActionsMenu" hidden>
+          <button type="button" id="chatShareBtn">Share chat</button>
+          <button type="button" id="chatRenameBtn">Rename chat</button>
+        </div>
         <button
           type="button"
           class="icon-btn"
@@ -210,6 +229,18 @@
         </button>
       </div>
     </section>
+
+    <div class="chat-rename-dialog" id="chatRenameDialog" hidden>
+      <div class="chat-rename-card">
+        <h2>Rename chat</h2>
+        <input id="chatRenameInput" type="text" maxlength="120" autocomplete="off"
+               aria-label="Chat name" />
+        <div class="chat-rename-actions">
+          <button type="button" id="chatRenameCancel">Cancel</button>
+          <button type="button" id="chatRenameSave">Save</button>
+        </div>
+      </div>
+    </div>
 
     <section
       class="chat-page"
