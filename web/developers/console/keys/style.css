@@ -1,11 +1,11 @@
 /* Sankalp console - keys: only what this screen has of its own (the create dialog). */
-.dlg{border:1px solid var(--line);border-radius:16px;background:#fff;max-width:430px;margin:18px 0 0;
+.dlg{border:1px solid var(--line);border-radius:10px;background:#fff;max-width:430px;margin:18px 0 0;
 box-shadow:0 26px 60px -34px rgba(40,24,70,.6);overflow:hidden}
 .dlg .top{padding:16px 18px 0}
 .dlg h4{margin:0 0 4px;font-size:15px}
-.dlg p{margin:0;color:var(--dim);font-size:13.5px;line-height:1.5}
+.dlg p{margin:0;color:var(--dim);font-size:12.5px;line-height:1.5}
 .dlg .body{padding:14px 18px 18px}
-.secret{display:flex;gap:8px;align-items:center;background:#fbf9ff;border:1px dashed var(--brand-soft);
+.secret{display:flex;gap:8px;align-items:center;background:var(--card);border:1px dashed var(--brand-soft);
 border-radius:10px;padding:11px 12px}
 .secret code{color:#3a1a8f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .warnbox{background:#fdf3e3;border:1px solid #f0dfc0;color:#9a5b00;font-size:12.5px;line-height:1.5;
