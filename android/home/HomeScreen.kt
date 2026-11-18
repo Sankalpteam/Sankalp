@@ -846,12 +846,17 @@ fun HomeScreen(
             for (turn in settled) {
                 // Already on screen: no second indicator, no second copy.
                 //
-                // The test is whether this exact answer is in the thread, not whether the stream
-                // remembers drawing it. A flag was spent by the wrong turn, and comparing against
-                // the stream's last chunk missed when the final chunk was not the whole reply.
-                // What the poll needs to know is simply: is this answer already there?
+                // The answer this turn carries is the LAST message when the stream drew it. It
+                // has to be the last one, not one of them: asking "is this text anywhere in the
+                // thread" matched an older answer that happened to be identical - ask "hi" twice
+                // and the greeting is the same both times - so the poll decided the new answer
+                // was already there, skipped it, and the reply was saved but never shown.
+                val last = messages.lastOrNull()
+
                 if (!turn.reply.isNullOrBlank() &&
-                    messages.any { !it.fromUser && it.text == turn.reply }
+                    last != null &&
+                    !last.fromUser &&
+                    last.text == turn.reply
                 ) {
                     continue
                 }
