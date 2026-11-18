@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import datetime
 import pathlib
+import re
 import shutil
 import sys
 
@@ -103,6 +104,64 @@ def require(paths: list[pathlib.Path]) -> None:
         die("missing required input: " + ", ".join(missing))
 
 
+
+# The console's rail, written into every console page at build time.
+#
+# It was a script the pages fetched, which is one request that a browser can serve from its cache -
+# and did: some screens drew eight items and some twelve, depending on which copy of the script that
+# page had been given. A rail that is part of the page cannot be stale, and there is still only one
+# list, here.
+CONSOLE_RAIL = [
+    ("console", "./", "Overview"),
+    ("keys", "keys/", "API keys"),
+    ("usage", "usage/", "Usage"),
+    ("models", "models/", "Models"),
+    ("playground", "playground/", "Playground"),
+    ("logs", "logs/", "Logs"),
+    ("limits", "limits/", "Rate limits"),
+    ("webhooks", "webhooks/", "Webhooks"),
+    ("projects", "projects/", "Projects"),
+    ("team", "team/", "Team"),
+    ("settings", "settings/", "Settings"),
+    ("wallet", "wallet/", "Wallet"),
+]
+
+
+def paint_console_rail() -> int:
+    """Fill the rail placeholder in every console page, and drop the script that used to."""
+    console = SITE / "app" / "developers" / "console"
+    if not console.exists():
+        return 0
+
+    painted = 0
+
+    for page in sorted(console.rglob("index.html")):
+        html = page.read_text(encoding="utf-8")
+        if 'data-console-nav' not in html:
+            continue
+
+        depth = "" if page.parent == console else "../"
+        current = "console" if page.parent == console else page.parent.name
+
+        lines = []
+        for item_id, href, label in CONSOLE_RAIL:
+            active = ' class="on"' if item_id == current else ""
+            lines.append(f'          <a{active} href="{depth}{href}"><span class="dot"></span>{label}</a>')
+
+        html = html.replace(
+            '<div class="nav" data-console-nav></div>',
+            '<div class="nav">\n' + "\n".join(lines) + "\n        </div>",
+            1,
+        )
+        # the script that filled it is no longer needed
+        html = re.sub(r'\s*<script src="(?:\.\./)?nav\.js[^"]*"></script>', "", html)
+
+        page.write_text(html, encoding="utf-8")
+        painted += 1
+
+    return painted
+
+
 def main() -> None:
     require(
         [LANDING / "index.html", LANDING / "style.css", APP / "index.html", APP / "update.json"]
@@ -122,6 +181,8 @@ def main() -> None:
     shutil.copytree(APP, SITE / "app")
     for shared in SHARED:
         shutil.copytree(WEB / shared, SITE / "app" / shared)
+
+    painted = paint_console_rail()
 
     # The same artwork, inside /app/ as well as at the root.
     #
