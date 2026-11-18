@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - wallet</title>
-<link rel="stylesheet" href="style.css?v=20261118e">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -35,12 +36,12 @@
       <div class="main">
         <div class="grid2">
           <div>
-            <div class="kpi" style="background:linear-gradient(180deg,#f7f1ff,#fbf9ff)">
+            <div class="kpi card-tint">
               <div class="k">balance</div>
-              <div class="v" style="font-size:34px">&#8377;460.20</div>
+              <div class="v bignum">&#8377;460.20</div>
               <div class="mini">enough for about 4,600 replies at today's rate</div>
             </div>
-            <div class="btnrow" style="margin-top:12px">
+            <div class="btnrow note-tight">
               <button class="btn primary">Add money</button>
               <button class="btn ghost">Auto top-up: off</button>
             </div>
@@ -52,9 +53,9 @@
               <thead><tr><th>When</th><th>What</th><th class="right">Amount</th></tr></thead>
               <tbody>
                 <tr><td class="mini">18 Nov</td><td>Top-up</td><td class="right"><b>&#8377;500.00</b></td></tr>
-                <tr><td class="mini">18 Nov</td><td>Usage</td><td class="right" style="color:var(--bad)">&minus;&#8377;39.80</td></tr>
+                <tr><td class="mini">18 Nov</td><td>Usage</td><td class="right text-bad">&minus;&#8377;39.80</td></tr>
                 <tr><td class="mini">14 Nov</td><td>Top-up</td><td class="right"><b>&#8377;200.00</b></td></tr>
-                <tr><td class="mini">13 Nov</td><td>Usage</td><td class="right" style="color:var(--bad)">&minus;&#8377;200.00</td></tr>
+                <tr><td class="mini">13 Nov</td><td>Usage</td><td class="right text-bad">&minus;&#8377;200.00</td></tr>
               </tbody>
             </table>
           </div>
@@ -63,6 +64,6 @@
     </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 </body>
 </html>
