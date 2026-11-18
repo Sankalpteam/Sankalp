@@ -55,7 +55,7 @@
             <div class="field">
               <label for="pgSystem">System prompt</label>
               <textarea id="pgSystem" placeholder="You are Sankalp, a helpful assistant."></textarea>
-              <span class="hint">Optional. Sets the behaviour for this one request.</span>
+              <span class="hintline">Optional. Sets the behaviour for this one request.</span>
             </div>
 
             <div class="field">
@@ -75,27 +75,42 @@
             </div>
 
             <button class="btn primary" id="pgRun" type="button">Run</button>
-            <p class="hint note-tight">The gateway is not connected yet, so this shows a
-              sample answer and the exact request that will be sent.</p>
+            <p class="note-tight">The gateway is not connected yet, so this shows a sample answer and
+              the exact request that will be sent.</p>
           </div>
 
           <div class="panel">
-            <h4>Answer</h4>
-            <div class="answer" id="pgAnswer"><span class="placeholder">Press Run to see an answer.</span></div>
-
-            <div class="meter">
-              <span>model <b id="pgMeterModel">sankalp-standard</b></span>
-              <span>tokens <b id="pgMeterTokens">&ndash;</b></span>
-              <span>cost <b id="pgMeterCost">&ndash;</b></span>
+            <!-- One pane, three views of the same run: the answer you read, the request you paste,
+                 and the raw JSON for when something is wrong and you need to see what was sent. -->
+            <div class="tabline" role="tablist">
+              <button class="tab on" id="pgTabAnswer" type="button" role="tab">Answer</button>
+              <button class="tab" id="pgTabRequest" type="button" role="tab">Request</button>
+              <button class="tab" id="pgTabJson" type="button" role="tab">Raw JSON</button>
             </div>
 
-            <h4 class="section">The same request, from your server</h4>
-            <pre class="code" id="pgCode"></pre>
+            <div id="pgViewAnswer">
+              <div class="answer" id="pgAnswer"><span class="placeholder">Press Run to see an answer.</span></div>
+              <div class="meter">
+                <span>model <b id="pgMeterModel">sankalp-standard</b></span>
+                <span>tokens <b id="pgMeterTokens">&ndash;</b></span>
+                <span>cost <b id="pgMeterCost">&ndash;</b></span>
+              </div>
+            </div>
+
+            <div id="pgViewRequest" hidden>
+              <pre class="code" id="pgCode"></pre>
+              <p class="note-tight">This is the request your server sends. The key is a placeholder -
+                the real one is never in a page.</p>
+            </div>
+
+            <div id="pgViewJson" hidden>
+              <pre class="code" id="pgJson"></pre>
+            </div>
+
             <pre id="pgCurlTemplate" hidden>&#99;url https://sankalp.indoworkspace.in/v1/chat/completions \
   -H &#34;Authoriz&#97;tion: Be&#97;rer YOUR_API_KEY&#34; \
   -H &#34;Content-Type: application/json&#34; \
   -d &#39;__BODY__&#39;</pre>
-
           </div>
         </div>
       </div>
