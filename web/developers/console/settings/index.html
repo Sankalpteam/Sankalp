@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - settings</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Settings</h3><small>Security, spending and what we tell you.</small></div>
+          <span class="pill">not saved yet</span>
+        </div>
+
+        <div class="stack">
+
+          <div class="card">
+            <h4>Account</h4>
+            <p class="sub">The name that appears on invoices, and where we write when something needs you.</p>
+            <div class="inline">
+              <div class="field"><label for="stName">Name</label><input id="stName" value="Yashwanth"></div>
+              <div class="field"><label for="stEmail">Email</label><input id="stEmail" type="email" value="yashwanthputtarajegowda@gmail.com"></div>
+            </div>
+            <div class="field"><label for="stTz">Time zone</label>
+              <select id="stTz"><option selected>Asia/Kolkata (IST)</option><option>UTC</option></select>
+            </div>
+            <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
+          </div>
+
+          <div class="card">
+            <h4>Key security</h4>
+            <p class="sub">A key that can only be used from your own servers is worth much less to anyone who finds it.</p>
+            <div class="field">
+              <label for="stIps">IP allowlist</label>
+              <textarea id="stIps" placeholder="One address or range per line, for example&#10;203.0.113.7&#10;198.51.100.0/24"></textarea>
+              <span class="sub" style="margin:0">Empty means any address may use the key. Filled, every other address is refused.</span>
+            </div>
+            <div class="inline">
+              <div class="field"><label for="stExpiry">Keys expire after</label>
+                <select id="stExpiry"><option>Never</option><option selected>90 days</option><option>180 days</option><option>365 days</option></select>
+              </div>
+              <div class="field"><label for="stGrace">Warn before expiry</label>
+                <select id="stGrace"><option>7 days</option><option selected>14 days</option><option>30 days</option></select>
+              </div>
+            </div>
+            <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
+          </div>
+
+          <div class="card">
+            <h4>Spending</h4>
+            <p class="sub">Told before it is gone, not after. The wallet stops answering at zero.</p>
+            <div class="inline">
+              <div class="field"><label for="stAlert">Warn when balance falls below</label>
+                <input id="stAlert" type="number" min="0" step="10" value="100">
+              </div>
+              <div class="field"><label for="stHard">Stop requests below</label>
+                <input id="stHard" type="number" min="0" step="10" value="0">
+              </div>
+            </div>
+            <label class="toggle"><input id="stAuto" type="checkbox"> Top up automatically when it gets low</label>
+            <div class="inline">
+              <div class="field"><label for="stAutoAmt">Top up by</label><input id="stAutoAmt" type="number" min="100" step="100" value="500"></div>
+              <div class="field"><label for="stAutoAt">When below</label><input id="stAutoAt" type="number" min="0" step="50" value="150"></div>
+            </div>
+            <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
+          </div>
+
+          <div class="card">
+            <h4>Notifications</h4>
+            <p class="sub">All of these go to the address above. Nothing here is on by default except the first two.</p>
+            <label class="toggle"><input type="checkbox" checked> Balance is low, or a top-up failed</label>
+            <label class="toggle"><input type="checkbox" checked> A key was created or revoked</label>
+            <label class="toggle"><input type="checkbox"> Weekly usage summary</label>
+            <label class="toggle"><input type="checkbox"> A webhook keeps failing</label>
+            <label class="toggle"><input type="checkbox"> Product changes that affect the API</label>
+            <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
+          </div>
+
+          <div class="card">
+            <h4>Danger zone</h4>
+            <p class="sub">Revoking every key stops every server at once. The account, its history and
+              its wallet stay; only the keys go.</p>
+            <button class="btn ghost" id="stRevokeAll" type="button" style="color:#c0392b;border-color:#e8b7b1">Revoke all keys</button>
+          </div>
+
+        </div>
+
+        <p class="note">
+          These settings are stored with the account and enforced by the gateway - the allowlist and
+          the expiry at the door, the spend warning when the balance is checked. Nothing here is
+          saved until the gateway exists to honour it.
+        </p>
+      </div>
+  </div>
+</main>
+
+<script src="../nav.js?v=20261118f"></script>
+<script src="settings.js?v=20261118a"></script>
+</body>
+</html>
