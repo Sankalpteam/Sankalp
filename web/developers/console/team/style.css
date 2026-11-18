@@ -5,15 +5,15 @@
    still on screen. */
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
 .filters .field{margin:0;min-width:150px}
-.filters select,.filters input{font-family:inherit;font-size:13px;color:var(--ink);background:#fbf9ff;
+.filters select,.filters input{font-family:inherit;font-size:13px;color:var(--ink);background:var(--card);
 border:1px solid var(--line);border-radius:9px;padding:8px 10px}
 tr.logrow{cursor:pointer}
-tr.logrow:hover td{background:#fbf9ff}
-tr.detail td{background:#fbf9ff;padding:0}
+tr.logrow:hover td{background:var(--card)}
+tr.detail td{background:var(--card);padding:0}
 .detailbox{padding:14px 16px;display:grid;gap:10px}
 .detailbox .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:12.5px}
 .detailbox .kv b{color:var(--faint);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-.detailbox pre{margin:0;background:#14121a;color:#e9e4f5;border-radius:10px;padding:12px;
+.detailbox pre{margin:0;background:#0f1115;color:#e8e6f0;border-radius:10px;padding:12px;
 overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.55}
 .pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;font-size:12.5px;color:var(--faint)}
 .pager .btn{padding:8px 14px;font-size:12.5px}
@@ -26,16 +26,16 @@ overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:
    once you know where it went. */
 .wh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:20px}
 @media(max-width:1000px){.wh{grid-template-columns:1fr}}
-.wh .panel{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px}
-.wh .panel h4{margin:0 0 12px;font-size:14px}
+.wh .panel{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px}
+.wh .panel h4{margin:0 0 12px;font-size:12.5px}
 .wh .field{display:grid;gap:6px;margin-bottom:12px}
 .wh .field label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700}
-.wh .field input{font-family:inherit;font-size:13.5px;color:var(--ink);background:#fbf9ff;
+.wh .field input{font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--card);
 border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box}
 .events{display:grid;gap:8px}
 .events label{display:flex;gap:9px;align-items:center;font-size:13px;color:var(--dim)}
 .events code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#3a1a8f}
-.secretline{display:flex;gap:8px;align-items:center;background:#fbf9ff;border:1px dashed var(--brand-soft);
+.secretline{display:flex;gap:8px;align-items:center;background:var(--card);border:1px dashed var(--brand-soft);
 border-radius:10px;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#3a1a8f}
 .secretline span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
@@ -43,15 +43,15 @@ border-radius:10px;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Men
    Sections, each its own card, each with one Save. A single page-wide Save makes it impossible to
    tell what was saved, and one bad field blocks every other change. */
 .stack{display:grid;gap:16px;max-width:760px}
-.card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px}
-.card h4{margin:0 0 4px;font-size:14px}
+.card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px}
+.card h4{margin:0 0 4px;font-size:12.5px}
 .card .sub{margin:0 0 14px;font-size:12.5px;color:var(--faint);line-height:1.5}
 .card .field{display:grid;gap:6px;margin-bottom:12px}
 .card .field label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700}
-.card .field input,.card .field select,.card .field textarea{font-family:inherit;font-size:13.5px;color:var(--ink);
-background:#fbf9ff;border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box}
+.card .field input,.card .field select,.card .field textarea{font-family:inherit;font-size:12.5px;color:var(--ink);
+background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box}
 .card .field textarea{min-height:80px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6}
-.toggle{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--dim);margin-bottom:10px}
+.toggle{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--dim);margin-bottom:10px}
 .toggle input{width:16px;height:16px}
 .inline{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:820px){.inline{grid-template-columns:1fr}}
@@ -61,7 +61,7 @@ background:#fbf9ff;border:1px solid var(--line);border-radius:10px;padding:10px 
 /* ---------- team ----------
    A member list is short and a role is the only thing worth changing, so the role is a select in
    the row rather than a dialog behind a button. */
-.members td select{font-family:inherit;font-size:12.5px;color:var(--ink);background:#fbf9ff;
+.members td select{font-family:inherit;font-size:12.5px;color:var(--ink);background:var(--card);
 border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .members .who-cell{display:flex;align-items:center;gap:10px}
 .members .avatar{width:28px;height:28px;border-radius:8px;background:linear-gradient(180deg,var(--brand-2),var(--brand-soft));
