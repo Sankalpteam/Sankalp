@@ -25,6 +25,7 @@
     { id: 'logs', href: 'logs/', label: 'Logs' },
     { id: 'limits', href: 'limits/', label: 'Rate limits' },
     { id: 'webhooks', href: 'webhooks/', label: 'Webhooks' },
+    { id: 'settings', href: 'settings/', label: 'Settings' },
     { id: 'wallet', href: 'wallet/', label: 'Wallet' }
   ];
 
