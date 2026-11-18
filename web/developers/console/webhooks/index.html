@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - webhooks</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -46,7 +47,7 @@
             <div class="field">
               <label>Signing secret</label>
               <div class="secretline"><span>whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;3f7a</span></div>
-              <span class="hint" style="font-size:11.5px;color:var(--faint)">
+              <span class="hint hintline">
                 Every delivery carries a signature made with this secret, so your server can prove
                 the call came from us. Shown once, then never again.
               </span>
@@ -63,14 +64,14 @@
               <label><input type="checkbox"> <code>key.created</code> - a new key was made</label>
               <label><input type="checkbox"> <code>key.revoked</code> - a key was revoked</label>
             </div>
-            <p class="note" style="margin-top:12px">
+            <p class="note note-tight">
               A delivery is retried with a growing gap for a day before it is dropped, and every
               attempt is listed below with the code your server returned.
             </p>
           </div>
         </div>
 
-        <h4 style="margin:6px 0 8px;font-size:14px">Recent deliveries</h4>
+        <h4 class="section">Recent deliveries</h4>
         <table>
           <thead>
             <tr>
@@ -118,8 +119,8 @@
           </tbody>
         </table>
 
-        <h4 style="margin:22px 0 8px;font-size:14px">What we send</h4>
-        <pre class="code" style="margin:0" id="whSample"></pre>
+        <h4 class="section">What we send</h4>
+        <pre class="code flush" id="whSample"></pre>
 
         <p class="note">
           Sample deliveries until the gateway records real ones. The body carries ids and counts,
@@ -130,7 +131,7 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 <script src="webhooks.js?v=20261118a"></script>
 </body>
 </html>
