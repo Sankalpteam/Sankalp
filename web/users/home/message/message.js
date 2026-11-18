@@ -13,6 +13,33 @@
 
   // HomeScreen.kt: REPLY_LINK_PATTERN = Regex("""https?://\S+""") - an http or
   // https URL, running to the next space.
+  // The address a person should see.
+  //
+  // A search result arrives as a redirect: https://www.google.com/url?q=<the real address>. The
+  // row then shows a hundred characters of encoding, and the copy button copies the redirect
+  // instead of the page. It is unwrapped here, at the one place every link in a reply passes
+  // through - the app does the same, in cleanLinkUrl.
+  function cleanLinkUrl(raw) {
+    const trimmed = String(raw || '').trim().replace(/[.,)\]>'"']+$/, '');
+
+    try {
+      const url = new URL(trimmed);
+      const host = url.hostname.toLowerCase();
+
+      if (host.endsWith('google.com') && url.pathname.startsWith('/url')) {
+        const target = url.searchParams.get('q') || url.searchParams.get('url');
+
+        if (target && target.startsWith('http')) {
+          return target;
+        }
+      }
+    } catch (error) {
+      // not a URL we can parse; show what arrived
+    }
+
+    return trimmed;
+  }
+
   const REPLY_LINK_PATTERN = /https?:\/\/\S+/g;
 
   function logo() {
@@ -114,7 +141,8 @@
   // long, and a copy button at the end of the row. The button puts the whole
   // URL on the clipboard and says so - a tap with no visible result reads as
   // though it did nothing.
-  function linkRow(url, isFirst) {
+  function linkRow(rawUrl, isFirst) {
+    const url = cleanLinkUrl(rawUrl);
     const row = document.createElement('div');
     row.className = isFirst ? 'chat-link-row' : 'chat-link-row chat-gap';
 

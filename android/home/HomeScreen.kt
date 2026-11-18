@@ -2370,6 +2370,35 @@ private val MARKDOWN_LINK_PATTERN = Regex("""\[([^\]\n]+)\]\((https?://[^\s)]+)\
  * line above it, and prose that was only the whitespace around a link should not become
  * a line of its own.
  */
+/**
+ * The address a person should see.
+ *
+ * A search result arrives as a redirect: https://www.google.com/url?q=<the real address>. The
+ * row then shows a hundred characters of encoding and the copy button copies that instead of the
+ * page. The redirect is unwrapped here, at the one place every link in a reply passes through, so
+ * the row shows the address the reader would have opened anyway.
+ */
+private fun cleanLinkUrl(raw: String): String {
+    val trimmed = raw.trim().trimEnd('.', ',', ')', ']', '>', '"', '\'')
+    val uri = runCatching { java.net.URI(trimmed) }.getOrNull() ?: return trimmed
+
+    val host = uri.host?.lowercase().orEmpty()
+
+    if (host.endsWith("google.com") && uri.path.orEmpty().startsWith("/url")) {
+        val target = uri.rawQuery.orEmpty()
+            .split('&')
+            .firstOrNull { it.startsWith("q=") || it.startsWith("url=") }
+            ?.substringAfter('=')
+            ?.let { runCatching { java.net.URLDecoder.decode(it, "UTF-8") }.getOrNull() }
+
+        if (!target.isNullOrBlank() && target.startsWith("http")) {
+            return target
+        }
+    }
+
+    return trimmed
+}
+
 private fun splitReplyIntoParts(text: String): List<ReplyPart> {
     val parts = mutableListOf<ReplyPart>()
     var cursor = 0
@@ -2378,7 +2407,7 @@ private fun splitReplyIntoParts(text: String): List<ReplyPart> {
     // backend wrote instead of the URL being lifted out into a row of its own.
     MARKDOWN_LINK_PATTERN.findAll(text).forEach { match ->
         appendBareLinks(parts, text.substring(cursor, match.range.first))
-        parts += ReplyPart.Link(url = match.groupValues[2], label = match.groupValues[1])
+        parts += ReplyPart.Link(url = cleanLinkUrl(match.groupValues[2]), label = match.groupValues[1])
         cursor = match.range.last + 1
     }
 
@@ -2393,7 +2422,7 @@ private fun appendBareLinks(parts: MutableList<ReplyPart>, segment: String) {
     REPLY_LINK_PATTERN.findAll(segment).forEach { match ->
         val prose = segment.substring(cursor, match.range.first).trim()
         if (prose.isNotEmpty()) parts += ReplyPart.Prose(prose)
-        parts += ReplyPart.Link(match.value)
+        parts += ReplyPart.Link(cleanLinkUrl(match.value))
         cursor = match.range.last + 1
     }
 
