@@ -707,6 +707,33 @@ fun HomeScreen(
     // raises it, only a settled turn lowers it, and it is reset on every send.
     var streamedReplies by remember { mutableStateOf(0) }
 
+    // Put an answer on screen, once.
+    //
+    // The same reply could reach the thread from two directions - the stream that draws it and
+    // the reconciliation that watches the durable store - and on a phone the second one showed
+    // up as a second identical bubble. The web never showed it twice because it has one path.
+    //
+    // Rather than keep guessing which path wins, the thread itself refuses to hold the same
+    // answer twice in a row. Two identical answers, one under the other, are never something a
+    // person should see: if the last message is that same answer, this replaces it.
+    fun addReply(text: String, chips: List<ActionChip> = emptyList()) {
+        if (text.isBlank()) {
+            return
+        }
+
+        val last = messages.lastOrNull()
+
+        if (last != null && !last.fromUser && last.text == text) {
+            messages = messages.dropLast(1) + last.copy(
+                chips = if (chips.isEmpty()) last.chips else chips,
+            )
+            return
+        }
+
+        messages = messages + ChatMessage(text, false, chips = chips)
+    }
+
+
     var conversationId by rememberSaveable(userKey, startNewChat) { mutableStateOf<String?>(null) }
 
     // The thread menu's rename dialog. The title is seeded from what the thread is called
@@ -998,32 +1025,6 @@ fun HomeScreen(
                 }
             isLoadingHistory = false
         }
-    }
-
-    // Put an answer on screen, once.
-    //
-    // The same reply could reach the thread from two directions - the stream that draws it and
-    // the reconciliation that watches the durable store - and on a phone the second one showed
-    // up as a second identical bubble. The web never showed it twice because it has one path.
-    //
-    // Rather than keep guessing which path wins, the thread itself refuses to hold the same
-    // answer twice in a row. Two identical answers, one under the other, are never something a
-    // person should see: if the last message is that same answer, this replaces it.
-    fun addReply(text: String, chips: List<ActionChip> = emptyList()) {
-        if (text.isBlank()) {
-            return
-        }
-
-        val last = messages.lastOrNull()
-
-        if (last != null && !last.fromUser && last.text == text) {
-            messages = messages.dropLast(1) + last.copy(
-                chips = if (chips.isEmpty()) last.chips else chips,
-            )
-            return
-        }
-
-        messages = messages + ChatMessage(text, false, chips = chips)
     }
 
     fun sendMessage() {
