@@ -1,22 +1,36 @@
 /* Sankalp console - playground: only what this screen has of its own. */
-/* ---------- playground ----------
-   Two columns: the form on the left, the answer and its cURL on the right. Below 1000px they
-   stack, because a half-width answer pane is unreadable on a phone. */
-.pg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+
+/* Two columns: the form, and one pane on the right with three views of the same run. */
+.pg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
 @media(max-width:1000px){.pg{grid-template-columns:1fr}}
-.panel{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px}
-.panel h4{margin:0 0 12px;font-size:12.5px;letter-spacing:-.2px}
+
+.panel{border:1px solid var(--line);border-radius:8px;padding:18px}
+.panel h4{margin:0 0 14px;font-size:14px;font-weight:600;letter-spacing:-.2px}
+
 .field{display:grid;gap:6px;margin-bottom:12px}
-.field label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700}
-.field select,.field input[type=number],.field textarea{font-family:inherit;font-size:12.5px;color:var(--ink);
-background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box}
-.field textarea{resize:vertical;min-height:104px;line-height:1.55}
-.field .hint{font-size:11.5px;color:var(--faint)}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.answer{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:13px;font-size:12.5px;
-line-height:1.6;white-space:pre-wrap;min-height:120px}
+.field label{font-size:12.5px;color:var(--dim)}
+.field select,.field input,.field textarea{font-family:inherit;font-size:13.5px;color:#000;background:#fff;
+border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;box-sizing:border-box}
+.field textarea{resize:vertical;min-height:76px;line-height:1.55}
+.field select:focus,.field input:focus,.field textarea:focus{outline:2px solid #d6e7ff;outline-offset:1px;
+border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:1000px){.row2{grid-template-columns:1fr}}
+
+/* The three views, as tabs rather than three stacked blocks: the answer is what you read, the
+   request is what you paste, and they are never needed at the same time. */
+.tabline{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{font:inherit;font-size:12.5px;font-weight:500;color:var(--dim);background:none;border:0;
+border-bottom:2px solid transparent;padding:8px 10px;cursor:pointer;margin-bottom:-1px}
+.tab:hover{color:#000}
+.tab.on{color:#000;border-bottom-color:#000}
+
+.answer{background:var(--grey);border:1px solid var(--line);border-radius:8px;padding:14px;
+font-size:13.5px;line-height:1.6;white-space:pre-wrap;min-height:132px}
 .answer .placeholder{color:var(--faint)}
-pre.code{margin:12px 0 0;background:#0f1115;color:#e8e6f0;border-radius:8px;padding:13px;overflow:auto;
-font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6}
-.meter{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--faint);margin-top:10px}
-.meter b{color:var(--ink);font-weight:700}
+
+.meter{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--faint)}
+.meter b{color:#000;font-weight:600}
+
+pre.code{margin:0;background:#0f1115;color:#e8e6f0;border-radius:8px;padding:13px;overflow:auto;
+font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.55}
