@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - playground</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -74,7 +75,7 @@
             </div>
 
             <button class="btn primary" id="pgRun" type="button">Run</button>
-            <p class="hint" style="margin-top:10px">The gateway is not connected yet, so this shows a
+            <p class="hint note-tight">The gateway is not connected yet, so this shows a
               sample answer and the exact request that will be sent.</p>
           </div>
 
@@ -88,7 +89,7 @@
               <span>cost <b id="pgMeterCost">&ndash;</b></span>
             </div>
 
-            <h4 style="margin-top:16px">The same request, from your server</h4>
+            <h4 class="section">The same request, from your server</h4>
             <pre class="code" id="pgCode"></pre>
             <pre id="pgCurlTemplate" hidden>&#99;url https://sankalp.indoworkspace.in/v1/chat/completions \
   -H &#34;Authoriz&#97;tion: Be&#97;rer YOUR_API_KEY&#34; \
@@ -101,7 +102,7 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 <script src="playground.js?v=20261118a"></script>
 </body>
 </html>
