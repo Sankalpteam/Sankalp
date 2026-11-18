@@ -21,6 +21,7 @@
     { id: 'keys', href: 'keys/', label: 'API keys' },
     { id: 'usage', href: 'usage/', label: 'Usage' },
     { id: 'models', href: 'models/', label: 'Models' },
+    { id: 'playground', href: 'playground/', label: 'Playground' },
     { id: 'wallet', href: 'wallet/', label: 'Wallet' }
   ];
 
