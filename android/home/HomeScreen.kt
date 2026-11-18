@@ -2544,8 +2544,14 @@ private fun MarkdownLink(label: String, url: String, modifier: Modifier = Modifi
 @Composable
 private fun ReplyLinkRow(url: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    // One width, whatever the link is.
+    //
+    // This was widthIn(max = 250.dp) with a text that only took the room it needed, so a short
+    // link drew a short row and a long one drew a wide row - the start of the row was always in
+    // the same place and the end never was. Every link row is 250dp now, the link is one line
+    // with an ellipsis when it does not fit, and the copy button sits at the same end every time.
     Surface(
-        modifier = modifier.widthIn(max = 250.dp),
+        modifier = modifier.width(250.dp),
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
         border = BorderStroke(1.dp, Color(0xFFE6DEF4)),
@@ -2557,7 +2563,7 @@ private fun ReplyLinkRow(url: String, modifier: Modifier = Modifier) {
         ) {
             Text(
                 url,
-                modifier = Modifier.weight(1f, fill = false),
+                modifier = Modifier.weight(1f),
                 color = Color(0xFF6330DB),
                 fontSize = 13.sp,
                 maxLines = 1,
