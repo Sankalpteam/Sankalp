@@ -695,6 +695,17 @@ fun HomeScreen(
     var messages by remember(userKey, startNewChat) { mutableStateOf(emptyList<ChatMessage>()) }
     var isSending by remember { mutableStateOf(false) }
     var chatActivityState by remember { mutableStateOf(ChatActivityState.IDLE) }
+    // How many answers the foreground stream has put on screen and the poll has not yet been
+    // told about.
+    //
+    // Three attempts at this, and the first two failed for the same reason: they asked a
+    // question the poll could answer wrongly. A boolean was spent by whichever turn settled
+    // first. A text match hid a genuine reply when the same answer came twice, and missed when
+    // the stream's last chunk was not the whole reply - which brought the duplicate back.
+    //
+    // A count cannot be spent by the wrong turn and does not depend on the text: only the stream
+    // raises it, only a settled turn lowers it, and it is reset on every send.
+    var streamedReplies by remember { mutableStateOf(0) }
 
     var conversationId by rememberSaveable(userKey, startNewChat) { mutableStateOf<String?>(null) }
 
@@ -845,19 +856,8 @@ fun HomeScreen(
 
             for (turn in settled) {
                 // Already on screen: no second indicator, no second copy.
-                //
-                // The answer this turn carries is the LAST message when the stream drew it. It
-                // has to be the last one, not one of them: asking "is this text anywhere in the
-                // thread" matched an older answer that happened to be identical - ask "hi" twice
-                // and the greeting is the same both times - so the poll decided the new answer
-                // was already there, skipped it, and the reply was saved but never shown.
-                val last = messages.lastOrNull()
-
-                if (!turn.reply.isNullOrBlank() &&
-                    last != null &&
-                    !last.fromUser &&
-                    last.text == turn.reply
-                ) {
+                if (streamedReplies > 0) {
+                    streamedReplies -= 1
                     continue
                 }
 
@@ -1011,6 +1011,7 @@ fun HomeScreen(
         }
         val requestConversationId = conversationId ?: UUID.randomUUID().toString()
         messages = messages + ChatMessage(typed, true, attachmentsToSend)
+        streamedReplies = 0
         input = ""
         conversationId = requestConversationId
         isSending = true
@@ -1080,6 +1081,8 @@ fun HomeScreen(
                         messages = updated
                     }
 
+                    // One answer is on screen; the poll should not draw it again.
+                    streamedReplies += 1
                     chatActivityState = ChatActivityState.IDLE
                     isSending = false
 
