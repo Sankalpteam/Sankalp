@@ -24,6 +24,7 @@
     { id: 'playground', href: 'playground/', label: 'Playground' },
     { id: 'logs', href: 'logs/', label: 'Logs' },
     { id: 'limits', href: 'limits/', label: 'Rate limits' },
+    { id: 'webhooks', href: 'webhooks/', label: 'Webhooks' },
     { id: 'wallet', href: 'wallet/', label: 'Wallet' }
   ];
 
