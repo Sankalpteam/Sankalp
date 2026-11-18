@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - projects</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -44,8 +45,8 @@
             <span>test key <code>sk_test_&bull;&bull;&bull;&bull;9b31</code></span>
           </div>
           <div class="foot">
-            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Open in console</button>
-            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Rename</button>
+            <button class="btn ghost" type="button" class="btn-sm">Open in console</button>
+            <button class="btn ghost" type="button" class="btn-sm">Rename</button>
           </div>
         </div>
 
@@ -57,15 +58,14 @@
             <span>test key <code>sk_test_&bull;&bull;&bull;&bull;4d77</code></span>
           </div>
           <div class="foot">
-            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Open in console</button>
-            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Rename</button>
+            <button class="btn ghost" type="button" class="btn-sm">Open in console</button>
+            <button class="btn ghost" type="button" class="btn-sm">Rename</button>
           </div>
         </div>
 
         <div class="newproj">
-          <div class="field" style="margin:0"><label for="pjName">New project</label>
-            <input id="pjName" placeholder="Name, for example Sankalp app" style="font-family:inherit;font-size:13.5px;
-              color:var(--ink);background:#fbf9ff;border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box">
+          <div class="inline-field"><label for="pjName">New project</label>
+            <input id="pjName" placeholder="Name, for example Sankalp app">
           </div>
           <button class="btn primary" id="pjCreate" type="button">Create</button>
         </div>
@@ -79,7 +79,7 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 <script src="projects.js?v=20261118a"></script>
 </body>
 </html>
