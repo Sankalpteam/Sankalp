@@ -1,0 +1,32 @@
+name: Web Chat Contracts
+
+on:
+  pull_request:
+    branches: [main, develop, terminal]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-chat-checks.yml"
+  push:
+    branches: [main, "fix/**"]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-chat-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-chat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check production chat JavaScript syntax
+        run: |
+          node --check web/users/home/message/chat-api.js
+          node --check web/users/home/send/send.js
+      - name: Test turn-ID and streaming request contracts
+        run: node --test web/tests/chat-api-turn-id.test.cjs
