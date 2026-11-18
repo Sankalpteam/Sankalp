@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - settings</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -57,7 +58,7 @@
             <div class="field">
               <label for="stIps">IP allowlist</label>
               <textarea id="stIps" placeholder="One address or range per line, for example&#10;203.0.113.7&#10;198.51.100.0/24"></textarea>
-              <span class="sub" style="margin:0">Empty means any address may use the key. Filled, every other address is refused.</span>
+              <span class="sub flush">Empty means any address may use the key. Filled, every other address is refused.</span>
             </div>
             <div class="inline">
               <div class="field"><label for="stExpiry">Keys expire after</label>
@@ -104,7 +105,7 @@
             <h4>Danger zone</h4>
             <p class="sub">Revoking every key stops every server at once. The account, its history and
               its wallet stay; only the keys go.</p>
-            <button class="btn ghost" id="stRevokeAll" type="button" style="color:#c0392b;border-color:#e8b7b1">Revoke all keys</button>
+            <button class="btn ghost" id="stRevokeAll" type="button" class="text-bad">Revoke all keys</button>
           </div>
 
         </div>
@@ -118,7 +119,7 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 <script src="settings.js?v=20261118a"></script>
 </body>
 </html>
