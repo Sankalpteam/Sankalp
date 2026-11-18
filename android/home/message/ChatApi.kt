@@ -138,7 +138,9 @@ private const val READ_TIMEOUT_MS = 300_000
     private const val WARMUP_TIMEOUT_MS = 15_000
     private const val WARMUP_RETRIES = 1
     private const val WARMUP_COOLDOWN_MS = 60_000L
-    private const val CHAT_TRANSIENT_RETRIES = 1
+    // A failed POST may already have changed the user's GitHub/email data.
+    // Transport retries require reconciliation, never an automatic second POST.
+    private const val CHAT_TRANSIENT_RETRIES = 0
     private const val CHAT_RETRY_DELAY_MS = 5_000L
     private const val MAX_UPLOAD_BYTES = 2_000_000
     private const val MAX_CHAT_IMAGE_BYTES = 5_000_000
@@ -158,6 +160,7 @@ private const val READ_TIMEOUT_MS = 300_000
         attachmentBytes: ByteArray? = null,
         fileIds: List<String> = emptyList(),
         mediaAttachments: List<ChatMediaAttachment> = emptyList(),
+        clientTurnId: String? = null,
     ): ChatResponse {
         val backendUrl = requireBackendUrl()
         val authToken = requireAuthToken()
@@ -178,6 +181,7 @@ private const val READ_TIMEOUT_MS = 300_000
 
         val payload = JSONObject().apply {
             put("message", message)
+            clientTurnId?.takeIf { it.isNotBlank() }?.let { put("client_turn_id", it) }
             conversationId?.takeIf { it.isNotBlank() }?.let { put("conversation_id", it) }
             fileId?.takeIf { it.isNotBlank() }?.let { put("file_id", it) }
             if (fileIds.isNotEmpty()) {
@@ -384,6 +388,7 @@ private const val READ_TIMEOUT_MS = 300_000
     suspend fun streamMessage(
         message: String,
         conversationId: String?,
+        clientTurnId: String? = null,
         onMeta: suspend (String) -> Unit = {},
         onDelta: suspend (String) -> Unit = {},
     ): ChatResponse {
@@ -391,6 +396,7 @@ private const val READ_TIMEOUT_MS = 300_000
         val backendUrl = requireBackendUrl()
         val payload = JSONObject().apply {
             put("message", message)
+            if (!clientTurnId.isNullOrBlank()) put("client_turn_id", clientTurnId)
             if (!conversationId.isNullOrBlank()) put("conversation_id", conversationId)
         }.toString()
 

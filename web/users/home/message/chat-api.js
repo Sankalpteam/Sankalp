@@ -159,9 +159,10 @@
     }
   }
 
-  async function send({ message, conversationId, attachments = [] }) {
+  async function send({ message, conversationId, attachments = [], clientTurnId, signal }) {
     const media = await buildMediaPayload(attachments);
     const payload = { message };
+    if (clientTurnId) payload.client_turn_id = clientTurnId;
 
     if (conversationId) {
       payload.conversation_id = conversationId;
@@ -176,7 +177,7 @@
       payload.attachments = media;
     }
 
-    const json = await postJson('/api/chat', payload);
+    const json = await postJson('/api/chat', payload, signal);
 
     if (!json.conversation_id) {
       throw new Error('Sankalp could not start this chat just now. Please try again.');
@@ -222,7 +223,7 @@
   // that carries the finished reply and the chips it offered. Reading them here means the
   // caller can show the first words immediately and clear its "thinking" indicator on the
   // first delta instead of waiting for the whole answer.
-  async function streamMessage({ message, conversationId, signal, onMeta, onDelta }) {
+  async function streamMessage({ message, conversationId, clientTurnId, signal, onMeta, onDelta }) {
     const token = await authToken();
 
     const response = await fetch(`${backendBase()}/api/chat/stream`, {
@@ -232,7 +233,7 @@
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream'
       },
-      body: JSON.stringify({ message, conversation_id: conversationId }),
+      body: JSON.stringify({ message, conversation_id: conversationId, client_turn_id: clientTurnId }),
       signal
     });
 

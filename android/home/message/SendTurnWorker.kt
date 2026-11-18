@@ -49,6 +49,7 @@ class SendTurnWorker(
                 ChatApi.sendMessage(
                     message = turn.text,
                     conversationId = turn.conversationId,
+                    clientTurnId = turn.id,
                 )
             }
             store.markDelivered(turn.id, response.reply, chipsToJson(response.actionChips))

@@ -115,10 +115,6 @@ import com.indoone.menu.AppTab
 import com.indoone.menu.AppTopBar
 import com.indoone.menu.IndooneTopBarLogo
 import com.indoone.menu.data.UserDataRepository
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.indoone.home.message.ActionChip
 import com.indoone.home.message.parseActionChips
 import org.json.JSONArray
@@ -130,7 +126,6 @@ import com.indoone.home.message.CloudChatConversation
 import com.indoone.home.message.CloudChatRepository
 import com.indoone.home.message.MessageFeedbackStore
 import com.indoone.home.message.PendingTurnStore
-import com.indoone.home.message.SendTurnWorker
 import com.indoone.home.plus.PlusAttachmentSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -1037,6 +1032,7 @@ fun HomeScreen(
             "Please inspect the attached file(s) and describe their contents or visible details."
         }
         val requestConversationId = conversationId ?: UUID.randomUUID().toString()
+        val clientTurnId = UUID.randomUUID().toString()
         messages = messages + ChatMessage(typed, true, attachmentsToSend)
         streamedReplies = 0
         input = ""
@@ -1072,6 +1068,7 @@ fun HomeScreen(
                     ChatApi.streamMessage(
                         message = messageToBackend,
                         conversationId = requestConversationId,
+                        clientTurnId = clientTurnId,
                         onMeta = { id -> conversationId = id },
                         onDelta = { full ->
                             // First token: the wait is over. The poll below does not need to be
@@ -1122,48 +1119,33 @@ fun HomeScreen(
                     return@launch
                 }
 
-                // A partial bubble is removed before the worker takes over, so the
-                // fallback cannot leave half an answer above the real one.
+                // A lost stream may still have completed a GitHub/email action.
+                // Never enqueue a second POST automatically without an end-to-end
+                // idempotency key shared by both chat endpoints.
                 if (streamedIndex >= 0 && streamedIndex < messages.size) {
                     val updated = messages.toMutableList()
                     updated.removeAt(streamedIndex)
                     messages = updated
                 }
 
-                val store = PendingTurnStore.get(context)
-                val turn = store.begin(requestConversationId, messageToBackend)
-                val request = OneTimeWorkRequestBuilder<SendTurnWorker>()
-                .setInputData(workDataOf(SendTurnWorker.KEY_TURN_ID to turn.id))
-                .build()
-
-                WorkManager.getInstance(context).enqueueUniqueWork(
-                SendTurnWorker.workName(turn.id),
-                // One work item per turn: a double tap cannot send the same text twice.
-                ExistingWorkPolicy.KEEP,
-                request,
-                )
-
-                // The live activity stays, and the reconciliation effect below owns every
-                // stage of it. A coroutine here that flipped to Thinking after a delay used
-                // to race that effect: on a fast reply it fired after the answer had landed
-                // and the indicator reappeared. One owner, one order: Received, Thinking,
-                // Preparing, done.
-                isSending = true
-                activeTurnId = turn.id
-                activeTurnStartedAt = System.currentTimeMillis()
-                chatActivityState = ChatActivityState.RECEIVED
-
-                scope.launch {
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            cloudChatRepository.appendMessage(
-                                conversationId = requestConversationId,
-                                role = "user",
-                                content = persistedUserContent,
-                            )
-                        }
+                // Preserve the attempted user message in cloud history for review.
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        cloudChatRepository.appendMessage(
+                            conversationId = requestConversationId,
+                            role = "user",
+                            content = persistedUserContent,
+                        )
                     }
                 }
+
+                addReply(
+                    "The connection was interrupted. This request may already have been " +
+                        "processed. Check the conversation and connected app before trying again."
+                )
+                isSending = false
+                chatActivityState = ChatActivityState.IDLE
+                return@launch
             }
             return@sendMessage
         }
@@ -1215,6 +1197,7 @@ fun HomeScreen(
                     withContext(NonCancellable) {
                         ChatApi.sendMessage(
                             message = messageToBackend,
+                            clientTurnId = clientTurnId,
                             conversationId = requestConversationId,
                             fileIds = fileIds,
                             mediaAttachments = mediaPayloads,
