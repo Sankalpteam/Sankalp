@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - models</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav">
+          <a class="" href=".././"><span class="dot"></span>Overview</a>
+          <a class="" href="../keys/"><span class="dot"></span>API keys</a>
+          <a class="" href="../usage/"><span class="dot"></span>Usage</a>
+          <a class="on" href="../models/"><span class="dot"></span>Models</a>
+          <a class="" href="../wallet/"><span class="dot"></span>Wallet</a>
+        </div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Models</h3><small>Five models, priced per million tokens.</small></div>
+          <span class="pill ok">all available</span>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="k">models</div><div class="v">5</div><div class="d">chat, all streaming</div></div>
+          <div class="kpi"><div class="k">cheapest</div><div class="v">&#8377;8</div><div class="d">per 1M input</div></div>
+          <div class="kpi"><div class="k">largest context</div><div class="v">128K</div><div class="d">tokens</div></div>
+          <div class="kpi"><div class="k">billing unit</div><div class="v">1M</div><div class="d">tokens, in and out</div></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Best for</th>
+              <th>Context</th>
+              <th class="right">Input / 1M</th>
+              <th class="right">Output / 1M</th>
+              <th class="right">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="key mono">sankalp-mini</td>
+              <td>Short replies, classification, routing</td>
+              <td class="mini">32K</td>
+              <td class="right mono">&#8377;8.00</td>
+              <td class="right mono">&#8377;24.00</td>
+              <td class="right"><span class="pill ok">available</span></td>
+            </tr>
+            <tr>
+              <td class="key mono">sankalp-lite</td>
+              <td>Everyday chat, summaries, drafting</td>
+              <td class="mini">64K</td>
+              <td class="right mono">&#8377;15.00</td>
+              <td class="right mono">&#8377;45.00</td>
+              <td class="right"><span class="pill ok">available</span></td>
+            </tr>
+            <tr>
+              <td class="key mono">sankalp-standard</td>
+              <td>The default: general help, tools, long context</td>
+              <td class="mini">128K</td>
+              <td class="right mono">&#8377;30.00</td>
+              <td class="right mono">&#8377;90.00</td>
+              <td class="right"><span class="pill ok">available</span></td>
+            </tr>
+            <tr>
+              <td class="key mono">sankalp-pro</td>
+              <td>Reasoning, code, multi-step work</td>
+              <td class="mini">128K</td>
+              <td class="right mono">&#8377;60.00</td>
+              <td class="right mono">&#8377;180.00</td>
+              <td class="right"><span class="pill ok">available</span></td>
+            </tr>
+            <tr>
+              <td class="key mono">sankalp-max</td>
+              <td>The hardest tasks, where the answer matters most</td>
+              <td class="mini">200K</td>
+              <td class="right mono">&#8377;120.00</td>
+              <td class="right mono">&#8377;360.00</td>
+              <td class="right"><span class="pill ok">available</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          Prices are shown per million tokens, input and output, in rupees. These figures are
+          placeholders until the pricing is decided - the console, the docs and the gateway will
+          all read the same numbers once they are set, so nothing has to be edited twice.
+        </p>
+      </div>
+  </div>
+</main>
+</body>
+</html>
