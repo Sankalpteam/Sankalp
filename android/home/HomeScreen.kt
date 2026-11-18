@@ -876,7 +876,7 @@ fun HomeScreen(
                             runCatching { JSONArray(raw) }.getOrNull()
                         }
                     )
-                    messages = messages + ChatMessage(reply, false, chips = restoredChips)
+                    addReply(reply, restoredChips)
                     runCatching {
                         withContext(Dispatchers.IO) {
                             cloudChatRepository.appendMessage(
@@ -1000,6 +1000,32 @@ fun HomeScreen(
         }
     }
 
+    // Put an answer on screen, once.
+    //
+    // The same reply could reach the thread from two directions - the stream that draws it and
+    // the reconciliation that watches the durable store - and on a phone the second one showed
+    // up as a second identical bubble. The web never showed it twice because it has one path.
+    //
+    // Rather than keep guessing which path wins, the thread itself refuses to hold the same
+    // answer twice in a row. Two identical answers, one under the other, are never something a
+    // person should see: if the last message is that same answer, this replaces it.
+    fun addReply(text: String, chips: List<ActionChip> = emptyList()) {
+        if (text.isBlank()) {
+            return
+        }
+
+        val last = messages.lastOrNull()
+
+        if (last != null && !last.fromUser && last.text == text) {
+            messages = messages.dropLast(1) + last.copy(
+                chips = if (chips.isEmpty()) last.chips else chips,
+            )
+            return
+        }
+
+        messages = messages + ChatMessage(text, false, chips = chips)
+    }
+
     fun sendMessage() {
         val typed = input.trim()
         val attachmentsToSend = pendingAttachments.toList()
@@ -1067,11 +1093,7 @@ fun HomeScreen(
                     conversationId = response.conversationId
 
                     if (streamedIndex < 0) {
-                        messages = messages + ChatMessage(
-                            response.reply,
-                            false,
-                            chips = response.actionChips,
-                        )
+                        addReply(response.reply, response.actionChips)
                     } else {
                         val updated = messages.toMutableList()
                         updated[streamedIndex] = updated[streamedIndex].copy(
