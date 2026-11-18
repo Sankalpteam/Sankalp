@@ -21,6 +21,7 @@ them. So the published tree is built, not committed:
 from __future__ import annotations
 
 import datetime
+import hashlib
 import pathlib
 import re
 import shutil
@@ -155,6 +156,21 @@ def paint_console_rail() -> int:
         )
         # the script that filled it is no longer needed
         html = re.sub(r'\s*<script src="(?:\.\./)?nav\.js[^"]*"></script>', "", html)
+
+        # The stylesheet versions are worked out here, from the files themselves.
+        #
+        # They used to be edited by hand, and were forgotten twice: base.css changed while every
+        # page still asked for the old address, so four screens kept the old look from a cached
+        # copy. A hash of the bytes cannot be forgotten.
+        base_css = (console / "base.css").read_bytes()
+        own_css_path = page.parent / "style.css"
+        own_css = own_css_path.read_bytes() if own_css_path.exists() else b""
+
+        base_hash = hashlib.md5(base_css).hexdigest()[:8]
+        own_hash = hashlib.md5(base_css + own_css).hexdigest()[:8]
+
+        html = re.sub(r'base\.css\?v=\w+', f"base.css?v={base_hash}", html)
+        html = re.sub(r'(?<![\w/])style\.css\?v=\w+', f"style.css?v={own_hash}", html)
 
         page.write_text(html, encoding="utf-8")
         painted += 1
