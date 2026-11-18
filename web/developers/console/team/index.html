@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - team</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -67,26 +68,26 @@
               <td class="mini">ananya@example.com</td>
               <td><select><option selected>Developer</option><option>Billing</option><option>Owner</option></select></td>
               <td class="right mini">2 hours ago</td>
-              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Remove</button></td>
+              <td class="right"><button class="btn ghost" type="button" class="btn-xs">Remove</button></td>
             </tr>
             <tr>
               <td><div class="who-cell"><span class="avatar">R</span><b>Rahul</b></div></td>
               <td class="mini">rahul@example.com</td>
               <td><select><option>Developer</option><option selected>Billing</option><option>Owner</option></select></td>
               <td class="right mini">yesterday</td>
-              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Remove</button></td>
+              <td class="right"><button class="btn ghost" type="button" class="btn-xs">Remove</button></td>
             </tr>
             <tr>
               <td><div class="who-cell"><span class="avatar">?</span><b>pending</b></div></td>
               <td class="mini">dev@example.com</td>
               <td><select><option selected>Developer</option><option>Billing</option><option>Owner</option></select></td>
               <td class="right mini">invited 3 days ago</td>
-              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Revoke invite</button></td>
+              <td class="right"><button class="btn ghost" type="button" class="btn-xs">Revoke invite</button></td>
             </tr>
           </tbody>
         </table>
 
-        <h4 style="margin:22px 0 6px;font-size:14px">What each role may do</h4>
+        <h4 class="section">What each role may do</h4>
         <div class="roles">
           <div class="role-row"><b>Owner</b><span>Everything, including billing, members and revoking keys.</span></div>
           <div class="role-row"><b>Developer</b><span>Keys, playground, logs, usage and webhooks. Not billing, not members.</span></div>
@@ -102,7 +103,7 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 <script src="team.js?v=20261118a"></script>
 </body>
 </html>
