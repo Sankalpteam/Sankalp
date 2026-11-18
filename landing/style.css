@@ -197,8 +197,10 @@ html,body{overflow-x:hidden}
 
 
 /* The two entry points in the nav. Sign in is quiet, sign up is the one a new visitor wants. */
-/* The two were plain text links; they are buttons now, so the colour comes from .btn--green. */
-.nav__in,.nav__up{color:#fff;font-weight:600}
+/* The two were plain text links; they are buttons now, so the colour comes from .btn--green.
+   The selector has to be this specific: .nav__links a sets a grey on every link in that list and
+   outranks a bare class, which is why the words stayed dark on a green pill. */
+.nav__links a.nav__in,.nav__links a.nav__up,.nav__in,.nav__up{color:#fff;font-weight:600}
 @media(max-width:1120px){
   .nav__links a[href="#privacy"]{display:none}
 }
