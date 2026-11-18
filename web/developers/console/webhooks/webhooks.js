@@ -1,40 +1,37 @@
-// The webhook screen.
+// The webhooks screen.
 //
-// The sample body is built here rather than pasted into the page, so the field names live in one
-// place and can be checked against what the gateway will actually send.
+// The endpoint and the event switches post to the gateway when it exists; today the test button
+// confirms on screen so the flow can be walked through without pretending anything was stored.
 (function () {
-  var sample = {
-    id: 'evt_2f91c4a8',
-    type: 'chat.completed',
-    created: '2026-11-18T09:41:12Z',
-    data: {
-      request_id: 'req_8f21c4',
-      key_id: 'sk_live_7f2a',
-      model: 'sankalp-standard',
-      tokens: { input: 412, output: 96 },
-      cost_inr: 0.021,
-      latency_ms: 1240
-    }
-  };
-
-  var node = document.getElementById('whSample');
-
-  if (node) {
-    node.textContent = JSON.stringify(sample, null, 2);
-  }
-
   var test = document.getElementById('whTest');
+  var url = document.getElementById('whUrl');
 
-  if (test) {
-    test.addEventListener('click', function () {
-      var url = (document.getElementById('whUrl') || {}).value || '';
-      var ok = /^https:\/\/.+/.test(url);
-
-      test.textContent = ok
-        ? 'Test sent - check the deliveries above'
-        : 'Enter an https address first';
-
-      setTimeout(function () { test.textContent = 'Send a test delivery'; }, 2600);
-    });
+  if (!test) {
+    return;
   }
+
+  test.addEventListener('click', function () {
+    var value = (url && url.value || '').trim();
+    var ok = /^https:\/\/.+/.test(value);
+
+    test.textContent = ok
+      ? 'Test sent - check the deliveries below'
+      : 'Enter an https address first';
+
+    setTimeout(function () { test.textContent = 'Send a test delivery'; }, 2600);
+  });
+
+  // A switch that is off has no effect, so the row it belongs to fades with it.
+  Array.prototype.forEach.call(document.querySelectorAll('.ev input'), function (box) {
+    var row = box.closest('.ev');
+
+    function paint() {
+      if (row) {
+        row.style.opacity = box.checked ? '1' : '.55';
+      }
+    }
+
+    box.addEventListener('change', paint);
+    paint();
+  });
 })();
