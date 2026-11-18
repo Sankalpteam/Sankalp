@@ -244,6 +244,8 @@
 
     const conversationId = store.ensureConversationId();
     const turnId = ++activeTurnId;
+    // One stable server-visible ID per user action, shared by either endpoint.
+    const clientTurnId = window.crypto?.randomUUID?.() || `turn-${Date.now()}-${turnId}`;
     let streamedElement = null;
     const controller = new AbortController();
     activeAbortController = controller;
@@ -299,6 +301,7 @@
           result = await api.streamMessage({
             message,
             conversationId,
+            clientTurnId,
             signal: controller.signal,
             onMeta: id => store.setConversationId(id),
             onDelta: (chunk, full) => {
@@ -387,6 +390,7 @@
         result = await api.send({
           message,
           conversationId,
+          clientTurnId,
           attachments,
           signal: controller.signal
         });

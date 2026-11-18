@@ -1032,6 +1032,7 @@ fun HomeScreen(
             "Please inspect the attached file(s) and describe their contents or visible details."
         }
         val requestConversationId = conversationId ?: UUID.randomUUID().toString()
+        val clientTurnId = UUID.randomUUID().toString()
         messages = messages + ChatMessage(typed, true, attachmentsToSend)
         streamedReplies = 0
         input = ""
@@ -1067,6 +1068,7 @@ fun HomeScreen(
                     ChatApi.streamMessage(
                         message = messageToBackend,
                         conversationId = requestConversationId,
+                        clientTurnId = clientTurnId,
                         onMeta = { id -> conversationId = id },
                         onDelta = { full ->
                             // First token: the wait is over. The poll below does not need to be
@@ -1195,6 +1197,7 @@ fun HomeScreen(
                     withContext(NonCancellable) {
                         ChatApi.sendMessage(
                             message = messageToBackend,
+                            clientTurnId = clientTurnId,
                             conversationId = requestConversationId,
                             fileIds = fileIds,
                             mediaAttachments = mediaPayloads,
