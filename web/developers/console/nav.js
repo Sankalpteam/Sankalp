@@ -22,6 +22,7 @@
     { id: 'usage', href: 'usage/', label: 'Usage' },
     { id: 'models', href: 'models/', label: 'Models' },
     { id: 'playground', href: 'playground/', label: 'Playground' },
+    { id: 'logs', href: 'logs/', label: 'Logs' },
     { id: 'wallet', href: 'wallet/', label: 'Wallet' }
   ];
 
