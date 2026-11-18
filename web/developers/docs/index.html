@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp Developers - docs</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261119a">
 </head>
 <body>
 <header class="dev-top">
@@ -14,38 +14,186 @@
   <span class="spacer"></span>
   <a class="toplink on" href="../docs/">Docs</a>
   <a class="toplink" href="../console/">Console</a>
-  <a class="toplink" href="../../index.html?next=console">Sign in</a>
 </header>
 
-
 <main class="wrap">
-  <section class="section" style="margin-top:44px">
-    <h2>The first call</h2>
-    <p class="lede">One endpoint, OpenAI-shaped. The response says which model answered it and how
-       many tokens were billed, so the bill and the answer always agree.</p>
-<pre><span class="c"># one endpoint, OpenAI-shaped</span>
-c&#117;rl https://api.sankalp.in/v1/chat/completions \
-  &#45;H <span class="s">"A&#117;thorization: B&#101;arer sk&#45;live-..."</span> \
-  &#45;H <span class="s">"Content&#45;Type: application/json"</span> \
-  &#45;d <span class="s">'{
-    "model": "sankalp-1",
-    "messages": [{"role":"user","content":"hi"}]
-  }'</span></pre>
-  </section>
+  <aside class="docnav">
+        <a href="#what">What this is</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#auth">Authentication</a>
+        <a href="#endpoint">The endpoint</a>
+        <a href="#response">The response</a>
+        <a href="#streaming">Streaming</a>
+        <a href="#errors">Errors</a>
+        <a href="#limits">Rate limits</a>
+        <a href="#models">Models</a>
+        <a href="#webhooks">Webhooks</a>
+        <a href="#help">Help</a>
+  </aside>
 
-  <section class="section">
-    <h2>What it costs</h2>
-    <p class="lede">Input tokens are charged at a fifth of output tokens, on both paths.
-       Nothing is charged for a request that fails.</p>
-    <table>
-      <thead><tr><th>Model</th><th>Answered by</th><th>Input / 1K</th><th>Output / 1K</th></tr></thead>
-      <tbody>
-        <tr><td><b>sankalp-1</b></td><td>our own model</td><td>&#8377;0.05</td><td>&#8377;0.20</td></tr>
-        <tr><td><b>sankalp-upstream</b></td><td>Groq or Sarvam</td><td>&#8377;0.25</td><td>&#8377;0.90</td></tr>
-      </tbody>
-    </table>
-  </section>
+  <article class="doc">
+    <h1>Sankalp API</h1>
+    <p class="lede">One endpoint, one key, one bill. Send a request to Sankalp and an answer comes
+      back - the models behind it are ones we operate, served through this API.</p>
+
+    <section id="what">
+      <h2>What this is</h2>
+      <p>Sankalp is an API in front of the models we operate. You call one endpoint; we take care of
+        the key, the limits, the bill and the record of what happened. The model names below are our
+        routes, not engines - the engine behind a name may change, and the API stays the same.</p>
+      <p>That is why there is one place to look for what you spent: every request records the route
+        that answered it and the tokens it used, so the console's numbers and your invoice are the
+        same numbers counted once.</p>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quickstart</h2>
+      <p>Make a key in the console, then send this. The key is the only thing you have to keep
+        secret.</p>
+      <pre><code>c&#117;rl https://sankalp.indoworkspace.in/v1/chat/completions \
+  -H &#34;Authoriz&#97;tion: Be&#97;rer YOUR_API_KEY&#34; \
+  -H &#34;Content-Type: application/json&#34; \
+  -d &#39;{&#10;    "model": "sankalp-standard",&#10;    "messages": [{"role": "user", "content": "Say hello in one sentence."}]&#10;  }&#39;</code></pre>
+      <p class="muted">The first request of a new account is free to try; a failed request is never
+        charged.</p>
+    </section>
+
+    <section id="auth">
+      <h2>Authentication</h2>
+      <p>Every request carries a key in a header, as a bearer token. Two kinds of key exist, and they
+        are not interchangeable:</p>
+      <table>
+        <thead><tr><th>Key</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><b>sk_live_…</b></td><td>Answers requests and spends from the wallet.</td></tr>
+          <tr><td><b>sk_test_…</b></td><td>Answers requests, never spends, never appears in live usage.</td></tr>
+        </tbody>
+      </table>
+      <p>Keys are shown once when they are made. What we keep is a hash, so a key that is lost cannot
+        be shown again - revoke it and make another.</p>
+    </section>
+
+    <section id="endpoint">
+      <h2>The endpoint</h2>
+      <p><code class="inline">POST /v1/chat/completions</code></p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><b>model</b></td><td>string</td><td>One of the five routes below.</td></tr>
+          <tr><td><b>messages</b></td><td>array</td><td>role and content, oldest first. A
+            <code class="inline">system</code> message sets the behaviour.</td></tr>
+          <tr><td><b>temperature</b></td><td>number</td><td>0 to 2. Lower is steadier.</td></tr>
+          <tr><td><b>max_tokens</b></td><td>number</td><td>The longest answer you will accept.</td></tr>
+          <tr><td><b>stream</b></td><td>boolean</td><td>Words as they are written, instead of all at
+            once.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="response">
+      <h2>The response</h2>
+      <pre><code>{&#10;  "id": "req_8f21c4",&#10;  "model": "sankalp-standard",&#10;  "choices": [{&#10;    "message": {"role": "assistant", "content": "Hello! How can I help?"}&#10;  }],&#10;  "usage": {"input_tokens": 12, "output_tokens": 8}&#10;}</code></pre>
+      <p>The <code class="inline">usage</code> block is what the bill is made from. It is the same
+        number the console shows, so a disagreement between them is a bug, not a rounding.</p>
+    </section>
+
+    <section id="streaming">
+      <h2>Streaming</h2>
+      <p>With <code class="inline">"stream": true</code> the answer arrives as server-sent events, one
+        piece at a time, ending with <code class="inline">data: [DONE]</code>. The usage block is in
+        the last event before that.</p>
+      <pre><code>data: {"delta": "Hello"}&#10;data: {"delta": " there"}&#10;data: {"usage": {"input_tokens": 12, "output_tokens": 8}}&#10;data: [DONE]</code></pre>
+    </section>
+
+    <section id="errors">
+      <h2>Errors</h2>
+      <table>
+        <thead><tr><th>Status</th><th>What happened</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><b>400</b></td><td>The request is malformed.</td><td>Read the message; it names the
+            field.</td></tr>
+          <tr><td><b>401</b></td><td>The key is wrong or revoked.</td><td>Make a new key.</td></tr>
+          <tr><td><b>402</b></td><td>The wallet is empty.</td><td>Top up, or lower the spend
+            threshold.</td></tr>
+          <tr><td><b>429</b></td><td>A limit was hit.</td><td>Wait for <code class="inline">Retry-After</code>
+            and try again.</td></tr>
+          <tr><td><b>500</b></td><td>Something on our side failed.</td><td>Retry once; if it repeats,
+            send us the request id.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="limits">
+      <h2>Rate limits</h2>
+      <p>Limits belong to the key, so one runaway script cannot stop your other keys. Every response
+        carries the state of the window:</p>
+      <pre><code>X-RateLimit-Limit: 60&#10;X-RateLimit-Remaining: 12&#10;X-RateLimit-Reset: 34</code></pre>
+      <p>When a limit is reached the answer is <b>429</b> with <code class="inline">Retry-After</code>
+        in seconds. The console's Rate limits screen lists every refusal with the limit that caused it.</p>
+    </section>
+
+    <section id="models">
+      <h2>Models</h2>
+      <p>Five routes. Each is a model we operate, served through Sankalp; the name is what you send,
+        and it stays the same if the engine behind it changes. Prices are per million tokens, in
+        rupees.</p>
+      <table>
+        <thead><tr><th>Route</th><th>Best for</th><th>Context</th><th class="r">Input / 1M</th><th class="r">Output / 1M</th></tr></thead>
+        <tbody>
+          <tr><td><b>sankalp-mini</b></td><td>Short replies, classification, routing</td><td>32K</td><td class="r">₹8.00</td><td class="r">₹24.00</td></tr>
+          <tr><td><b>sankalp-lite</b></td><td>Everyday chat, summaries, drafting</td><td>64K</td><td class="r">₹15.00</td><td class="r">₹45.00</td></tr>
+          <tr><td><b>sankalp-standard</b></td><td>The default: general help, tools, long context</td><td>128K</td><td class="r">₹30.00</td><td class="r">₹90.00</td></tr>
+          <tr><td><b>sankalp-pro</b></td><td>Reasoning, code, multi-step work</td><td>128K</td><td class="r">₹60.00</td><td class="r">₹180.00</td></tr>
+          <tr><td><b>sankalp-max</b></td><td>The hardest tasks, where the answer matters most</td><td>200K</td><td class="r">₹120.00</td><td class="r">₹360.00</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Prices are placeholders until the pricing is decided. The console, this page and
+        the gateway read the same numbers.</p>
+    </section>
+
+    <section id="webhooks">
+      <h2>Webhooks</h2>
+      <p>Point an HTTPS address at us and we call it when something finishes, with a signature your
+        server can check. The body carries ids and counts, not the conversation.</p>
+      <pre><code>{&#10;  "id": "evt_2f91c4a8",&#10;  "type": "chat.completed",&#10;  "data": {&#10;    "request_id": "req_8f21c4",&#10;    "model": "sankalp-standard",&#10;    "tokens": {"input": 412, "output": 96}&#10;  }&#10;}</code></pre>
+      <p>Events: <code class="inline">chat.completed</code>, <code class="inline">chat.failed</code>,
+        <code class="inline">wallet.low</code>, <code class="inline">key.created</code>,
+        <code class="inline">key.revoked</code>. A delivery is retried with a growing gap for a day.</p>
+    </section>
+
+    <section id="help">
+      <h2>Help</h2>
+      <p>If a request fails and the reason is not in the table above, send us the request id from the
+        console's Logs screen. That id is the whole story of one call, and it saves a round of
+        questions.</p>
+      <p class="muted">Sankalp is built by Indo Workspace. <a href="https://indoworkspace.in/">indoworkspace.in</a></p>
+    </section>
+  </article>
 </main>
 
+<script>
+// Copy buttons on every code block: a snippet you cannot copy is a snippet you retype.
+(function () {
+  Array.prototype.forEach.call(document.querySelectorAll('pre'), function (block) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy';
+    button.textContent = 'Copy';
+
+    button.addEventListener('click', function () {
+      var text = block.querySelector('code') ? block.querySelector('code').textContent : block.textContent;
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () {
+          button.textContent = 'Copied';
+          setTimeout(function () { button.textContent = 'Copy'; }, 1600);
+        });
+      }
+    });
+
+    block.appendChild(button);
+  });
+})();
+</script>
 </body>
 </html>
