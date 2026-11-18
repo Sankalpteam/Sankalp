@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
@@ -219,7 +220,13 @@ fun MenuDrawer(
                                 Color(0xFFF8F4FC),
                             ),
                         ),
-                    )
+                    ),
+            ) {
+            // The list scrolls; the company line below does not.
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 15.dp, vertical = 19.dp),
             ) {
@@ -295,6 +302,22 @@ fun MenuDrawer(
 
                 Spacer(Modifier.height(8.dp))
             }
+            }
+
+            // The company line, at the foot of the sheet.
+            //
+            // It used to sit at the end of the scrolling list, so a long menu pushed it below the
+            // fold and it was only found by scrolling to the bottom. It is an attribution, not an
+            // option: it belongs on screen at the end of the menu either way.
+            Text(
+                text = "Powered by Indo Workspace",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 14.dp),
+                color = Color(0xFF9A92A8),
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+            )
         }
         Spacer(
             modifier = Modifier

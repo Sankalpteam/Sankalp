@@ -510,6 +510,27 @@ body {
   transform: translateX(0);
 }
 
+/* The company line at the foot of the drawer.
+   margin-top: auto pushes it to the bottom when there are few options; position: sticky keeps it
+   there while the panel scrolls when there are many. Either way it is on screen at the end of the
+   menu, which is where an attribution belongs. */
+.drawer-powered {
+  margin: auto 0 0;
+  padding: 14px 10px 2px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: .01em;
+  color: #9a92a8;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(248, 244, 252, 0) 0%, #f8f4fc 42%);
+}
+
+.drawer-powered a {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* the logo 36dp, then the wordmark, then the close button */
 .drawer-brand {
   display: flex;
