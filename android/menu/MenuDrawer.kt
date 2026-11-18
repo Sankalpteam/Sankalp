@@ -302,7 +302,6 @@ fun MenuDrawer(
 
                 Spacer(Modifier.height(8.dp))
             }
-            }
 
             // The company line, at the foot of the sheet.
             //
@@ -318,6 +317,7 @@ fun MenuDrawer(
                 fontSize = 11.sp,
                 textAlign = TextAlign.Center,
             )
+            }
         }
         Spacer(
             modifier = Modifier
