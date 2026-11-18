@@ -36,16 +36,99 @@
       <div class="main">
         <div class="mainhead"><div><h3>Overview</h3><small>This account, this wallet, this key.</small></div>
           <span class="pill info">last 24 hours</span></div>
-        <div class="kpis">
-          <div class="kpi"><div class="k">requests</div><div class="v">1,284</div><div class="d">+18% vs yesterday</div></div>
-          <div class="kpi"><div class="k">tokens</div><div class="v">508K</div><div class="d">input + output</div></div>
-          <div class="kpi"><div class="k">spent</div><div class="v">&#8377;39.80</div><div class="d">from wallet</div></div>
-          <div class="kpi"><div class="k">balance</div><div class="v">&#8377;460.20</div><div class="d">prepaid</div></div>
+
+        <!-- Six figures, not four: keys and errors are what a developer checks first when something
+             is wrong, and they cost nothing to show next to the rest. -->
+        <div class="six">
+          <div class="cell"><span>Requests</span><b>1,284</b><small>+18% vs yesterday</small></div>
+          <div class="cell"><span>Tokens</span><b>508K</b><small>input + output</small></div>
+          <div class="cell"><span>Spent</span><b>&#8377;39.80</b><small>from wallet</small></div>
+          <div class="cell"><span>Balance</span><b>&#8377;460.20</b><small>prepaid</small></div>
+          <div class="cell"><span>Keys</span><b>3</b><small>2 live, 1 test</small></div>
+          <div class="cell"><span>Errors</span><b>1</b><small>one 429 at 08:55</small></div>
         </div>
-        <div class="note">Every screen in this console is its own folder with its own stylesheet, so a
-          break in one cannot take the others down. The bar above stays on all of them.</div>
+
+        <h2 class="sub">Requests per hour</h2>
+        <div class="bars"><i style="height:2px"></i><i style="height:2px"></i><i style="height:2px"></i><i style="height:2px"></i><i style="height:2px"></i><i style="height:2px"></i><i style="height:7px"></i><i style="height:19px"></i><i style="height:32px"></i><i style="height:41px"></i><i style="height:30px"></i><i style="height:37px"></i><i style="height:50px"></i><i style="height:56px"></i><i style="height:46px"></i><i style="height:35px"></i><i style="height:31px"></i><i style="height:40px"></i><i style="height:52px"></i><i style="height:46px"></i><i style="height:34px"></i><i style="height:24px"></i><i style="height:15px"></i><i style="height:9px"></i></div>
+        <p class="note-tight">Peak 71 at 13:00 &middot; 1,284 today &middot; the last bar is this hour</p>
+
+        <h2 class="sub">Recent requests</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Request</th>
+              <th>Model</th>
+              <th class="right">In / out</th>
+              <th class="right">Latency</th>
+              <th class="right">Cost</th>
+              <th class="right">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mini">09:41</td>
+              <td class="key mono">req_8f21c4</td>
+              <td class="mono">sankalp-standard</td>
+              <td class="right mini">412 / 96</td>
+              <td class="right mini">1,240 ms</td>
+              <td class="right mono">&#8377;0.0210</td>
+              <td class="right"><span class="pill ok">200</span></td>
+            </tr>
+            <tr>
+              <td class="mini">09:38</td>
+              <td class="key mono">req_8f21b7</td>
+              <td class="mono">sankalp-mini</td>
+              <td class="right mini">88 / 22</td>
+              <td class="right mini">410 ms</td>
+              <td class="right mono">&#8377;0.0012</td>
+              <td class="right"><span class="pill ok">200</span></td>
+            </tr>
+            <tr>
+              <td class="mini">09:12</td>
+              <td class="key mono">req_8f2188</td>
+              <td class="mono">sankalp-pro</td>
+              <td class="right mini">2,140 / 780</td>
+              <td class="right mini">5,310 ms</td>
+              <td class="right mono">&#8377;0.2690</td>
+              <td class="right"><span class="pill ok">200</span></td>
+            </tr>
+            <tr>
+              <td class="mini">08:55</td>
+              <td class="key mono">req_8f2140</td>
+              <td class="mono">sankalp-max</td>
+              <td class="right mini">9,800 / 0</td>
+              <td class="right mini">900 ms</td>
+              <td class="right mono">&#8377;0.0000</td>
+              <td class="right"><span class="pill bad">429</span></td>
+            </tr>
+            <tr>
+              <td class="mini">08:40</td>
+              <td class="key mono">req_8f20f1</td>
+              <td class="mono">sankalp-lite</td>
+              <td class="right mini">640 / 310</td>
+              <td class="right mini">1,980 ms</td>
+              <td class="right mono">&#8377;0.0236</td>
+              <td class="right"><span class="pill ok">200</span></td>
+            </tr>
+            <tr>
+              <td class="mini">08:12</td>
+              <td class="key mono">req_8f2090</td>
+              <td class="mono">sankalp-standard</td>
+              <td class="right mini">1,520 / 410</td>
+              <td class="right mini">2,760 ms</td>
+              <td class="right mono">&#8377;0.0825</td>
+              <td class="right"><span class="pill ok">200</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          One row per request, and the prompt is kept as a preview rather than the conversation. These
+          figures are samples until the gateway counts real ones; the shape is what it will write.
+        </p>
       </div>
-    </div>
+  </div>
 </main>
 </body>
 </html>
