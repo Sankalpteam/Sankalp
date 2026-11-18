@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - webhooks</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Webhooks</h3><small>A message to your server when something finishes.</small></div>
+          <span class="pill">sample deliveries</span>
+        </div>
+
+        <div class="wh">
+          <div class="panel">
+            <h4>Endpoint</h4>
+            <div class="field">
+              <label for="whUrl">HTTPS address</label>
+              <input id="whUrl" type="url" value="https://example.com/sankalp/webhook" placeholder="https://your-server/hook">
+            </div>
+            <div class="field">
+              <label>Signing secret</label>
+              <div class="secretline"><span>whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;3f7a</span></div>
+              <span class="hint" style="font-size:11.5px;color:var(--faint)">
+                Every delivery carries a signature made with this secret, so your server can prove
+                the call came from us. Shown once, then never again.
+              </span>
+            </div>
+            <button class="btn primary" id="whTest" type="button">Send a test delivery</button>
+          </div>
+
+          <div class="panel">
+            <h4>Events</h4>
+            <div class="events">
+              <label><input type="checkbox" checked> <code>chat.completed</code> - an answer finished</label>
+              <label><input type="checkbox" checked> <code>chat.failed</code> - a request failed</label>
+              <label><input type="checkbox"> <code>wallet.low</code> - balance fell below your threshold</label>
+              <label><input type="checkbox"> <code>key.created</code> - a new key was made</label>
+              <label><input type="checkbox"> <code>key.revoked</code> - a key was revoked</label>
+            </div>
+            <p class="note" style="margin-top:12px">
+              A delivery is retried with a growing gap for a day before it is dropped, and every
+              attempt is listed below with the code your server returned.
+            </p>
+          </div>
+        </div>
+
+        <h4 style="margin:6px 0 8px;font-size:14px">Recent deliveries</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Delivery</th>
+              <th class="right">Attempts</th>
+              <th class="right">Your response</th>
+              <th class="right">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mini">18 Nov, 09:41</td>
+              <td class="mono">chat.completed</td>
+              <td class="key mono">wh_2f91c4</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 84 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>
+            <tr>
+              <td class="mini">18 Nov, 09:38</td>
+              <td class="mono">chat.completed</td>
+              <td class="key mono">wh_2f91b7</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 61 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>
+            <tr>
+              <td class="mini">18 Nov, 08:55</td>
+              <td class="mono">chat.failed</td>
+              <td class="key mono">wh_2f9140</td>
+              <td class="right">3</td>
+              <td class="right mini">502 after 3 tries</td>
+              <td class="right"><span class="pill">retrying</span></td>
+            </tr>
+            <tr>
+              <td class="mini">17 Nov, 22:10</td>
+              <td class="mono">wallet.low</td>
+              <td class="key mono">wh_2f8e02</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 120 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin:22px 0 8px;font-size:14px">What we send</h4>
+        <pre class="code" style="margin:0" id="whSample"></pre>
+
+        <p class="note">
+          Sample deliveries until the gateway records real ones. The body carries ids and counts,
+          not the conversation: a webhook that repeats the answer would put the text in a third
+          place, and the answer already lives in the chat you can read back.
+        </p>
+      </div>
+  </div>
+</main>
+
+<script src="../nav.js?v=20261118e"></script>
+<script src="webhooks.js?v=20261118a"></script>
+</body>
+</html>
