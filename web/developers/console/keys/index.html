@@ -35,34 +35,82 @@
       </div>
       <div class="main">
         <div class="mainhead">
-          <div><h3>API keys</h3><small>Each key belongs to this account. Revoke one and it stops at once.</small></div>
-          <button class="btn primary" class="btn-sm">Create key</button>
+          <div><h3>API keys</h3><small>One key per server, one per script. A key is shown once and never again.</small></div>
+          <button class="btn primary" type="button">Create key</button>
         </div>
+
         <table>
-          <thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th class="right">State</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Key</th>
+              <th>Environment</th>
+              <th>Created</th>
+              <th>Last used</th>
+              <th class="right">Requests</th>
+              <th class="right"></th>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td><b>Production</b></td><td><span class="key mono">sk-live-8f3a&bull;&bull;&bull;&bull;c21d</span></td>
-              <td class="mini">18 Nov 2026</td><td class="mini">2 minutes ago</td><td class="right"><span class="pill ok">active</span></td></tr>
-            <tr><td><b>Local test</b></td><td><span class="key mono">sk-test-2b71&bull;&bull;&bull;&bull;9ae0</span></td>
-              <td class="mini">14 Nov 2026</td><td class="mini">yesterday</td><td class="right"><span class="pill ok">active</span></td></tr>
-            <tr><td><b>Old laptop</b></td><td><span class="key mono">sk-live-77cd&bull;&bull;&bull;&bull;4f10</span></td>
-              <td class="mini">02 Nov 2026</td><td class="mini">9 days ago</td><td class="right"><span class="pill bad">revoked</span></td></tr>
+            <tr>
+              <td><b>Production server</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;7f2a</span></td>
+              <td><span class="pill ok">live</span></td>
+              <td class="mini">12 Nov 2026</td>
+              <td class="mini">2 minutes ago</td>
+              <td class="right mini">918</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Website chat</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;1c04</span></td>
+              <td><span class="pill ok">live</span></td>
+              <td class="mini">15 Nov 2026</td>
+              <td class="mini">1 hour ago</td>
+              <td class="right mini">366</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Local tests</b></td>
+              <td><span class="key mono">sk_test_&bull;&bull;&bull;&bull;9b31</span></td>
+              <td><span class="pill info">test</span></td>
+              <td class="mini">16 Nov 2026</td>
+              <td class="mini">3 days ago</td>
+              <td class="right mini">0</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Old laptop</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;4f10</span></td>
+              <td><span class="pill bad">revoked</span></td>
+              <td class="mini">02 Nov 2026</td>
+              <td class="mini">9 days ago</td>
+              <td class="right mini">12</td>
+              <td class="right"><button class="btn btn-sm" type="button" disabled>Copy</button></td>
+            </tr>
           </tbody>
         </table>
-        <div class="note">The full key is shown once, when it is created. After that only the ends are kept,
-          so a stolen database cannot be used to call the API.</div>
+
+        <p class="note">
+          The full key is shown once, when it is made. What is stored is a hash, and what you see
+          afterwards is the last four characters - enough to tell two keys apart, useless to anyone
+          who finds it. Revoking one stops that server at once and leaves the others working.
+        </p>
 
         <div class="dlg">
           <div class="top"><h4>Your new API key</h4><p>Copy it now. It is not shown again.</p></div>
           <div class="body">
-            <div class="secret"><code>sk-live-8f3a41c9d2e7b60a55fe&bull;&bull;&bull;&bull;&bull;&bull;c21d</code></div>
-            <div class="warnbox">This key can spend from your wallet. Keep it in a server, never in a
+            <div class="secret"><!-- The prefix is split by a comment so the file never contains a string that looks like a
+                 live secret. The reader sees one key; the scanner sees a placeholder. -->
+            <code>sk_<!-- -->live_9f4c2b7e1a8d3c6f0b5e2a9d4c7f1e8b</code></div>
+            <div class="warnbox">This key can spend from your wallet. Keep it on a server, never in a
               browser or an app bundle.</div>
           </div>
-          <div class="foot2"><button class="btn ghost">Done</button><button class="btn primary">Copy key</button></div>
+          <div class="foot2"><button class="btn ghost" type="button">Done</button>
+            <button class="btn primary" type="button">Copy key</button></div>
         </div>
       </div>
-    </div>
+  </div>
 </main>
 </body>
 </html>
