@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - team</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Team</h3><small>One account, the people in it, and what each may do.</small></div>
+          <span class="pill">sample members</span>
+        </div>
+
+        <div class="invite">
+          <div class="field"><label for="tmEmail">Email</label><input id="tmEmail" type="email" placeholder="name@company.com"></div>
+          <div class="field"><label for="tmRole">Role</label>
+            <select id="tmRole"><option>Developer</option><option>Billing</option><option>Owner</option></select>
+          </div>
+          <button class="btn primary" id="tmInvite" type="button">Invite</button>
+        </div>
+
+        <table class="members">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th class="right">Last active</th>
+              <th class="right"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="who-cell"><span class="avatar">Y</span><b>Yashwanth</b></div></td>
+              <td class="mini">yashwanthputtarajegowda@gmail.com</td>
+              <td><select><option selected>Owner</option><option>Developer</option><option>Billing</option></select></td>
+              <td class="right mini">now</td>
+              <td class="right mini">&ndash;</td>
+            </tr>
+            <tr>
+              <td><div class="who-cell"><span class="avatar">A</span><b>Ananya</b></div></td>
+              <td class="mini">ananya@example.com</td>
+              <td><select><option selected>Developer</option><option>Billing</option><option>Owner</option></select></td>
+              <td class="right mini">2 hours ago</td>
+              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Remove</button></td>
+            </tr>
+            <tr>
+              <td><div class="who-cell"><span class="avatar">R</span><b>Rahul</b></div></td>
+              <td class="mini">rahul@example.com</td>
+              <td><select><option>Developer</option><option selected>Billing</option><option>Owner</option></select></td>
+              <td class="right mini">yesterday</td>
+              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Remove</button></td>
+            </tr>
+            <tr>
+              <td><div class="who-cell"><span class="avatar">?</span><b>pending</b></div></td>
+              <td class="mini">dev@example.com</td>
+              <td><select><option selected>Developer</option><option>Billing</option><option>Owner</option></select></td>
+              <td class="right mini">invited 3 days ago</td>
+              <td class="right"><button class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Revoke invite</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin:22px 0 6px;font-size:14px">What each role may do</h4>
+        <div class="roles">
+          <div class="role-row"><b>Owner</b><span>Everything, including billing, members and revoking keys.</span></div>
+          <div class="role-row"><b>Developer</b><span>Keys, playground, logs, usage and webhooks. Not billing, not members.</span></div>
+          <div class="role-row"><b>Billing</b><span>The wallet, invoices and spending limits. Cannot see a key or make one.</span></div>
+        </div>
+
+        <p class="note">
+          Sample members until the gateway exists. A role is enforced by the gateway, not by hiding
+          a button: a Developer who opens the wallet's address directly is refused, the same as one
+          who never saw the link.
+        </p>
+      </div>
+  </div>
+</main>
+
+<script src="../nav.js?v=20261118g"></script>
+<script src="team.js?v=20261118a"></script>
+</body>
+</html>
