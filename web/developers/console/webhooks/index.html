@@ -37,41 +37,64 @@
           <span class="pill">sample deliveries</span>
         </div>
 
-        <div class="wh">
-          <div class="panel">
-            <h4>Endpoint</h4>
-            <div class="field">
-              <label for="whUrl">HTTPS address</label>
-              <input id="whUrl" type="url" value="https://example.com/sankalp/webhook" placeholder="https://your-server/hook">
-            </div>
-            <div class="field">
-              <label>Signing secret</label>
-              <div class="secretline"><span>whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;3f7a</span></div>
-              <span class="hint hintline">
-                Every delivery carries a signature made with this secret, so your server can prove
-                the call came from us. Shown once, then never again.
-              </span>
-            </div>
-            <button class="btn primary" id="whTest" type="button">Send a test delivery</button>
+        <div class="panel">
+          <h4>Endpoint</h4>
+          <div class="field">
+            <label for="whUrl">HTTPS address</label>
+            <input id="whUrl" type="url" value="https://example.com/sankalp/webhook" placeholder="https://your-server/hook">
           </div>
-
-          <div class="panel">
-            <h4>Events</h4>
-            <div class="events">
-              <label><input type="checkbox" checked> <code>chat.completed</code> - an answer finished</label>
-              <label><input type="checkbox" checked> <code>chat.failed</code> - a request failed</label>
-              <label><input type="checkbox"> <code>wallet.low</code> - balance fell below your threshold</label>
-              <label><input type="checkbox"> <code>key.created</code> - a new key was made</label>
-              <label><input type="checkbox"> <code>key.revoked</code> - a key was revoked</label>
-            </div>
-            <p class="note note-tight">
-              A delivery is retried with a growing gap for a day before it is dropped, and every
-              attempt is listed below with the code your server returned.
-            </p>
+          <div class="field">
+            <label>Signing secret</label>
+            <div class="secretline"><span>whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;3f7a</span>
+              <button class="btn btn-sm" type="button">Rotate</button></div>
+            <span class="hintline">Every delivery carries a signature made with this secret, so your
+              server can prove the call came from us. Shown once, then never again.</span>
           </div>
+          <button class="btn primary" id="whTest" type="button">Send a test delivery</button>
         </div>
 
-        <h4 class="section">Recent deliveries</h4>
+        <!-- Events first: choosing what to be told about is the decision, and the endpoint and the
+             deliveries follow from it. -->
+        <h2 class="section">Events</h2>
+        <div class="panel">
+            <label class="ev">
+              <input type="checkbox" checked>
+              <span class="evname mono">chat.completed</span>
+              <span class="evwhat">an answer finished</span>
+              <span class="evlast">2 minutes ago</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox" checked>
+              <span class="evname mono">chat.failed</span>
+              <span class="evwhat">a request failed</span>
+              <span class="evlast">1 hour ago</span>
+              <span class="tag bad">502</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">wallet.low</span>
+              <span class="evwhat">the balance fell below your threshold</span>
+              <span class="evlast">yesterday</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">key.created</span>
+              <span class="evwhat">a new key was made</span>
+              <span class="evlast">12 Nov</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">key.revoked</span>
+              <span class="evwhat">a key was revoked</span>
+              <span class="evlast">never</span>
+              <span class="tag ">&ndash;</span>
+            </label>
+        </div>
+
+        <h2 class="section">Recent deliveries</h2>
         <table>
           <thead>
             <tr>
@@ -85,32 +108,29 @@
           </thead>
           <tbody>
             <tr>
-              <td class="mini">18 Nov, 09:41</td>
+              <td class="mini">09:41</td>
               <td class="mono">chat.completed</td>
               <td class="key mono">wh_2f91c4</td>
               <td class="right">1</td>
               <td class="right mini">200 in 84 ms</td>
               <td class="right"><span class="pill ok">delivered</span></td>
-            </tr>
-            <tr>
-              <td class="mini">18 Nov, 09:38</td>
+            </tr>            <tr>
+              <td class="mini">09:38</td>
               <td class="mono">chat.completed</td>
               <td class="key mono">wh_2f91b7</td>
               <td class="right">1</td>
               <td class="right mini">200 in 61 ms</td>
               <td class="right"><span class="pill ok">delivered</span></td>
-            </tr>
-            <tr>
-              <td class="mini">18 Nov, 08:55</td>
+            </tr>            <tr>
+              <td class="mini">08:55</td>
               <td class="mono">chat.failed</td>
               <td class="key mono">wh_2f9140</td>
               <td class="right">3</td>
               <td class="right mini">502 after 3 tries</td>
-              <td class="right"><span class="pill">retrying</span></td>
-            </tr>
-            <tr>
-              <td class="mini">17 Nov, 22:10</td>
-              <td class="mono">wallet.low</td>
+              <td class="right"><span class="pill ">retrying</span></td>
+            </tr>            <tr>
+              <td class="mini">07:10</td>
+              <td class="mono">chat.completed</td>
               <td class="key mono">wh_2f8e02</td>
               <td class="right">1</td>
               <td class="right mini">200 in 120 ms</td>
@@ -119,13 +139,10 @@
           </tbody>
         </table>
 
-        <h4 class="section">What we send</h4>
-        <pre class="code flush" id="whSample"></pre>
-
         <p class="note">
-          Sample deliveries until the gateway records real ones. The body carries ids and counts,
-          not the conversation: a webhook that repeats the answer would put the text in a third
-          place, and the answer already lives in the chat you can read back.
+          A delivery is retried with a growing gap for a day before it is dropped, and every attempt
+          is listed with the code your server returned. The body carries ids and counts, not the
+          conversation: an answer already lives in the chat you can read back.
         </p>
       </div>
   </div>
