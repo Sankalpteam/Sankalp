@@ -33,7 +33,7 @@
         <div class="nav" data-console-nav></div>
       </div>
       <div class="main">
-        <div class="mainhead"><div><h3>Rate limits</h3><small>What this account may send, and what is left.</small></div>
+        <div class="mainhead"><div><h3>Rate limits</h3><small>What this account may send, and what has been refused.</small></div>
           <span class="pill">sample figures</span>
         </div>
 
@@ -44,85 +44,32 @@
           <div class="kpi"><div class="k">monthly tokens</div><div class="v">2M</div><div class="d">resets 1 Dec</div></div>
         </div>
 
-        <div class="panel" class="panel-plain">
-          <h4 class="section">This minute</h4>
-          <div class="bars">
-            <div class="barrow">
-              <span>Requests</span>
-              <div class="track"><div class="fill" style="width:38%"></div></div>
-              <span class="num"><b>23</b> of 60</span>
-            </div>
-            <div class="barrow">
-              <span>Tokens</span>
-              <div class="track"><div class="fill warn" style="width:71%"></div></div>
-              <span class="num"><b>64K</b> of 90K</span>
-            </div>
-            <div class="barrow">
-              <span>Concurrent</span>
-              <div class="track"><div class="fill" style="width:25%"></div></div>
-              <span class="num"><b>2</b> of 8</span>
-            </div>
+        <h2 class="section">Refused requests, last 24 hours</h2>
+        <div class="events">
+          <div class="ev">
+            <span class="when">09:12:55</span>
+            <span class="what"><b>Production server</b> hit the token limit</span>
+            <span class="used mono">64K of 90K used</span>
+            <span class="code"><span class="pill bad">429</span></span>
           </div>
-        </div>
-
-        <h4 class="section">This month</h4>
-        <div class="bars">
-          <div class="barrow">
-            <span>Included tokens</span>
-            <div class="track"><div class="fill full" style="width:96%"></div></div>
-            <span class="num"><b>1.92M</b> of 2M</span>
+          <div class="ev">
+            <span class="when">08:55:31</span>
+            <span class="what"><b>Production server</b> hit requests a minute</span>
+            <span class="used mono">60 of 60 used</span>
+            <span class="code"><span class="pill bad">429</span></span>
           </div>
-        </div>
-
-        <h4 class="section">Per key, last 24 hours</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Key</th>
-              <th class="right">Requests</th>
-              <th class="right">Tokens</th>
-              <th class="right">429s</th>
-              <th class="right">Share of limit</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="key mono">sk_live_&bull;&bull;&bull;&bull;7f2a</td>
-              <td class="right">918</td>
-              <td class="right">412K</td>
-              <td class="right">3</td>
-              <td class="right"><span class="pill ok">71%</span></td>
-            </tr>
-            <tr>
-              <td class="key mono">sk_live_&bull;&bull;&bull;&bull;1c04</td>
-              <td class="right">366</td>
-              <td class="right">96K</td>
-              <td class="right">0</td>
-              <td class="right"><span class="pill ok">29%</span></td>
-            </tr>
-            <tr>
-              <td class="key mono">sk_test_&bull;&bull;&bull;&bull;9b31</td>
-              <td class="right">0</td>
-              <td class="right">0</td>
-              <td class="right">0</td>
-              <td class="right"><span class="pill">0%</span></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h4 class="section">When a limit is reached</h4>
-        <div class="codes">
-          <div class="code-row"><code>429 Too Many Requests</code><span>with a body that says which limit was hit and when to retry</span></div>
-          <div class="code-row"><code>Retry-After</code><span>seconds to wait before sending again</span></div>
-          <div class="code-row"><code>X-RateLimit-Limit</code><span>the limit that applies to this key</span></div>
-          <div class="code-row"><code>X-RateLimit-Remaining</code><span>what is left in the current window</span></div>
-          <div class="code-row"><code>X-RateLimit-Reset</code><span>when the window resets, in seconds</span></div>
+          <div class="ev">
+            <span class="when">08:41:02</span>
+            <span class="what"><b>Production server</b> hit concurrency</span>
+            <span class="used mono">8 of 8 open</span>
+            <span class="code"><span class="pill bad">429</span></span>
+          </div>
         </div>
 
         <p class="note">
-          Sample figures until the gateway counts real ones. The limits belong to the key, not to
-          the account, so one runaway script cannot stop every other key - and the response headers
-          above are what a client needs to back off on its own instead of hammering and failing.
+          Every refusal with what was hit and how much was used. A count alone tells you that it
+          happened; this tells you which limit to raise. The limits belong to the key rather than the
+          account, so one runaway script cannot stop every other key.
         </p>
       </div>
   </div>
