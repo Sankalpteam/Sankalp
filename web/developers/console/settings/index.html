@@ -37,8 +37,17 @@
           <span class="pill">not saved yet</span>
         </div>
 
-        <div class="stack">
+        <!-- One section at a time: five short forms instead of one long page, which is the easiest
+             thing to find a single setting in. -->
+        <div class="subtabs" role="tablist">
+          <button class="subtab on" id="stTabAccount" type="button" role="tab">Account</button>
+          <button class="subtab" id="stTabSecurity" type="button" role="tab">Key security</button>
+          <button class="subtab" id="stTabSpending" type="button" role="tab">Spending</button>
+          <button class="subtab" id="stTabNotify" type="button" role="tab">Notifications</button>
+          <button class="subtab" id="stTabDanger" type="button" role="tab">Danger zone</button>
+        </div>
 
+        <div id="stViewAccount">
           <div class="card">
             <h4>Account</h4>
             <p class="sub">The name that appears on invoices, and where we write when something needs you.</p>
@@ -51,14 +60,16 @@
             </div>
             <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
           </div>
+        </div>
 
+        <div id="stViewSecurity" hidden>
           <div class="card">
             <h4>Key security</h4>
             <p class="sub">A key that can only be used from your own servers is worth much less to anyone who finds it.</p>
             <div class="field">
               <label for="stIps">IP allowlist</label>
               <textarea id="stIps" placeholder="One address or range per line, for example&#10;203.0.113.7&#10;198.51.100.0/24"></textarea>
-              <span class="sub flush">Empty means any address may use the key. Filled, every other address is refused.</span>
+              <span class="hintline">Empty means any address may use the key. Filled, every other address is refused.</span>
             </div>
             <div class="inline">
               <div class="field"><label for="stExpiry">Keys expire after</label>
@@ -70,7 +81,9 @@
             </div>
             <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
           </div>
+        </div>
 
+        <div id="stViewSpending" hidden>
           <div class="card">
             <h4>Spending</h4>
             <p class="sub">Told before it is gone, not after. The wallet stops answering at zero.</p>
@@ -89,10 +102,12 @@
             </div>
             <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
           </div>
+        </div>
 
+        <div id="stViewNotify" hidden>
           <div class="card">
             <h4>Notifications</h4>
-            <p class="sub">All of these go to the address above. Nothing here is on by default except the first two.</p>
+            <p class="sub">All of these go to the address in the account section.</p>
             <label class="toggle"><input type="checkbox" checked> Balance is low, or a top-up failed</label>
             <label class="toggle"><input type="checkbox" checked> A key was created or revoked</label>
             <label class="toggle"><input type="checkbox"> Weekly usage summary</label>
@@ -100,20 +115,21 @@
             <label class="toggle"><input type="checkbox"> Product changes that affect the API</label>
             <button class="btn primary" data-save type="button">Save</button><span class="saved">Saved</span>
           </div>
+        </div>
 
-          <div class="card">
+        <div id="stViewDanger" hidden>
+          <div class="card danger">
             <h4>Danger zone</h4>
             <p class="sub">Revoking every key stops every server at once. The account, its history and
               its wallet stay; only the keys go.</p>
-            <button class="btn ghost" id="stRevokeAll" type="button" class="text-bad">Revoke all keys</button>
+            <button class="btn ghost" id="stRevokeAll" type="button">Revoke all keys</button>
           </div>
-
         </div>
 
         <p class="note">
           These settings are stored with the account and enforced by the gateway - the allowlist and
-          the expiry at the door, the spend warning when the balance is checked. Nothing here is
-          saved until the gateway exists to honour it.
+          the expiry at the door, the spend warning when the balance is checked. Nothing here is saved
+          until the gateway exists to honour it.
         </p>
       </div>
   </div>
