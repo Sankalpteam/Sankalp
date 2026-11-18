@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - projects</title>
+<link rel="stylesheet" href="style.css?v=20261118a">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Projects</h3><small>One name per product, with its own test and live keys.</small></div>
+          <span class="pill">sample projects</span>
+        </div>
+
+        <div class="projcard">
+          <div class="top"><b>Sankalp app</b><span class="pill ok">live</span><span class="spacer"></span>
+            <span class="mini">created 12 Nov 2026</span></div>
+          <div class="keys">
+            <span>live key <code>sk_live_&bull;&bull;&bull;&bull;7f2a</code></span>
+            <span>test key <code>sk_test_&bull;&bull;&bull;&bull;9b31</code></span>
+          </div>
+          <div class="foot">
+            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Open in console</button>
+            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Rename</button>
+          </div>
+        </div>
+
+        <div class="projcard">
+          <div class="top"><b>Indoone site</b><span class="pill ok">live</span><span class="spacer"></span>
+            <span class="mini">created 15 Nov 2026</span></div>
+          <div class="keys">
+            <span>live key <code>sk_live_&bull;&bull;&bull;&bull;1c04</code></span>
+            <span>test key <code>sk_test_&bull;&bull;&bull;&bull;4d77</code></span>
+          </div>
+          <div class="foot">
+            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Open in console</button>
+            <button class="btn ghost" type="button" style="padding:8px 14px;font-size:12.5px">Rename</button>
+          </div>
+        </div>
+
+        <div class="newproj">
+          <div class="field" style="margin:0"><label for="pjName">New project</label>
+            <input id="pjName" placeholder="Name, for example Sankalp app" style="font-family:inherit;font-size:13.5px;
+              color:var(--ink);background:#fbf9ff;border:1px solid var(--line);border-radius:10px;padding:10px 11px;width:100%;box-sizing:border-box">
+          </div>
+          <button class="btn primary" id="pjCreate" type="button">Create</button>
+        </div>
+
+        <p class="note">
+          Test keys never reach the wallet and never appear in live usage, which is the point: a
+          script being written should not spend money or pollute the numbers you report on. A new
+          project starts with one of each.
+        </p>
+      </div>
+  </div>
+</main>
+
+<script src="../nav.js?v=20261118g"></script>
+<script src="projects.js?v=20261118a"></script>
+</body>
+</html>
