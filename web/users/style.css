@@ -1390,25 +1390,6 @@ html, body { height: 100%; }
 }
 
 
-/* The company line at the foot of the page. Deliberately quiet: it is an attribution, not a
-   navigation element, and the app's own chrome ends above it. */
-.site-footer {
-  padding: 18px 20px 26px;
-  text-align: center;
-  font-size: 12px;
-  color: #6b6478;
-}
-
-.site-footer a {
-  color: #6b6478;
-  text-decoration: none;
-}
-
-.site-footer a:hover {
-  text-decoration: underline;
-}
-
-
 /* Present for a crawler and a screen reader, out of the way for everyone else. The home page
    is an app shell, so its only server-rendered heading is this one. */
 .visually-hidden {

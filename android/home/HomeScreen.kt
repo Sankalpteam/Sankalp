@@ -695,14 +695,17 @@ fun HomeScreen(
     var messages by remember(userKey, startNewChat) { mutableStateOf(emptyList<ChatMessage>()) }
     var isSending by remember { mutableStateOf(false) }
     var chatActivityState by remember { mutableStateOf(ChatActivityState.IDLE) }
-    // Set when the foreground stream has drawn its first token.
+    // The text the foreground stream last drew.
     //
     // The reconciliation effect below polls the durable store - it is what keeps a reply alive
     // across a process death - and it cannot know that the stream has already put the answer on
-    // screen. So it treated a streamed turn as one that finished in the background: it raised
+    // screen. It treated a streamed turn as one that finished in the background: it raised
     // Preparing again (the spinner reappearing under the finished answer) and appended the reply
-    // a second time. This flag is the stream claiming its turn.
-    var streamDrewAnswer by remember { mutableStateOf(false) }
+    // a second time.
+    //
+    // A boolean was not enough: it was consumed by whichever turn settled first, which was not
+    // always the streamed one. The reply text is what actually identifies it.
+    var streamedReply by remember { mutableStateOf("") }
     var conversationId by rememberSaveable(userKey, startNewChat) { mutableStateOf<String?>(null) }
 
     // The thread menu's rename dialog. The title is seeded from what the thread is called
@@ -852,8 +855,8 @@ fun HomeScreen(
 
             for (turn in settled) {
                 // Drawn by the stream already: no second indicator, no second copy.
-                if (streamDrewAnswer) {
-                    streamDrewAnswer = false
+                if (streamedReply.isNotBlank() && turn.reply == streamedReply) {
+                    streamedReply = ""
                     continue
                 }
 
@@ -1044,7 +1047,7 @@ fun HomeScreen(
                         onDelta = { full ->
                             // First token: the wait is over, and this turn is being drawn
                             // here - so the poll must leave it alone.
-                            streamDrewAnswer = true
+                            streamedReply = full
                             chatActivityState = ChatActivityState.IDLE
 
                             if (streamedIndex < 0) {
