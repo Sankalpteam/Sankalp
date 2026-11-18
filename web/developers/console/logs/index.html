@@ -37,6 +37,9 @@
           <span class="pill">sample rows</span>
         </div>
 
+        <!-- Filters and the four numbers that say whether the day was healthy, above the rows they
+             apply to. The numbers are recomputed from whatever the filters leave, so they describe
+             what you are looking at rather than the whole account. -->
         <div class="filters">
           <div class="field"><label for="lgStatus">Status</label>
             <select id="lgStatus"><option value="">Any</option><option value="ok">200</option><option value="bad">Error</option></select>
@@ -56,6 +59,13 @@
           </div>
         </div>
 
+        <div class="summary">
+          <div><span>Requests</span><b id="lgSumCount">&ndash;</b></div>
+          <div><span>Error rate</span><b id="lgSumErrors">&ndash;</b></div>
+          <div><span>p95 latency</span><b id="lgSumP95">&ndash;</b></div>
+          <div><span>Spend</span><b id="lgSumCost">&ndash;</b></div>
+        </div>
+
         <table>
           <thead>
             <tr>
@@ -73,8 +83,8 @@
 
         <div class="pager">
           <span id="lgCount">-</span>
-          <span><button class="btn ghost" id="lgPrev" type="button">Newer</button>
-                <button class="btn ghost" id="lgNext" type="button">Older</button></span>
+          <span><button class="btn ghost" type="button" id="lgPrev">Newer</button>
+                <button class="btn ghost" type="button" id="lgNext">Older</button></span>
         </div>
 
         <p class="note">
