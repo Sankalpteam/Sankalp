@@ -37,43 +37,47 @@
           <span class="pill">sample projects</span>
         </div>
 
-        <div class="projcard">
-          <div class="top"><b>Sankalp app</b><span class="pill ok">live</span><span class="spacer"></span>
-            <span class="mini">created 12 Nov 2026</span></div>
-          <div class="keys">
-            <span>live key <code>sk_live_&bull;&bull;&bull;&bull;7f2a</code></span>
-            <span>test key <code>sk_test_&bull;&bull;&bull;&bull;9b31</code></span>
-          </div>
-          <div class="foot">
-            <button class="btn ghost" type="button" class="btn-sm">Open in console</button>
-            <button class="btn ghost" type="button" class="btn-sm">Rename</button>
+        <div class="pcard">
+          <div class="pcard-top"><b>Sankalp app</b><span class="pill ok">live</span>
+            <span class="spacer"></span><span class="mini">created 12 Nov 2026</span></div>
+          <div class="pcard-keys mono">2 live, 1 test</div>
+          <div class="pcard-stats"><span>1,284 requests</span><span>₹39.80 in 24 hours</span></div>
+          <div class="pcard-foot">
+            <button class="btn btn-sm" type="button">Open</button>
+            <button class="btn btn-sm" type="button">Rename</button>
           </div>
         </div>
-
-        <div class="projcard">
-          <div class="top"><b>Indoone site</b><span class="pill ok">live</span><span class="spacer"></span>
-            <span class="mini">created 15 Nov 2026</span></div>
-          <div class="keys">
-            <span>live key <code>sk_live_&bull;&bull;&bull;&bull;1c04</code></span>
-            <span>test key <code>sk_test_&bull;&bull;&bull;&bull;4d77</code></span>
+        <div class="pcard">
+          <div class="pcard-top"><b>Indoone site</b><span class="pill ok">live</span>
+            <span class="spacer"></span><span class="mini">created 15 Nov 2026</span></div>
+          <div class="pcard-keys mono">1 live, 1 test</div>
+          <div class="pcard-stats"><span>412 requests</span><span>₹12.40 in 24 hours</span></div>
+          <div class="pcard-foot">
+            <button class="btn btn-sm" type="button">Open</button>
+            <button class="btn btn-sm" type="button">Rename</button>
           </div>
-          <div class="foot">
-            <button class="btn ghost" type="button" class="btn-sm">Open in console</button>
-            <button class="btn ghost" type="button" class="btn-sm">Rename</button>
+        </div>
+        <div class="pcard">
+          <div class="pcard-top"><b>Sandbox</b><span class="pill ">idle</span>
+            <span class="spacer"></span><span class="mini">created 16 Nov 2026</span></div>
+          <div class="pcard-keys mono">0 live, 1 test</div>
+          <div class="pcard-stats"><span>0 requests</span><span>₹0.00 in 24 hours</span></div>
+          <div class="pcard-foot">
+            <button class="btn btn-sm" type="button">Open</button>
+            <button class="btn btn-sm" type="button">Rename</button>
           </div>
         </div>
 
         <div class="newproj">
           <div class="inline-field"><label for="pjName">New project</label>
-            <input id="pjName" placeholder="Name, for example Sankalp app">
-          </div>
+            <input id="pjName" placeholder="Name, for example Sankalp app"></div>
           <button class="btn primary" id="pjCreate" type="button">Create</button>
         </div>
 
         <p class="note">
-          Test keys never reach the wallet and never appear in live usage, which is the point: a
-          script being written should not spend money or pollute the numbers you report on. A new
-          project starts with one of each.
+          A card per project with its keys, its traffic and its money. Test keys never reach the
+          wallet and never appear in live usage, which is the point: a script being written should not
+          spend money or pollute the numbers you report on.
         </p>
       </div>
   </div>
