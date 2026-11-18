@@ -61,7 +61,12 @@ tr:last-child td{border-bottom:0}
 .pill.info{background:var(--tint);color:var(--brand)}
 .mini{font-size:12px;color:var(--faint)}
 .right{text-align:right}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-bottom:20px}
+/* The cards do not stretch to fill the shell.
+   auto-fit with 1fr gave each of four cards a third of a 1240px pane - around 290px - so the same
+   card read much larger on Overview, which has four and little else, than on the screens where a
+   table takes the width. A card is 168 to 240px on every screen now, and the row starts at the
+   left edge like everything else in the pane. */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,240px));justify-content:start;gap:14px;margin-bottom:20px}
 .kpi{border:1px solid var(--line);border-radius:13px;padding:16px;background:var(--tint-2)}
 .kpi .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 .kpi .v{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-top:6px;line-height:1.15}
