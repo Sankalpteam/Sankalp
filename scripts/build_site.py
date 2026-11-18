@@ -112,7 +112,7 @@ def require(paths: list[pathlib.Path]) -> None:
 # and did: some screens drew eight items and some twelve, depending on which copy of the script that
 # page had been given. A rail that is part of the page cannot be stale, and there is still only one
 # list, here.
-CONSOLE_RAIL = [
+CONSOLE_TABS = [
     ("console", "./", "Overview"),
     ("keys", "keys/", "API keys"),
     ("usage", "usage/", "Usage"),
@@ -128,8 +128,13 @@ CONSOLE_RAIL = [
 ]
 
 
-def paint_console_rail() -> int:
-    """Fill the rail placeholder in every console page, and drop the script that used to."""
+def paint_console_nav() -> int:
+    """Write the tab bar into every console page, and drop the side block it replaces.
+
+    The navigation was a rail of links fetched by a script, which a browser could serve from its
+    cache - and did, so screens disagreed about what the console contained. It is part of the page
+    now, in one place, with the current screen marked.
+    """
     console = SITE / "app" / "developers" / "console"
     if not console.exists():
         return 0
@@ -138,30 +143,27 @@ def paint_console_rail() -> int:
 
     for page in sorted(console.rglob("index.html")):
         html = page.read_text(encoding="utf-8")
-        if 'data-console-nav' not in html:
+        if 'data-console-nav' not in html and 'class="side"' not in html:
             continue
 
         depth = "" if page.parent == console else "../"
         current = "console" if page.parent == console else page.parent.name
 
-        lines = []
-        for item_id, href, label in CONSOLE_RAIL:
-            active = ' class="on"' if item_id == current else ""
-            lines.append(f'          <a{active} href="{depth}{href}"><span class="dot"></span>{label}</a>')
+        links = []
+        for tab_id, href, label in CONSOLE_TABS:
+            active = ' class="on"' if tab_id == current else ""
+            links.append(f'    <a{active} href="{depth}{href}">{label}</a>')
 
-        html = html.replace(
-            '<div class="nav" data-console-nav></div>',
-            '<div class="nav">\n' + "\n".join(lines) + "\n        </div>",
-            1,
-        )
-        # the script that filled it is no longer needed
+        tabs = '<nav class="tabs">\n' + "\n".join(links) + "\n  </nav>"
+
+        # the side block: the account line and the rail placeholder, gone in one piece
+        html = re.sub(r'\s*<div class="side">.*?<div class="nav" data-console-nav></div>\s*</div>',
+                      "", html, flags=re.S)
+        # the tab bar goes directly under the top bar
+        html = html.replace('</header>', '</header>\n\n  ' + tabs, 1)
+
         html = re.sub(r'\s*<script src="(?:\.\./)?nav\.js[^"]*"></script>', "", html)
 
-        # The stylesheet versions are worked out here, from the files themselves.
-        #
-        # They used to be edited by hand, and were forgotten twice: base.css changed while every
-        # page still asked for the old address, so four screens kept the old look from a cached
-        # copy. A hash of the bytes cannot be forgotten.
         base_css = (console / "base.css").read_bytes()
         own_css_path = page.parent / "style.css"
         own_css = own_css_path.read_bytes() if own_css_path.exists() else b""
@@ -198,7 +200,7 @@ def main() -> None:
     for shared in SHARED:
         shutil.copytree(WEB / shared, SITE / "app" / shared)
 
-    painted = paint_console_rail()
+    painted = paint_console_nav()
 
     # The same artwork, inside /app/ as well as at the root.
     #
