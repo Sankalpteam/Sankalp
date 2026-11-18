@@ -107,8 +107,25 @@
     return tr;
   }
 
+  function paintSummary(list) {
+    var count = list.length;
+    var errors = list.filter(function (r) { return r.status !== 200; }).length;
+    var spend = list.reduce(function (sum, r) { return sum + cost(r); }, 0);
+
+    // p95 the honest way: sort the latencies, take the one at 95% - with a handful of rows that is
+    // the slowest, which is what someone is looking for anyway.
+    var latencies = list.map(function (r) { return r.ms; }).sort(function (a, b) { return a - b; });
+    var p95 = latencies.length ? latencies[Math.min(latencies.length - 1, Math.floor(latencies.length * 0.95))] : 0;
+
+    el('lgSumCount').textContent = count.toLocaleString('en-IN');
+    el('lgSumErrors').textContent = count ? ((errors / count) * 100).toFixed(1) + '%' : '\u2013';
+    el('lgSumP95').textContent = count ? (p95 / 1000).toFixed(1) + ' s' : '\u2013';
+    el('lgSumCost').textContent = '\u20b9' + spend.toFixed(2);
+  }
+
   function paint(rows) {
     var list = filtered(rows);
+    paintSummary(list);
     var body = el('lgBody');
     body.textContent = '';
 
