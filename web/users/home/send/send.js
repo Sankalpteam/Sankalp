@@ -364,17 +364,22 @@
             throw error;
           }
 
-          // A stream that fails before a single token falls back to the blocking call:
-          // same pipeline, same answer, without the progressive reveal. A partial bubble
-          // is removed so the fallback does not leave half an answer behind.
-          console.warn('Sankalp stream failed, falling back:', error);
+          // Do not automatically POST the same turn again. The backend could
+          // have executed a GitHub/email write before the stream was lost.
+          // Retrying without an idempotency key risks executing it twice.
+          console.warn('Sankalp stream interrupted; outcome unconfirmed:', error);
 
           if (streamedMessage) {
             store.remove(streamedMessage);
             streamedMessage = null;
           }
 
-          result = null;
+          const uncertain = new Error(
+            'The connection was interrupted. This request may already have been processed. ' +
+            'Check the conversation and connected app before trying again.'
+          );
+          uncertain.name = 'UncertainRequestError';
+          throw uncertain;
         }
       }
 
@@ -415,7 +420,10 @@
 
       console.error('Sankalp chat send failed:', error);
       window.IndooneInflight?.finish();
-      store.remove(mine);
+      // Keep the user's question visible when the backend outcome is unknown.
+      if (error?.name !== 'UncertainRequestError') {
+        store.remove(mine);
+      }
       store.add({
         text:
           error?.message &&
