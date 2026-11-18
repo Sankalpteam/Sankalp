@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - rate limits</title>
-<link rel="stylesheet" href="style.css?v=20261118a">
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
 <script>
   // The console is for a signed-in account, and it is the app's own session - the same sign-in,
   // no second account. Without one, back to it.
@@ -43,8 +44,8 @@
           <div class="kpi"><div class="k">monthly tokens</div><div class="v">2M</div><div class="d">resets 1 Dec</div></div>
         </div>
 
-        <div class="panel" style="border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px">
-          <h4 style="margin:0 0 12px;font-size:14px">This minute</h4>
+        <div class="panel" class="panel-plain">
+          <h4 class="section">This minute</h4>
           <div class="bars">
             <div class="barrow">
               <span>Requests</span>
@@ -64,7 +65,7 @@
           </div>
         </div>
 
-        <h4 style="margin:20px 0 8px;font-size:14px">This month</h4>
+        <h4 class="section">This month</h4>
         <div class="bars">
           <div class="barrow">
             <span>Included tokens</span>
@@ -73,7 +74,7 @@
           </div>
         </div>
 
-        <h4 style="margin:22px 0 8px;font-size:14px">Per key, last 24 hours</h4>
+        <h4 class="section">Per key, last 24 hours</h4>
         <table>
           <thead>
             <tr>
@@ -109,7 +110,7 @@
           </tbody>
         </table>
 
-        <h4 style="margin:22px 0 8px;font-size:14px">When a limit is reached</h4>
+        <h4 class="section">When a limit is reached</h4>
         <div class="codes">
           <div class="code-row"><code>429 Too Many Requests</code><span>with a body that says which limit was hit and when to retry</span></div>
           <div class="code-row"><code>Retry-After</code><span>seconds to wait before sending again</span></div>
@@ -127,6 +128,6 @@
   </div>
 </main>
 
-<script src="../nav.js?v=20261118g"></script>
+<script src="../nav.js"></script>
 </body>
 </html>
