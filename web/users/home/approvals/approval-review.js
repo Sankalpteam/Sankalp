@@ -102,6 +102,12 @@
   }
 
   async function review(summary) {
+    // A Firebase account switch can happen before onAuthStateChanged has
+    // cleared the old account's card. Hide it before fetching or opening UI.
+    if (currentUid !== signedInUid()) {
+      resetForAccount();
+      return;
+    }
     if (reviewLocked || !canReview(summary) || !signedInUid()) return;
     const owner = signedInUid();
     reviewLocked = true;
