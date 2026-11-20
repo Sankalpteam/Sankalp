@@ -299,6 +299,11 @@
       if (!api) {
         throw new Error('Sankalp is not reachable right now.');
       }
+      // The account may have changed during the 350ms chat activity delay.
+      // Do not send an old account's explicit approval intent with a NEW token.
+      if (agentSelected && agentOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
+        throw new Error('Account changed before agent dispatch. No request was sent.');
+      }
 
       // The stream is preferred: the first delta is the answer starting, so the indicator
       // goes away then instead of after the whole reply.
