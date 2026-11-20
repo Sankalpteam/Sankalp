@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
  * A submitted decision is NEVER retried, including on network timeout.
  */
 @Composable
-fun AgentApprovalPanel(modifier: Modifier = Modifier) {
+fun AgentApprovalPanel(modifier: Modifier = Modifier, refreshKey: Int = 0) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
     val lifecycle = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
@@ -68,7 +68,7 @@ fun AgentApprovalPanel(modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(userId) {
+    LaunchedEffect(userId, refreshKey) {
         if (userId.isNotBlank()) refresh()
     }
     DisposableEffect(lifecycle, userId) {
