@@ -73,3 +73,18 @@ test('limits page never presents mock quotas or fabricated 429 refusals as produ
   assert.match(html, /Live inference,/);
   assert.doesNotMatch(html, /Yashwanth|Production server|09:12:55|90K|2M|60 of 60|sample figures/);
 });
+
+test('wallet is owner-authenticated, read-only and never treats browser UID as proof of identity', () => {
+  const html = read('web/developers/console/wallet/index.html');
+  const js = read('web/developers/console/wallet/wallet.js');
+  assert.match(html, /id="dwAvailable"/);
+  assert.match(html, /id="dwHeld"/);
+  assert.match(html, /id="dwPending"/);
+  assert.match(html, /wallet\.js/);
+  assert.doesNotMatch(html, /indoone_otp_verified_uid|Yashwanth/);
+  assert.match(js, /getIdToken\(false\)/);
+  assert.match(js, /\/api\/developers\/wallet/);
+  assert.match(js, /data\.paid_inference_enabled !== false/);
+  assert.match(js, /data\.payments_enabled !== false/);
+  assert.doesNotMatch(js, /localStorage|sessionStorage|fetch\([^)]*top.up|POST/);
+});
