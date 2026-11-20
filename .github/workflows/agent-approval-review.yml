@@ -8,6 +8,9 @@ on:
     paths:
       - "web/users/home/approvals/**"
       - "web/users/home/message/chat-api.js"
+      - "web/users/home/agent-mode.js"
+      - "web/users/home/send/send.js"
+      - "web/users/home/message/inflight.js"
       - "web/users/home/chat-home.js"
       - "web/users/index.html"
       - "scripts/tests/test_agent_approval_web.mjs"
@@ -29,6 +32,9 @@ jobs:
         run: |
           node --check web/users/home/message/chat-api.js
           node --check web/users/home/approvals/approval-review.js
+          node --check web/users/home/agent-mode.js
+          node --check web/users/home/send/send.js
+          node --check web/users/home/message/inflight.js
           node --check web/users/home/chat-home.js
       - name: Unit-test authenticated approval contract and one-shot decision
         run: node --test scripts/tests/test_agent_approval_web.mjs
