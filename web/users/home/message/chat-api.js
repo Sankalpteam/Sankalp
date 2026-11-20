@@ -308,10 +308,63 @@
     return final;
   }
 
+  // LangGraph's /api/agent review flow is independent of /api/chat action chips.
+  // All three calls use the SAME Firebase bearer identity as normal chat.
+  function approvalPath(runId) {
+    const id = String(runId || '').trim();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new Error('Invalid agent run identifier.');
+    }
+    return '/api/agent/runs/' + encodeURIComponent(id) + '/approval';
+  }
+
+  async function getApprovalJson(path) {
+    const token = await authToken();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(backendBase() + path, {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' },
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      if (!response.ok) {
+        const error = new Error('Could not load pending approvals.');
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function listAgentApprovals() {
+    const data = await getApprovalJson('/api/agent/approvals');
+    return Array.isArray(data?.approvals) ? data.approvals : [];
+  }
+
+  function getAgentApproval(runId) {
+    return getApprovalJson(approvalPath(runId));
+  }
+
+  // Writes NEVER retry on timeout or 409. A network failure can mean the
+  // provider received the action; only a separate read may reconcile status.
+  function decideAgentApproval(runId, decision) {
+    if (decision !== 'approve' && decision !== 'deny') {
+      throw new Error('Invalid approval decision.');
+    }
+    return postJson(approvalPath(runId), { decision });
+  }
+
   window.IndooneChatApi = {
     send,
     streamMessage,
     uploadFile,
+    listAgentApprovals,
+    getAgentApproval,
+    decideAgentApproval,
     backendUrl: backendBase()
   };
 })();
