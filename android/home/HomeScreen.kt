@@ -119,6 +119,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.indoone.home.approvals.AgentApprovalPanel
 import com.indoone.home.message.ActionChip
 import com.indoone.home.message.parseActionChips
 import org.json.JSONArray
@@ -2168,6 +2169,10 @@ fun HomeScreen(
                 )
             }
             }
+
+            // Read-only list of official LangGraph actions already awaiting consent.
+            // This does NOT replace normal /api/chat confirmation chips.
+            AgentApprovalPanel()
 
             if (pendingAttachments.isNotEmpty()) {
                 Row(
