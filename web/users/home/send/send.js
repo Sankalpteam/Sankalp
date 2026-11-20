@@ -231,6 +231,7 @@
     // The same ID is the durable admission key on BOTH chat transports.
     // Agent mode uses exactly one blocking request and never auto-falls back.
     const agentTurnId = agentSelected ? 'turn_' + crypto.randomUUID().replace(/-/g, '') : null;
+    const agentOwnerUid = agentSelected ? window.firebase?.auth?.().currentUser?.uid : null;
     if (agentSelected) window.IndooneAgentMode?.clear?.();
 
     const message = text || (
@@ -408,6 +409,9 @@
         return;
       }
 
+      if (agentSelected && agentOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
+        throw new Error('Account changed during this agent request. Do not resend the action.');
+      }
       if (result.agentStatus === 'awaiting_approval') {
         void window.IndooneAgentApprovals?.refresh?.();
       }
