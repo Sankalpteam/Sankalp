@@ -368,6 +368,12 @@
     if (record.hadAttachments) {
       window.toast?.('Message restored - please re-attach your file');
     }
+    if (record.agentMode) {
+      window.toast?.('An Agent action may already have run. Do not resend until you check its status.');
+      // No agent-mode selection is automatically restored: each turn needs
+      // a fresh, deliberate opt-in, never a silent replay after refresh.
+      window.IndooneAgentMode?.clear?.();
+    }
 
     console.warn('Sankalp: an unfinished message was restored to the composer.');
   }
