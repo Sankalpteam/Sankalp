@@ -1089,6 +1089,9 @@ fun HomeScreen(
                         )
                     }
                     outcome.onSuccess { response ->
+                        if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
+                            return@onSuccess
+                        }
                         conversationId = response.conversationId
                         addReply(response.reply, response.actionChips)
                         if (response.agentStatus == "awaiting_approval") {
@@ -1102,6 +1105,9 @@ fun HomeScreen(
                             }
                         }
                     }.onFailure {
+                        if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
+                            return@onFailure
+                        }
                         addReply(
                             "Agent request outcome could not be confirmed. Do not resend. " +
                             "Check Pending agent approvals and the connected provider first."
