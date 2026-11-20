@@ -11,6 +11,7 @@ import android.print.PrintManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import android.content.ClipData
@@ -758,6 +759,15 @@ fun HomeScreen(
     var recentChats by remember { mutableStateOf(emptyList<CloudChatConversation>()) }
     val scope = rememberCoroutineScope()
     val chatListState = rememberLazyListState()
+    var agentChatAvailable by remember(userKey) { mutableStateOf(false) }
+    var agentModeNext by remember(userKey) { mutableStateOf(false) }
+    var agentApprovalRefresh by remember(userKey) { mutableStateOf(0) }
+
+    // Read-only capability discovery. OFF on existing production backends.
+    LaunchedEffect(userKey) {
+        agentChatAvailable = if (userKey.isNotBlank()) ChatApi.chatAgentModeAvailable() else false
+        if (!agentChatAvailable) agentModeNext = false
+    }
 
     // One speech engine for the screen, not one per bubble: each engine is a service
     // connection, and a thread of twenty replies would open twenty of them. The
@@ -1033,6 +1043,12 @@ fun HomeScreen(
         val attachmentsToSend = pendingAttachments.toList()
         val hasPendingAttachment = attachmentsToSend.isNotEmpty()
         if (isSending || isAddingAttachments || (typed.isEmpty() && !hasPendingAttachment)) return
+        if (agentModeNext && hasPendingAttachment) {
+            Toast.makeText(context, "Agent mode does not support attachments yet.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val runWithAgent = agentModeNext && agentChatAvailable && !hasPendingAttachment
+        if (runWithAgent) agentModeNext = false
 
         val messageToBackend = typed.ifBlank {
             "Please inspect the attached file(s) and describe their contents or visible details."
@@ -1060,6 +1076,42 @@ fun HomeScreen(
         // The turn is written first, so a process death leaves something to reconcile
         // against instead of a question with no answer.
         if (!hasPendingAttachment) {
+            if (runWithAgent) {
+                // Explicit ONE-TURN opt-in. Do not send through streaming +
+                // WorkManager fallback: a timeout might follow a remote write.
+                val agentTurnId = "turn_" + UUID.randomUUID().toString().replace("-", "")
+                scope.launch {
+                    val outcome = runCatching {
+                        ChatApi.sendLangGraphMessage(
+                            message = messageToBackend,
+                            conversationId = requestConversationId,
+                            clientTurnId = agentTurnId,
+                        )
+                    }
+                    outcome.onSuccess { response ->
+                        conversationId = response.conversationId
+                        addReply(response.reply, response.actionChips)
+                        if (response.agentStatus == "awaiting_approval") {
+                            agentApprovalRefresh += 1
+                        }
+                        scope.launch {
+                            runCatching {
+                                cloudChatRepository.appendExchange(
+                                    response.conversationId, persistedUserContent, response.reply
+                                )
+                            }
+                        }
+                    }.onFailure {
+                        addReply(
+                            "Agent request outcome could not be confirmed. Do not resend. " +
+                            "Check Pending agent approvals and the connected provider first."
+                        )
+                    }
+                    isSending = false
+                    chatActivityState = ChatActivityState.IDLE
+                }
+                return@sendMessage
+            }
             // Foreground stream first: the words appear as they are produced, and the
             // activity indicator goes on the first one instead of after the whole answer.
             //
@@ -2172,7 +2224,26 @@ fun HomeScreen(
 
             // Read-only list of official LangGraph actions already awaiting consent.
             // This does NOT replace normal /api/chat confirmation chips.
-            AgentApprovalPanel()
+            AgentApprovalPanel(refreshKey = agentApprovalRefresh)
+            if (agentChatAvailable && userKey.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = agentModeNext,
+                        onCheckedChange = { agentModeNext = it },
+                        enabled = !isSending && pendingAttachments.isEmpty(),
+                    )
+                    Column {
+                        Text("Run next message with LangGraph Agent (beta)", fontSize = 12.sp)
+                        Text(
+                            "One message only. No attachments or automatic retry.",
+                            color = Color(0xFF786C85), fontSize = 11.sp,
+                        )
+                    }
+                }
+            }
 
             if (pendingAttachments.isNotEmpty()) {
                 Row(
