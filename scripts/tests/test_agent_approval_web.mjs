@@ -43,7 +43,7 @@ test('details must use exact UUID; never a client-provided URL path', async () =
   const { api, calls } = apiHarness({ response: { run_id: uuid, status: 'pending' } });
   await api.getAgentApproval(uuid);
   assert.equal(calls[0].url, 'https://backend.example/api/agent/runs/' + uuid + '/approval');
-  await assert.rejects(() => api.getAgentApproval('../other?run=1'), /Invalid agent run identifier/);
+  assert.throws(() => api.getAgentApproval('../other?run=1'), /Invalid agent run identifier/);
   assert.equal(calls.length, 1);
 });
 
@@ -54,7 +54,7 @@ test('decision is exactly one POST, with only approve or deny payload', async ()
   assert.equal(calls[0].options.method, 'POST');
   assert.deepEqual(JSON.parse(calls[0].options.body), { decision: 'deny' });
   assert.equal(calls[0].options.headers.Authorization, 'Bearer firebase-id-token');
-  await assert.rejects(() => api.decideAgentApproval(uuid, 'approve;delete'), /Invalid approval decision/);
+  assert.throws(() => api.decideAgentApproval(uuid, 'approve;delete'), /Invalid approval decision/);
   assert.equal(calls.length, 1);
 });
 
