@@ -29,6 +29,8 @@ data class ChatResponse(
     val reply: String,
     val actionChips: List<ActionChip> = emptyList(),
     val sources: List<ChatSource> = emptyList(),
+    val agentRunId: String? = null,
+    val agentStatus: String? = null,
 )
 
 // The authenticated /api/agent approval workflow is separate from /api/chat chips.
@@ -475,6 +477,57 @@ private const val READ_TIMEOUT_MS = 300_000
             } finally {
                 connection.disconnect()
             }
+        }
+    }
+
+    /** Never offer LangGraph chat mode until this authenticated backend enables it. */
+    suspend fun chatAgentModeAvailable(): Boolean = withContext(Dispatchers.IO) {
+        runCatching { approvalGet("/api/chat/agent-mode").optBoolean("enabled", false) }
+            .getOrDefault(false)
+    }
+
+    /**
+     * Exactly ONE authenticated /api/chat POST with an idempotency claim.
+     * No automatic retries or stream-to-blocking fallback after a timeout.
+     * A successful write is never inferred from a lost HTTP response.
+     */
+    suspend fun sendLangGraphMessage(
+        message: String,
+        conversationId: String?,
+        clientTurnId: String,
+    ): ChatResponse = withContext(Dispatchers.IO) {
+        require(Regex("^turn_[a-fA-F0-9]{32}$").matches(clientTurnId)) {
+            "A stable agent turn ID is required."
+        }
+        val payload = JSONObject().apply {
+            put("message", message)
+            if (!conversationId.isNullOrBlank()) put("conversation_id", conversationId)
+            put("execution_mode", "langgraph")
+            put("client_turn_id", clientTurnId)
+        }
+        val connection = openConnection(
+            requireBackendUrl() + "/api/chat",
+            requireAuthToken(),
+        )
+        try {
+            val text = executeJson(connection, payload.toString())
+            val json = JSONObject(text)
+            val reply = json.optString("reply")
+            val id = json.optString("conversation_id")
+            if (id.isBlank() || reply.isBlank()) {
+                throw ChatApiException("Sankalp could not verify the agent response.")
+            }
+            val sources = parseSources(json.optJSONArray("sources"))
+            ChatResponse(
+                conversationId = id,
+                reply = withSources(reply, sources),
+                actionChips = parseActionChips(json.optJSONArray("action_chips")),
+                sources = sources,
+                agentRunId = json.optString("agent_run_id").takeIf { it.isNotBlank() },
+                agentStatus = json.optString("agent_status").takeIf { it.isNotBlank() },
+            )
+        } finally {
+            connection.disconnect()
         }
     }
 
