@@ -35,7 +35,7 @@
     }
   }
 
-  function begin({ conversationId, text, hadAttachments = false }) {
+  function begin({ conversationId, text, hadAttachments = false, agentMode = false, clientTurnId = null }) {
     const value = String(text || '').trim();
 
     if (!value) {
@@ -52,6 +52,8 @@
           // handle to it once the document dies. The record remembers that there was
           // one, so the restore can say so instead of silently sending text only.
           hadAttachments: Boolean(hadAttachments),
+          agentMode: Boolean(agentMode),
+          clientTurnId: agentMode ? clientTurnId : null,
           startedAt: Date.now()
         })
       );
