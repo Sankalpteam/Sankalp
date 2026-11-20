@@ -1,6 +1,8 @@
 name: Agent Approval Web Contract
 
 on:
+  push:
+    branches: ["feat/agent-approval-review-ui-20261120"]
   pull_request:
     branches: [main]
     paths:
