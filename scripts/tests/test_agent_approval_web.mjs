@@ -188,3 +188,89 @@ test('account switch before review does not POST any write', async () => {
   assert.equal(posts, 0);
   assert.equal(body.children.filter(el => el.tagName === 'dialog').length, 0);
 });
+
+
+test('explicit agent send includes exactly one stable turn id and agent mode', async () => {
+  const turnId = 'turn_1234567890abcdef1234567890abcdef';
+  const { api, calls } = apiHarness({
+    response: {
+      conversation_id: uuid, reply: 'Awaiting approval', action_chips: [],
+      agent_run_id: uuid, agent_status: 'awaiting_approval'
+    }
+  });
+  const output = await api.send({
+    message: 'count words: hi', conversationId: uuid,
+    executionMode: 'langgraph', clientTurnId: turnId
+  });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'https://backend.example/api/chat');
+  const payload = JSON.parse(calls[0].options.body);
+  assert.equal(payload.execution_mode, 'langgraph');
+  assert.equal(payload.client_turn_id, turnId);
+  assert.equal(output.agentRunId, uuid);
+  assert.equal(output.agentStatus, 'awaiting_approval');
+  await assert.rejects(api.send({
+    message: 'hi', executionMode: 'langgraph', clientTurnId: '../untrusted'
+  }), /stable turn ID/);
+  assert.equal(calls.length, 1);
+});
+
+test('default chat request retains existing payload and does not opt in', async () => {
+  const { api, calls } = apiHarness({
+    response: { conversation_id: uuid, reply: 'Normal reply' }
+  });
+  await api.send({ message: 'hi', conversationId: uuid });
+  const payload = JSON.parse(calls[0].options.body);
+  assert.equal(payload.message, 'hi');
+  assert.equal(payload.conversation_id, uuid);
+  assert.equal(Object.hasOwn(payload, 'execution_mode'), false);
+  assert.equal(Object.hasOwn(payload, 'client_turn_id'), false);
+});
+
+test('agent mode capability fails closed when unsupported or unauthenticated', async () => {
+  const on = apiHarness({ response: { enabled: true } });
+  assert.equal(await on.api.chatAgentModeEnabled(), true);
+  const off = apiHarness({ response: { enabled: false } });
+  assert.equal(await off.api.chatAgentModeEnabled(), false);
+  const noSession = apiHarness({ uid: '' });
+  assert.equal(await noSession.api.chatAgentModeEnabled(), false);
+  assert.equal(noSession.calls.length, 0);
+});
+
+test('agent-mode opt-in remains hidden until authenticated server supports it', async () => {
+  const checkbox = new Element('input');
+  checkbox.checked = false;
+  const label = new Element('label');
+  label.hidden = true;
+  let uid = 'alice', enabled = false;
+  const window = {
+    firebase: { auth: () => ({
+      get currentUser() { return uid ? { uid } : null; },
+      onAuthStateChanged: () => {}
+    }) },
+    IndooneChatApi: { chatAgentModeEnabled: async () => enabled }
+  };
+  const document = {
+    getElementById: id => id === 'agentModeControl' ? label
+      : id === 'agentModeNextTurn' ? checkbox : null
+  };
+  runInNewContext(
+    readFileSync('web/users/home/agent-mode.js', 'utf8'),
+    { window, document, console }
+  );
+  window.IndooneAgentMode.init();
+  await flush();
+  assert.equal(label.hidden, true);
+  assert.equal(window.IndooneAgentMode.selected(), false);
+  enabled = true;
+  await window.IndooneAgentMode.refresh();
+  assert.equal(label.hidden, false);
+  checkbox.checked = true;
+  assert.equal(window.IndooneAgentMode.selected(), true);
+  window.IndooneAgentMode.clear();
+  assert.equal(window.IndooneAgentMode.selected(), false);
+  uid = 'bob';
+  assert.equal(window.IndooneAgentMode.selected(), false);
+  await window.IndooneAgentMode.refresh();
+  assert.equal(checkbox.checked, false);
+});
