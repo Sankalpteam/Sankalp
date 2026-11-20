@@ -495,6 +495,7 @@ private const val READ_TIMEOUT_MS = 300_000
         message: String,
         conversationId: String?,
         clientTurnId: String,
+        expectedUserId: String,
     ): ChatResponse = withContext(Dispatchers.IO) {
         require(Regex("^turn_[a-fA-F0-9]{32}$").matches(clientTurnId)) {
             "A stable agent turn ID is required."
@@ -505,9 +506,22 @@ private const val READ_TIMEOUT_MS = 300_000
             put("execution_mode", "langgraph")
             put("client_turn_id", clientTurnId)
         }
+        // Bind the request to the account which selected Agent mode. An auth
+        // switch while waiting for a Firebase ID token must fail BEFORE dispatch.
+        val account = FirebaseAuth.getInstance().currentUser
+            ?: throw ChatApiException("Please sign in to use Agent mode.")
+        if (expectedUserId.isBlank() || account.uid != expectedUserId) {
+            throw ChatApiException("Account changed before Agent mode request; nothing was sent.")
+        }
+        val token = Tasks.await(account.getIdToken(false)).token
+            ?.takeIf { it.isNotBlank() }
+            ?: throw ChatApiException("Could not authenticate the agent request.")
+        if (FirebaseAuth.getInstance().currentUser?.uid != expectedUserId) {
+            throw ChatApiException("Account changed before Agent mode request; nothing was sent.")
+        }
         val connection = openConnection(
             requireBackendUrl() + "/api/chat",
-            requireAuthToken(),
+            token,
         )
         try {
             val text = executeJson(connection, payload.toString())
