@@ -1086,6 +1086,7 @@ fun HomeScreen(
                             message = messageToBackend,
                             conversationId = requestConversationId,
                             clientTurnId = agentTurnId,
+                            expectedUserId = userKey,
                         )
                     }
                     outcome.onSuccess { response ->
