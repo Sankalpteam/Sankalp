@@ -159,9 +159,19 @@
     }
   }
 
-  async function send({ message, conversationId, attachments = [] }) {
+  async function send({ message, conversationId, attachments = [], executionMode = 'default', clientTurnId = null }) {
     const media = await buildMediaPayload(attachments);
     const payload = { message };
+    if (executionMode === 'langgraph') {
+      if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId || ''))) {
+        throw new Error('Agent mode requires a fresh, stable turn ID.');
+      }
+      if (attachments.length) {
+        throw new Error('Agent mode does not support attachments yet.');
+      }
+      payload.execution_mode = 'langgraph';
+      payload.client_turn_id = clientTurnId;
+    }
 
     if (conversationId) {
       payload.conversation_id = conversationId;
@@ -197,7 +207,9 @@
       // Follow-ups the backend offered with this reply. Empty for most answers; a held
       // write carries Confirm/Cancel so the user presses a button instead of typing a
       // word the reply had to spell out.
-      chips: Array.isArray(json.action_chips) ? json.action_chips : []
+      chips: Array.isArray(json.action_chips) ? json.action_chips : [],
+      agentRunId: typeof json.agent_run_id === 'string' ? json.agent_run_id : null,
+      agentStatus: typeof json.agent_status === 'string' ? json.agent_status : null
     };
   }
 
@@ -308,6 +320,16 @@
     return final;
   }
 
+  async function chatAgentModeEnabled() {
+    try {
+      const result = await getApprovalJson('/api/chat/agent-mode');
+      return result?.enabled === true;
+    } catch (error) {
+      // Older backends or feature-off deployments must not advertise the UI.
+      return false;
+    }
+  }
+
   // LangGraph's /api/agent review flow is independent of /api/chat action chips.
   // All three calls use the SAME Firebase bearer identity as normal chat.
   function approvalPath(runId) {
@@ -362,6 +384,7 @@
     send,
     streamMessage,
     uploadFile,
+    chatAgentModeEnabled,
     listAgentApprovals,
     getAgentApproval,
     decideAgentApproval,
