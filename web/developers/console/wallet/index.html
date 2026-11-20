@@ -35,7 +35,7 @@
       </div>
       <div class="main">
         <div class="mainhead"><div><h3>Wallet</h3><small>What is left, what was spent, and the receipts.</small></div>
-          <span class="pill">sample figures</span>
+          <span class="pill">payments not enabled</span>
         </div>
 
         <!-- A strip and a table: the balance and the one action that changes it, then everything that
@@ -44,12 +44,12 @@
         <div class="strip">
           <div class="strip-left">
             <span>Balance</span>
-            <b>&#8377;460.20</b>
-            <small>about 11 days left at this rate</small>
+            <b>Not available</b>
+            <small>No wallet funding or charging is active.</small>
           </div>
           <div class="strip-right">
-            <button class="amt on" type="button">&#8377;500</button>
-            <button class="btn primary" type="button">Add money</button>
+            <button class="amt on" type="button" disabled>Top-up disabled</button>
+            <button class="btn primary" type="button" disabled>Payments unavailable</button>
           </div>
         </div>
 
@@ -63,40 +63,13 @@
               <th class="right">Balance after</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="mini">18 Nov 09:41</td>
-              <td>Requests, 18 Nov</td>
-              <td class="right mono ">&minus;&#8377;39.80</td>
-              <td class="right mono">&#8377;460.20</td>
-            </tr>            <tr>
-              <td class="mini">17 Nov 18:02</td>
-              <td>Top up</td>
-              <td class="right mono ok">+&#8377;500.00</td>
-              <td class="right mono">&#8377;500.00</td>
-            </tr>            <tr>
-              <td class="mini">17 Nov 12:20</td>
-              <td>Requests, 17 Nov</td>
-              <td class="right mono ">&minus;&#8377;28.40</td>
-              <td class="right mono">&#8377;0.00</td>
-            </tr>            <tr>
-              <td class="mini">16 Nov 10:05</td>
-              <td>Top up</td>
-              <td class="right mono ok">+&#8377;300.00</td>
-              <td class="right mono">&#8377;28.40</td>
-            </tr>            <tr>
-              <td class="mini">15 Nov 09:12</td>
-              <td>Requests, 15 Nov</td>
-              <td class="right mono ">&minus;&#8377;18.20</td>
-              <td class="right mono">&#8377;28.40</td>
-            </tr>
-          </tbody>
+          <tbody><tr><td colspan="4">No verified wallet transactions. Payments are not connected.</td></tr></tbody>
         </table>
 
         <p class="note">
-          Every top-up and every day's spend in one list, with the balance after each line. A wallet is
-          opened to answer "am I about to run out"; the receipts live on the same page because they are
-          the same money.
+          This is a planned wallet screen. No payment gateway, settlement,
+          prepaid balance, automated debit, or billing authorization exists
+          on this development branch. Do not send money based on these pages.
         </p>
       </div>
   </div>
