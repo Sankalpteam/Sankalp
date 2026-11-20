@@ -3,18 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sankalp console - usage</title>
+<title>Sankalp console - Verified usage</title>
 <link rel="stylesheet" href="../base.css?v=20261118a">
-<link rel="stylesheet" href="style.css?v=20261118b">
-<script>
-  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
-  // no second account. Without one, back to it.
-  try {
-    if (!localStorage.getItem('indoone_otp_verified_uid')) {
-      window.location.replace('../../../index.html?next=console');
-    }
-  } catch (error) {}
-</script>
+<link rel="stylesheet" href="style.css?v=20261120c">
 </head>
 <body>
 <header class="dev-top">
@@ -25,119 +16,40 @@
   <a class="toplink" href="../../docs/">Docs</a>
   <a class="toplink on" href="../../console/">Console</a>
 </header>
-
-
 <main class="wrap">
   <div class="console">
-      <div class="side">
-        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
-        <div class="nav" data-console-nav></div>
-      </div>
-      <div class="main">
-        <div class="mainhead">
-          <div><h3>Usage</h3><small>Today, counted as it happens.</small></div>
-          <div class="ranges">
-            <button class="rt on" type="button">24h</button>
-            <button class="rt" type="button">7d</button>
-            <button class="rt" type="button">30d</button>
-          </div>
-        </div>
-
-        <div class="kpis">
-          <div class="kpi"><div class="k">requests</div><div class="v">1,284</div><div class="d">+18% vs yesterday</div></div>
-          <div class="kpi"><div class="k">input tokens</div><div class="v">412K</div><div class="d">&#8377;30.00 / 1M</div></div>
-          <div class="kpi"><div class="k">output tokens</div><div class="v">96K</div><div class="d">&#8377;90.00 / 1M</div></div>
-          <div class="kpi"><div class="k">spent</div><div class="v">&#8377;39.80</div><div class="d">from wallet</div></div>
-        </div>
-
-        <h2 class="sub">Spend by model</h2>
-          <div class="mrow">
-            <span class="mono">sankalp-standard</span>
-            <div class="mtrack"><i style="width:58%"></i></div>
-            <span class="right mini">58%</span>
-            <span class="right mono">&#8377;21.40</span>
-          </div>          <div class="mrow">
-            <span class="mono">sankalp-pro</span>
-            <div class="mtrack"><i style="width:21%"></i></div>
-            <span class="right mini">21%</span>
-            <span class="right mono">&#8377;12.60</span>
-          </div>          <div class="mrow">
-            <span class="mono">sankalp-mini</span>
-            <div class="mtrack"><i style="width:14%"></i></div>
-            <span class="right mini">14%</span>
-            <span class="right mono">&#8377;1.90</span>
-          </div>          <div class="mrow">
-            <span class="mono">sankalp-lite</span>
-            <div class="mtrack"><i style="width:5%"></i></div>
-            <span class="right mini">5%</span>
-            <span class="right mono">&#8377;3.10</span>
-          </div>          <div class="mrow">
-            <span class="mono">sankalp-max</span>
-            <div class="mtrack"><i style="width:2%"></i></div>
-            <span class="right mini">2%</span>
-            <span class="right mono">&#8377;0.80</span>
-          </div>
-
-        <h2 class="sub">Models</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th class="right">Share</th>
-              <th class="right">Input</th>
-              <th class="right">Output</th>
-              <th class="right">Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="mono">sankalp-standard</td>
-              <td class="right">58%</td>
-              <td class="right mono">412K</td>
-              <td class="right mono">96K</td>
-              <td class="right mono">&#8377;21.40</td>
-            </tr>            <tr>
-              <td class="mono">sankalp-pro</td>
-              <td class="right">21%</td>
-              <td class="right mono">148K</td>
-              <td class="right mono">41K</td>
-              <td class="right mono">&#8377;12.60</td>
-            </tr>            <tr>
-              <td class="mono">sankalp-mini</td>
-              <td class="right">14%</td>
-              <td class="right mono">92K</td>
-              <td class="right mono">24K</td>
-              <td class="right mono">&#8377;1.90</td>
-            </tr>            <tr>
-              <td class="mono">sankalp-lite</td>
-              <td class="right">5%</td>
-              <td class="right mono">34K</td>
-              <td class="right mono">9K</td>
-              <td class="right mono">&#8377;3.10</td>
-            </tr>            <tr>
-              <td class="mono">sankalp-max</td>
-              <td class="right">2%</td>
-              <td class="right mono">18K</td>
-              <td class="right mono">4K</td>
-              <td class="right mono">&#8377;0.80</td>
-            </tr>
-            <tr class="total">
-              <td><b>Total</b></td>
-              <td class="right"><b>100%</b></td>
-              <td class="right mono"><b>704K</b></td>
-              <td class="right mono"><b>174K</b></td>
-              <td class="right mono"><b>&#8377;39.80</b></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p class="note">
-          Which model is spending the money is the question this screen exists to answer, so it comes
-          first and the days come after. Every request records the model that answered it, so the
-          share here and the cost on the wallet are the same numbers counted once.
-        </p>
-      </div>
+    <div class="side">
+      <div class="who"><span class="avatar">S</span><div><b>Sankalp account</b><small>Verified token usage</small></div></div>
+      <div class="nav" data-console-nav></div>
     </div>
+    <div class="main">
+      <div class="mainhead">
+        <div><h3>Usage</h3><small>Only tokens reported by actual AI providers.</small></div>
+        <span class="pill info">Development preview</span>
+      </div>
+      <p class="note" id="duStatus" role="status" aria-live="polite">Checking your account…</p>
+      <div class="kpis">
+        <div class="kpi"><div class="k">Verified requests</div><div class="v" id="duRequests">—</div></div>
+        <div class="kpi"><div class="k">Input tokens</div><div class="v" id="duInput">—</div></div>
+        <div class="kpi"><div class="k">Output tokens</div><div class="v" id="duOutput">—</div></div>
+        <div class="kpi"><div class="k">Billing</div><div class="v" id="duBilling">Not enabled</div></div>
+      </div>
+      <p class="note">
+        This is a read-only view of the backend's owner-scoped, deduplicated
+        token evidence. Usage is recorded only after a provider returns token
+        counts. No approximated tokens, invented prices, payments or wallet
+        deductions appear here. The public paid API is not enabled yet.
+      </p>
+      <p class="note">
+        <a href="../../../index.html?next=console">Return to Sankalp sign-in</a>.
+      </p>
+    </div>
+  </div>
 </main>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="../../../authentication/firebase-config.js"></script>
+<script src="../../../config.js"></script>
+<script src="usage.js?v=20261120c"></script>
 </body>
 </html>
