@@ -72,3 +72,24 @@
 .agent-approval-buttons button:disabled { opacity: .55; cursor: not-allowed; }
 .agent-approval-open:focus-visible, .agent-approval-refresh:focus-visible,
 .agent-approval-buttons button:focus-visible { outline: 3px solid #8969d7; outline-offset: 2px; }
+
+
+/* Explicit opt-in, visible only after an authenticated server capability read. */
+.agent-mode-control[hidden] { display: none !important; }
+.agent-mode-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px 8px;
+  color: #4b3076;
+  font-size: 12px;
+  cursor: pointer;
+}
+.agent-mode-control small {
+  color: #756b80;
+  font-size: 11px;
+  width: 100%;
+  margin-left: 22px;
+}
+.agent-mode-control input { accent-color: #6330db; }
