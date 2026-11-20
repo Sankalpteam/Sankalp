@@ -7,15 +7,15 @@
     // chat-api.js was written but never listed here, so window.IndooneChatApi
     // was undefined and both the composer and Vibe threw the moment they tried
     // to send. It goes first, because the others call it.
-    'home/message/chat-api.js?v=20261115a',
+    'home/message/chat-api.js?v=20261120b',
     'home/agent-mode.js?v=20261120a',
     'home/approvals/approval-review.js?v=20261120a',
     'home/message/cloud-chat.js?v=20261020b',
     'home/message/chat-store.js?v=20261018b',
     // The in-flight record. It has to load with the store, before anything can send.
-    'home/message/inflight.js?v=20261026a',
+    'home/message/inflight.js?v=20261120b',
     'home/message/message.js?v=20261118b',
-    'home/send/send.js?v=20261118c',
+    'home/send/send.js?v=20261120b',
     // Share chat and rename chat: the two actions the app has and the web did not.
     'home/message/chat-actions.js?v=20261117a',
     'home/voice/voice.js?v=20261019f',
