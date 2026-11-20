@@ -219,6 +219,19 @@
     if (!store || sending || (!text && !attachments.length)) {
       return;
     }
+    const agentSelected = window.IndooneAgentMode?.selected?.() === true;
+    if (agentSelected && attachments.length) {
+      window.toast?.('Agent mode does not support attachments. Turn off Agent mode first.');
+      return;
+    }
+    if (agentSelected && !globalThis.crypto?.randomUUID) {
+      window.toast?.('Secure agent request IDs are not available in this browser.');
+      return;
+    }
+    // The same ID is the durable admission key on BOTH chat transports.
+    // Agent mode uses exactly one blocking request and never auto-falls back.
+    const agentTurnId = agentSelected ? 'turn_' + crypto.randomUUID().replace(/-/g, '') : null;
+    if (agentSelected) window.IndooneAgentMode?.clear?.();
 
     const message = text || (
       'Please inspect the attached file(s) and describe their contents ' +
@@ -274,7 +287,9 @@
     window.IndooneInflight?.begin({
       conversationId,
       text: message,
-      hadAttachments: sentAttachments.length > 0
+      hadAttachments: sentAttachments.length > 0,
+      agentMode: agentSelected,
+      clientTurnId: agentTurnId
     });
 
     try {
@@ -294,7 +309,7 @@
       let latestText = '';
       let thinkingHold = false;
 
-      if (!sentAttachments.length && typeof api.streamMessage === 'function') {
+      if (!agentSelected && !sentAttachments.length && typeof api.streamMessage === 'function') {
         try {
           result = await api.streamMessage({
             message,
@@ -383,7 +398,9 @@
           message,
           conversationId,
           attachments,
-          signal: controller.signal
+          signal: controller.signal,
+          executionMode: agentSelected ? 'langgraph' : 'default',
+          clientTurnId: agentTurnId
         });
       }
 
@@ -391,6 +408,9 @@
         return;
       }
 
+      if (result.agentStatus === 'awaiting_approval') {
+        void window.IndooneAgentApprovals?.refresh?.();
+      }
       store.setConversationId(result.conversationId);
       setActivity(null);
       window.IndooneInflight?.finish();
@@ -417,11 +437,13 @@
       window.IndooneInflight?.finish();
       store.remove(mine);
       store.add({
-        text:
+        text: agentSelected
+          ? 'Agent request status could not be confirmed. Do NOT resend automatically. Check Pending agent approvals or the connected provider before creating a new request.'
+          : (
           error?.message &&
           !/undefined|not a function|null/i.test(error.message)
             ? error.message
-            : 'Sankalp could not complete the request.',
+            : 'Sankalp could not complete the request.'),
         mine: false
       });
     } finally {
