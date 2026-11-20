@@ -16,6 +16,7 @@ on:
       - "scripts/tests/test_agent_approval_web.mjs"
       - "scripts/tests/test_developer_console_web.mjs"
       - "web/developers/console/keys/**"
+      - "web/developers/console/usage/**"
       - "web/users/menu/plugins/script.js"
       - ".github/workflows/agent-approval-review.yml"
   workflow_dispatch:
@@ -40,6 +41,7 @@ jobs:
           node --check web/users/home/message/inflight.js
           node --check web/users/home/chat-home.js
           node --check web/developers/console/keys/keys.js
+          node --check web/developers/console/usage/usage.js
           node --check web/users/menu/plugins/script.js
       - name: Unit-test authenticated approval contract and one-shot decision
         run: node --test scripts/tests/test_agent_approval_web.mjs
@@ -51,5 +53,6 @@ jobs:
           test -f site/app/home/approvals/approval-review.js
           test -f site/app/home/approvals/approval-review.css
           test -f site/app/developers/console/keys/keys.js
+          test -f site/app/developers/console/usage/usage.js
           test -f site/app/authentication/firebase-config.js
           test -f site/app/config.js
