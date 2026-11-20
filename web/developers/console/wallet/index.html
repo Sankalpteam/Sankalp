@@ -6,15 +6,7 @@
 <title>Sankalp console - wallet</title>
 <link rel="stylesheet" href="../base.css?v=20261118a">
 <link rel="stylesheet" href="style.css?v=20261118b">
-<script>
-  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
-  // no second account. Without one, back to it.
-  try {
-    if (!localStorage.getItem('indoone_otp_verified_uid')) {
-      window.location.replace('../../../index.html?next=console');
-    }
-  } catch (error) {}
-</script>
+
 </head>
 <body>
 <header class="dev-top">
@@ -30,7 +22,7 @@
 <main class="wrap">
   <div class="console">
       <div class="side">
-        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="who"><span class="avatar">S</span><div><b>Sankalp account</b><small>Authenticated read-only wallet</small></div></div>
         <div class="nav" data-console-nav></div>
       </div>
       <div class="main">
@@ -44,14 +36,17 @@
         <div class="strip">
           <div class="strip-left">
             <span>Balance</span>
-            <b>Not available</b>
-            <small>No wallet funding or charging is active.</small>
+            <b id="dwAvailable">—</b>
+            <small id="dwAvailableHint">Sign in to view actual backend wallet readiness.</small>
           </div>
           <div class="strip-right">
             <button class="amt on" type="button" disabled>Top-up disabled</button>
             <button class="btn primary" type="button" disabled>Payments unavailable</button>
           </div>
         </div>
+
+        <p class="note" id="dwStatus" role="status" aria-live="polite">Checking your account and wallet status…</p>
+        <div class="kpis"><div class="kpi"><div class="k">Reserved (pending)</div><div class="v" id="dwHeld">—</div></div><div class="kpi"><div class="k">Open reservations</div><div class="v" id="dwPending">—</div></div></div>
 
         <h2 class="section">Everything that moved</h2>
         <table>
@@ -67,12 +62,17 @@
         </table>
 
         <p class="note">
-          This is a planned wallet screen. No payment gateway, settlement,
-          prepaid balance, automated debit, or billing authorization exists
-          on this development branch. Do not send money based on these pages.
+          This wallet currently displays only the owner-scoped internal preparation ledger.
+          Funding, payments, public inference and final customer invoices remain disabled.
+          No external payment should be sent based on these figures.
         </p>
       </div>
   </div>
 </main>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="../../../authentication/firebase-config.js"></script>
+<script src="../../../config.js"></script>
+<script src="wallet.js?v=20261120a"></script>
 </body>
 </html>
