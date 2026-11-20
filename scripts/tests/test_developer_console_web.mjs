@@ -34,3 +34,19 @@ test('web plugin disconnect includes authenticated owner user_id', () => {
   const source = read('web/users/menu/plugins/script.js');
   assert.match(source, /provider\.disconnect, \{ method: 'POST', body: JSON\.stringify\(\{ user_id: window\.IndoonePlugins\.userId\(\) \}\)/);
 });
+
+test('usage screen uses only server-reported tokens, without fabricated spend', () => {
+  const html = read('web/developers/console/usage/index.html');
+  const js = read('web/developers/console/usage/usage.js');
+  assert.match(html, /id="duRequests"/);
+  assert.match(html, /id="duInput"/);
+  assert.match(html, /id="duOutput"/);
+  assert.match(html, /id="duBilling"/);
+  assert.match(html, /usage\.js/);
+  assert.doesNotMatch(html, /1,284|412K|96K|39\.80|704K|174K/);
+  assert.match(js, /\/api\/developers\/usage/);
+  assert.match(js, /\.getIdToken\(false\)/);
+  assert.match(js, /data\.input_tokens/);
+  assert.match(js, /data\.output_tokens/);
+  assert.doesNotMatch(js, /localStorage|sessionStorage|tokens\s*\/\s*4/);
+});
