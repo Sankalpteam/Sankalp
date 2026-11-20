@@ -65,3 +65,11 @@ test('overview, wallet and model catalogue cannot impersonate live revenue', () 
   assert.match(models, /planned/);
   assert.doesNotMatch(models, /all available|>available<|&#8377;120\.00/);
 });
+
+test('limits page never presents mock quotas or fabricated 429 refusals as production data', () => {
+  const html = read('web/developers/console/limits/index.html');
+  assert.match(html, /not yet configured/);
+  assert.match(html, /No authenticated per-key refusal history/);
+  assert.match(html, /Live inference,/);
+  assert.doesNotMatch(html, /Yashwanth|Production server|09:12:55|90K|2M|60 of 60|sample figures/);
+});
