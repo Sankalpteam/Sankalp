@@ -8,6 +8,7 @@
     // was undefined and both the composer and Vibe threw the moment they tried
     // to send. It goes first, because the others call it.
     'home/message/chat-api.js?v=20261115a',
+    'home/approvals/approval-review.js?v=20261120a',
     'home/message/cloud-chat.js?v=20261020b',
     'home/message/chat-store.js?v=20261018b',
     // The in-flight record. It has to load with the store, before anything can send.
@@ -392,6 +393,7 @@
     window.IndooneChatScroll = { toBottom: scrollToBottom };
     window.IndoonePlusSheet?.init(document.getElementById('plusSheet'));
     window.IndooneVibe?.init();
+    window.IndooneAgentApprovals?.init();
 
     bindQuickPrompts();
     paintWelcome();
