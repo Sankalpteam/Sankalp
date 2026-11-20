@@ -50,3 +50,18 @@ test('usage screen uses only server-reported tokens, without fabricated spend', 
   assert.match(js, /data\.output_tokens/);
   assert.doesNotMatch(js, /localStorage|sessionStorage|tokens\s*\/\s*4/);
 });
+
+test('overview, wallet and model catalogue cannot impersonate live revenue', () => {
+  const overview = read('web/developers/console/index.html');
+  const wallet = read('web/developers/console/wallet/index.html');
+  const models = read('web/developers/console/models/index.html');
+  assert.match(overview, /paid inference disabled/);
+  assert.match(overview, /development preview/i);
+  assert.doesNotMatch(overview, /1,284|508K|39\.80|460\.20|req_8f21/);
+  assert.match(wallet, /payments not enabled/);
+  assert.match(wallet, /disabled>Payments unavailable/);
+  assert.doesNotMatch(wallet, /460\.20|39\.80|top up<\/td>/i);
+  assert.match(models, /model tiers not launched/);
+  assert.match(models, /planned/);
+  assert.doesNotMatch(models, /all available|>available<|&#8377;120\.00/);
+});
