@@ -1123,6 +1123,11 @@ fun HomeScreen(
             val streamTurnId = "turn_" + UUID.randomUUID().toString().replace("-", "")
             scope.launch {
                 var streamedIndex = -1
+                if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
+                    isSending = false
+                    chatActivityState = ChatActivityState.IDLE
+                    return@launch
+                }
 
                 // Persist the prompt before network dispatch, including if the
                 // activity is later cancelled or the stream outcome is unknown.
