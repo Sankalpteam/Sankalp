@@ -162,12 +162,6 @@
   async function send({ message, conversationId, attachments = [], executionMode = 'default', clientTurnId = null, signal }) {
     const media = await buildMediaPayload(attachments);
     const payload = { message };
-    if (clientTurnId) {
-      if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId))) {
-        throw new Error('Invalid chat turn ID.');
-      }
-      payload.client_turn_id = clientTurnId;
-    }
     if (executionMode === 'langgraph') {
       if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId || ''))) {
         throw new Error('Agent mode requires a fresh, stable turn ID.');
@@ -176,6 +170,12 @@
         throw new Error('Agent mode does not support attachments yet.');
       }
       payload.execution_mode = 'langgraph';
+    }
+
+    if (clientTurnId) {
+      if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId))) {
+        throw new Error('Invalid chat turn ID.');
+      }
       payload.client_turn_id = clientTurnId;
     }
 
