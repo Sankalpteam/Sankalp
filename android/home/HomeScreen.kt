@@ -116,9 +116,6 @@ import com.indoone.menu.AppTab
 import com.indoone.menu.AppTopBar
 import com.indoone.menu.IndooneTopBarLogo
 import com.indoone.menu.data.UserDataRepository
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.indoone.home.approvals.AgentApprovalPanel
 import com.indoone.home.message.ActionChip
@@ -132,7 +129,6 @@ import com.indoone.home.message.CloudChatConversation
 import com.indoone.home.message.CloudChatRepository
 import com.indoone.home.message.MessageFeedbackStore
 import com.indoone.home.message.PendingTurnStore
-import com.indoone.home.message.SendTurnWorker
 import com.indoone.home.plus.PlusAttachmentSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -860,9 +856,9 @@ fun HomeScreen(
         }
     }
 
-    // A text-only turn is sent by SendTurnWorker, so nothing here waits on the network.
-    // This reconciles what the worker settled: a delivered turn becomes the reply bubble,
-    // a failed one becomes the failure and puts the text back in the composer.
+    // Backward-compatible reconciliation for turns queued by earlier app versions.
+    // New chat streams are never retried through a worker after uncertain outcomes.
+    // Previously delivered/failed records can still be shown safely.
     //
     // The store hands each settled turn over once and forgets it, so this poll cannot
     // append the same reply twice. The text is never re-sent from here - a failed turn
