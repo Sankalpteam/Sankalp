@@ -1151,9 +1151,9 @@ fun HomeScreen(
                                 conversationId = id
                             }
                         },
-                        onDelta = { full ->
+                        onDelta = delta@{ full ->
                             if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                                return@streamMessage
+                                return@delta
                             }
                             // First token: the wait is over. The poll below does not need to be
                             // told - it asks the thread whether the answer is already there.
