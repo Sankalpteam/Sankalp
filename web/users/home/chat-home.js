@@ -10,8 +10,8 @@
     'home/message/chat-api.js?v=20261120b',
     'home/agent-mode.js?v=20261120a',
     'home/approvals/approval-review.js?v=20261120a',
-    'home/message/cloud-chat.js?v=20261020b',
-    'home/message/chat-store.js?v=20261018b',
+    'home/message/cloud-chat.js?v=20261121a',
+    'home/message/chat-store.js?v=20261121a',
     // The in-flight record. It has to load with the store, before anything can send.
     'home/message/inflight.js?v=20261120b',
     'home/message/message.js?v=20261118b',
