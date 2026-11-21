@@ -1122,18 +1122,39 @@ fun HomeScreen(
             // Foreground stream first: the words appear as they are produced, and the
             // activity indicator goes on the first one instead of after the whole answer.
             //
-            // The durable worker below is still the fallback. If the stream cannot start,
-            // or dies before a single token, the turn is handed to it exactly as before -
-            // so a turn that may be a GitHub write still survives a process death.
+            // A stream may already have executed a connected-tool write before
+            // losing its final event. NEVER enqueue a blocking worker after it fails.
+            val streamTurnId = "turn_" + UUID.randomUUID().toString().replace("-", "")
             scope.launch {
                 var streamedIndex = -1
+
+                // Persist the prompt before network dispatch, including if the
+                // activity is later cancelled or the stream outcome is unknown.
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        cloudChatRepository.appendMessage(
+                            conversationId = requestConversationId,
+                            role = "user",
+                            content = persistedUserContent,
+                        )
+                    }
+                }
 
                 val streamed = runCatching {
                     ChatApi.streamMessage(
                         message = messageToBackend,
                         conversationId = requestConversationId,
-                        onMeta = { id -> conversationId = id },
+                        clientTurnId = streamTurnId,
+                        expectedUserId = userKey,
+                        onMeta = { id ->
+                            if (FirebaseAuth.getInstance().currentUser?.uid == userKey) {
+                                conversationId = id
+                            }
+                        },
                         onDelta = { full ->
+                            if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
+                                return@streamMessage
+                            }
                             // First token: the wait is over. The poll below does not need to be
                             // told - it asks the thread whether the answer is already there.
                             chatActivityState = ChatActivityState.IDLE
@@ -1151,6 +1172,7 @@ fun HomeScreen(
                 }
 
                 streamed.getOrNull()?.let { response ->
+                    if (FirebaseAuth.getInstance().currentUser?.uid != userKey) return@launch
                     conversationId = response.conversationId
 
                     if (streamedIndex < 0) {
@@ -1182,48 +1204,22 @@ fun HomeScreen(
                     return@launch
                 }
 
-                // A partial bubble is removed before the worker takes over, so the
-                // fallback cannot leave half an answer above the real one.
+                // Unknown outcome: the stream could have completed a remote write.
+                // Removing a partial reply is safe; automatically resending is not.
+                if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
+                    return@launch
+                }
                 if (streamedIndex >= 0 && streamedIndex < messages.size) {
                     val updated = messages.toMutableList()
                     updated.removeAt(streamedIndex)
                     messages = updated
                 }
-
-                val store = PendingTurnStore.get(context)
-                val turn = store.begin(requestConversationId, messageToBackend)
-                val request = OneTimeWorkRequestBuilder<SendTurnWorker>()
-                .setInputData(workDataOf(SendTurnWorker.KEY_TURN_ID to turn.id))
-                .build()
-
-                WorkManager.getInstance(context).enqueueUniqueWork(
-                SendTurnWorker.workName(turn.id),
-                // One work item per turn: a double tap cannot send the same text twice.
-                ExistingWorkPolicy.KEEP,
-                request,
+                addReply(
+                    "Stream result could not be verified. Do not resend automatically. " +
+                    "Check Chat History and connected tools before trying again."
                 )
-
-                // The live activity stays, and the reconciliation effect below owns every
-                // stage of it. A coroutine here that flipped to Thinking after a delay used
-                // to race that effect: on a fast reply it fired after the answer had landed
-                // and the indicator reappeared. One owner, one order: Received, Thinking,
-                // Preparing, done.
-                isSending = true
-                activeTurnId = turn.id
-                activeTurnStartedAt = System.currentTimeMillis()
-                chatActivityState = ChatActivityState.RECEIVED
-
-                scope.launch {
-                    runCatching {
-                        withContext(Dispatchers.IO) {
-                            cloudChatRepository.appendMessage(
-                                conversationId = requestConversationId,
-                                role = "user",
-                                content = persistedUserContent,
-                            )
-                        }
-                    }
-                }
+                isSending = false
+                chatActivityState = ChatActivityState.IDLE
             }
             return@sendMessage
         }
