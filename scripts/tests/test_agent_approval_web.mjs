@@ -274,3 +274,125 @@ test('agent-mode opt-in remains hidden until authenticated server supports it', 
   await window.IndooneAgentMode.refresh();
   assert.equal(checkbox.checked, false);
 });
+
+
+test('web chat cache is scoped to the active Firebase identity, even when offline', async () => {
+  const file = readFileSync('web/users/home/message/chat-store.js', 'utf8');
+  const cache = new Map();
+  let owner = 'account-one';
+  const localStorage = {
+    getItem: key => cache.get(key) ?? null,
+    setItem: (key, value) => cache.set(key, String(value)),
+    removeItem: key => cache.delete(key),
+  };
+  const window = {
+    IndooneFirebase: { auth: { get currentUser() { return owner ? { uid: owner } : null; } } },
+    IndooneCloudChat: { loadLatest: async () => { throw new Error('offline'); } },
+    crypto: { randomUUID: () => '12345678-1234-4234-a234-1234567890ab' },
+  };
+  runInNewContext(file, { window, localStorage, console });
+  const store = window.IndooneChatStore;
+  store.add({ text: 'first account private chat', mine: true });
+  assert.ok(cache.has('indoone_chat_thread_v1:account-one'));
+
+  owner = 'account-two';
+  assert.equal(store.getMessages().length, 0);
+  store.add({ text: 'second account private chat', mine: true });
+  assert.ok(cache.has('indoone_chat_thread_v1:account-two'));
+
+  owner = 'account-one';
+  await store.load();
+  assert.equal(store.getMessages().length, 1);
+  assert.equal(store.getMessages()[0].text, 'first account private chat');
+  owner = null;
+  assert.equal(store.getMessages().length, 0);
+});
+
+test('in-flight chat cannot leak to a second account or be auto-replayed', () => {
+  const file = readFileSync('web/users/home/message/inflight.js', 'utf8');
+  const cache = new Map();
+  let owner = 'account-one';
+  const localStorage = {
+    getItem: key => cache.get(key) ?? null,
+    setItem: (key, value) => cache.set(key, String(value)),
+    removeItem: key => cache.delete(key),
+  };
+  const window = {
+    IndooneFirebase: { auth: { get currentUser() { return owner ? { uid: owner } : null; } } },
+  };
+  runInNewContext(file, { window, localStorage, console });
+  const inflight = window.IndooneInflight;
+  inflight.begin({ text: 'write to GitHub', conversationId: 'thread-1', clientTurnId: 'turn_' + 'a'.repeat(32) });
+  inflight.markDispatched();
+  assert.equal(inflight.pending().wasDispatched, true);
+  assert.equal(inflight.pending().clientTurnId, 'turn_' + 'a'.repeat(32));
+
+  owner = 'account-two';
+  assert.equal(inflight.pending(), null);
+  owner = null;
+  assert.equal(inflight.pending(), null);
+  owner = 'account-one';
+  assert.equal(inflight.pending().wasDispatched, true);
+  inflight.finish();
+  assert.equal(inflight.pending(), null);
+});
+
+test('web sender does not replay a failed tool stream as a blocking POST', async () => {
+  const file = readFileSync('web/users/home/send/send.js', 'utf8');
+  const messages = [];
+  let streamCalls = 0;
+  let blockingCalls = 0;
+  let dispatchMarkers = 0;
+  let clearedMarkers = 0;
+  const uid = 'account-one';
+  const uuid = () => '12345678-1234-4234-a234-1234567890ab';
+  const input = { value: 'create my GitHub issue', style: { height: '' } };
+  const document = {
+    getElementById: id => ({
+      chatInput: input,
+      sendBtn: { querySelector: () => null },
+      chatWelcome: { toggleAttribute: () => {} },
+    })[id] || null,
+  };
+  const store = {
+    add: item => { messages.push(item); return item; },
+    remove: item => { const index = messages.indexOf(item); if (index >= 0) messages.splice(index, 1); },
+    getMessages: () => messages,
+    ensureConversationId: () => 'thread-1',
+    setConversationId: () => {},
+  };
+  const window = {
+    firebase: { auth: () => ({ currentUser: { uid } }) },
+    IndooneChatStore: store,
+    IndooneAgentMode: { selected: () => false },
+    IndooneMessages: { render: () => {} },
+    IndooneChatScroll: { toBottom: () => {} },
+    IndooneChatHome: { syncComposer: () => {} },
+    IndooneCloudChat: { appendMessage: async () => {} },
+    IndooneInflight: {
+      begin: () => {},
+      markDispatched: () => { dispatchMarkers += 1; },
+      finish: () => { clearedMarkers += 1; },
+    },
+    IndooneChatApi: {
+      streamMessage: async ({ clientTurnId }) => {
+        assert.equal(clientTurnId, 'turn_' + uuid().replaceAll('-', ''));
+        streamCalls += 1;
+        throw new Error('connection lost after provider dispatch');
+      },
+      send: async () => { blockingCalls += 1; throw new Error('unsafe fallback'); },
+    },
+  };
+  runInNewContext(file, {
+    window, document, crypto: { randomUUID: uuid }, console,
+    setTimeout: callback => { callback(); return 0; },
+    AbortController, URL: { revokeObjectURL: () => {} },
+  });
+  await window.IndooneSend.send();
+  assert.equal(streamCalls, 1);
+  assert.equal(blockingCalls, 0);
+  assert.equal(dispatchMarkers, 1);
+  assert.equal(clearedMarkers, 0);
+  assert.equal(messages.length, 2);
+  assert.match(messages[1].text, /outcome could not be confirmed/i);
+});
