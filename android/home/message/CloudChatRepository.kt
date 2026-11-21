@@ -98,11 +98,6 @@ class CloudChatRepository(
             throw SecurityException("Account changed during chat save.")
         }
         val previousTitle = snapshot.getString("title").orEmpty().trim()
-        val title = if (role == "user" && (previousTitle.isBlank() || previousTitle == "New chat")) {
-            content.trim().take(60)
-        } else {
-            previousTitle.ifBlank { "New chat" }
-        }
 
         val messageRef = conversation.collection("messages").document(UUID.randomUUID().toString())
         val batch = firestore.batch()
@@ -120,18 +115,19 @@ class CloudChatRepository(
         // The user's turn and the answer to it are saved without waiting for each other, so
         // both reads saw the same number and both wrote it plus one - a two-message thread
         // could be recorded as one.
-        batch.set(
-            conversation,
-            mapOf(
-                "userId" to userId,
-                "title" to title,
-                "updatedAt" to now,
-                "messageCount" to FieldValue.increment(1),
-                "closed" to false,
-                "closedAt" to null,
-            ),
-            SetOptions.merge(),
+        val metadata = mutableMapOf<String, Any?>(
+            "userId" to userId,
+            "updatedAt" to now,
+            "messageCount" to FieldValue.increment(1),
+            "closed" to false,
+            "closedAt" to null,
         )
+        // Assistant saves do not reset titles. A new first user message
+        // supplies the default title, while later prompts preserve renames.
+        if (role == "user" && (previousTitle.isBlank() || previousTitle == "New chat")) {
+            metadata["title"] = content.trim().take(60)
+        }
+        batch.set(conversation, metadata, SetOptions.merge())
         Tasks.await(batch.commit())
         if (auth.currentUser?.uid != userId) {
             throw SecurityException("Account changed during chat save.")
