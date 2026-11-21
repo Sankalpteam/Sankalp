@@ -64,12 +64,26 @@
           // one, so the restore can say so instead of silently sending text only.
           hadAttachments: Boolean(hadAttachments),
           agentMode: Boolean(agentMode),
-          clientTurnId: agentMode ? clientTurnId : null,
+          clientTurnId: clientTurnId || null,
+          wasDispatched: false,
           startedAt: Date.now()
         })
       );
     } catch (error) {
       console.warn('Sankalp in-flight turn could not be recorded:', error);
+    }
+  }
+
+  // Set before the network request. A browser refresh after dispatch must not
+  // restore a ready-to-resend draft: the remote write may already have happened.
+  function markDispatched() {
+    const key = cacheKey();
+    const record = read();
+    if (!key || !record) return;
+    try {
+      localStorage.setItem(key, JSON.stringify({ ...record, wasDispatched: true }));
+    } catch (error) {
+      console.warn('Sankalp could not mark an in-flight request:', error);
     }
   }
 
@@ -89,6 +103,7 @@
 
   window.IndooneInflight = {
     begin,
+    markDispatched,
     finish,
     pending,
     clear: finish
