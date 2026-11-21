@@ -11,7 +11,6 @@ import android.print.PrintManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import android.content.ClipData
@@ -116,8 +115,10 @@ import com.indoone.menu.AppTab
 import com.indoone.menu.AppTopBar
 import com.indoone.menu.IndooneTopBarLogo
 import com.indoone.menu.data.UserDataRepository
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.indoone.home.approvals.AgentApprovalPanel
 import com.indoone.home.message.ActionChip
 import com.indoone.home.message.parseActionChips
 import org.json.JSONArray
@@ -129,6 +130,7 @@ import com.indoone.home.message.CloudChatConversation
 import com.indoone.home.message.CloudChatRepository
 import com.indoone.home.message.MessageFeedbackStore
 import com.indoone.home.message.PendingTurnStore
+import com.indoone.home.message.SendTurnWorker
 import com.indoone.home.plus.PlusAttachmentSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -755,15 +757,6 @@ fun HomeScreen(
     var recentChats by remember { mutableStateOf(emptyList<CloudChatConversation>()) }
     val scope = rememberCoroutineScope()
     val chatListState = rememberLazyListState()
-    var agentChatAvailable by remember(userKey) { mutableStateOf(false) }
-    var agentModeNext by remember(userKey) { mutableStateOf(false) }
-    var agentApprovalRefresh by remember(userKey) { mutableStateOf(0) }
-
-    // Read-only capability discovery. OFF on existing production backends.
-    LaunchedEffect(userKey) {
-        agentChatAvailable = if (userKey.isNotBlank()) ChatApi.chatAgentModeAvailable() else false
-        if (!agentChatAvailable) agentModeNext = false
-    }
 
     // One speech engine for the screen, not one per bubble: each engine is a service
     // connection, and a thread of twenty replies would open twenty of them. The
@@ -856,9 +849,9 @@ fun HomeScreen(
         }
     }
 
-    // Backward-compatible reconciliation for turns queued by earlier app versions.
-    // New chat streams are never retried through a worker after uncertain outcomes.
-    // Previously delivered/failed records can still be shown safely.
+    // A text-only turn is sent by SendTurnWorker, so nothing here waits on the network.
+    // This reconciles what the worker settled: a delivered turn becomes the reply bubble,
+    // a failed one becomes the failure and puts the text back in the composer.
     //
     // The store hands each settled turn over once and forgets it, so this poll cannot
     // append the same reply twice. The text is never re-sent from here - a failed turn
@@ -1039,12 +1032,6 @@ fun HomeScreen(
         val attachmentsToSend = pendingAttachments.toList()
         val hasPendingAttachment = attachmentsToSend.isNotEmpty()
         if (isSending || isAddingAttachments || (typed.isEmpty() && !hasPendingAttachment)) return
-        if (agentModeNext && hasPendingAttachment) {
-            Toast.makeText(context, "Agent mode does not support attachments yet.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val runWithAgent = agentModeNext && agentChatAvailable && !hasPendingAttachment
-        if (runWithAgent) agentModeNext = false
 
         val messageToBackend = typed.ifBlank {
             "Please inspect the attached file(s) and describe their contents or visible details."
@@ -1072,90 +1059,21 @@ fun HomeScreen(
         // The turn is written first, so a process death leaves something to reconcile
         // against instead of a question with no answer.
         if (!hasPendingAttachment) {
-            if (runWithAgent) {
-                // Explicit ONE-TURN opt-in. Do not send through streaming +
-                // WorkManager fallback: a timeout might follow a remote write.
-                val agentTurnId = "turn_" + UUID.randomUUID().toString().replace("-", "")
-                scope.launch {
-                    val outcome = runCatching {
-                        ChatApi.sendLangGraphMessage(
-                            message = messageToBackend,
-                            conversationId = requestConversationId,
-                            clientTurnId = agentTurnId,
-                            expectedUserId = userKey,
-                        )
-                    }
-                    outcome.onSuccess { response ->
-                        if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                            return@onSuccess
-                        }
-                        conversationId = response.conversationId
-                        addReply(response.reply, response.actionChips)
-                        if (response.agentStatus == "awaiting_approval") {
-                            agentApprovalRefresh += 1
-                        }
-                        scope.launch {
-                            runCatching {
-                                cloudChatRepository.appendExchange(
-                                    response.conversationId, persistedUserContent, response.reply
-                                )
-                            }
-                        }
-                    }.onFailure {
-                        if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                            return@onFailure
-                        }
-                        addReply(
-                            "Agent request outcome could not be confirmed. Do not resend. " +
-                            "Check Pending agent approvals and the connected provider first."
-                        )
-                    }
-                    isSending = false
-                    chatActivityState = ChatActivityState.IDLE
-                }
-                return@sendMessage
-            }
             // Foreground stream first: the words appear as they are produced, and the
             // activity indicator goes on the first one instead of after the whole answer.
             //
-            // A stream may already have executed a connected-tool write before
-            // losing its final event. NEVER enqueue a blocking worker after it fails.
-            val streamTurnId = "turn_" + UUID.randomUUID().toString().replace("-", "")
+            // The durable worker below is still the fallback. If the stream cannot start,
+            // or dies before a single token, the turn is handed to it exactly as before -
+            // so a turn that may be a GitHub write still survives a process death.
             scope.launch {
                 var streamedIndex = -1
-                if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                    isSending = false
-                    chatActivityState = ChatActivityState.IDLE
-                    return@launch
-                }
-
-                // Persist the prompt before network dispatch, including if the
-                // activity is later cancelled or the stream outcome is unknown.
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        cloudChatRepository.appendMessage(
-                            conversationId = requestConversationId,
-                            role = "user",
-                            content = persistedUserContent,
-                        )
-                    }
-                }
 
                 val streamed = runCatching {
                     ChatApi.streamMessage(
                         message = messageToBackend,
                         conversationId = requestConversationId,
-                        clientTurnId = streamTurnId,
-                        expectedUserId = userKey,
-                        onMeta = { id ->
-                            if (FirebaseAuth.getInstance().currentUser?.uid == userKey) {
-                                conversationId = id
-                            }
-                        },
-                        onDelta = delta@{ full ->
-                            if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                                return@delta
-                            }
+                        onMeta = { id -> conversationId = id },
+                        onDelta = { full ->
                             // First token: the wait is over. The poll below does not need to be
                             // told - it asks the thread whether the answer is already there.
                             chatActivityState = ChatActivityState.IDLE
@@ -1173,7 +1091,6 @@ fun HomeScreen(
                 }
 
                 streamed.getOrNull()?.let { response ->
-                    if (FirebaseAuth.getInstance().currentUser?.uid != userKey) return@launch
                     conversationId = response.conversationId
 
                     if (streamedIndex < 0) {
@@ -1205,22 +1122,48 @@ fun HomeScreen(
                     return@launch
                 }
 
-                // Unknown outcome: the stream could have completed a remote write.
-                // Removing a partial reply is safe; automatically resending is not.
-                if (FirebaseAuth.getInstance().currentUser?.uid != userKey) {
-                    return@launch
-                }
+                // A partial bubble is removed before the worker takes over, so the
+                // fallback cannot leave half an answer above the real one.
                 if (streamedIndex >= 0 && streamedIndex < messages.size) {
                     val updated = messages.toMutableList()
                     updated.removeAt(streamedIndex)
                     messages = updated
                 }
-                addReply(
-                    "Stream result could not be verified. Do not resend automatically. " +
-                    "Check Chat History and connected tools before trying again."
+
+                val store = PendingTurnStore.get(context)
+                val turn = store.begin(requestConversationId, messageToBackend)
+                val request = OneTimeWorkRequestBuilder<SendTurnWorker>()
+                .setInputData(workDataOf(SendTurnWorker.KEY_TURN_ID to turn.id))
+                .build()
+
+                WorkManager.getInstance(context).enqueueUniqueWork(
+                SendTurnWorker.workName(turn.id),
+                // One work item per turn: a double tap cannot send the same text twice.
+                ExistingWorkPolicy.KEEP,
+                request,
                 )
-                isSending = false
-                chatActivityState = ChatActivityState.IDLE
+
+                // The live activity stays, and the reconciliation effect below owns every
+                // stage of it. A coroutine here that flipped to Thinking after a delay used
+                // to race that effect: on a fast reply it fired after the answer had landed
+                // and the indicator reappeared. One owner, one order: Received, Thinking,
+                // Preparing, done.
+                isSending = true
+                activeTurnId = turn.id
+                activeTurnStartedAt = System.currentTimeMillis()
+                chatActivityState = ChatActivityState.RECEIVED
+
+                scope.launch {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            cloudChatRepository.appendMessage(
+                                conversationId = requestConversationId,
+                                role = "user",
+                                content = persistedUserContent,
+                            )
+                        }
+                    }
+                }
             }
             return@sendMessage
         }
@@ -2224,29 +2167,6 @@ fun HomeScreen(
                     },
                 )
             }
-            }
-
-            // Read-only list of official LangGraph actions already awaiting consent.
-            // This does NOT replace normal /api/chat confirmation chips.
-            AgentApprovalPanel(refreshKey = agentApprovalRefresh)
-            if (agentChatAvailable && userKey.isNotBlank()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = agentModeNext,
-                        onCheckedChange = { agentModeNext = it },
-                        enabled = !isSending && pendingAttachments.isEmpty(),
-                    )
-                    Column {
-                        Text("Run next message with LangGraph Agent (beta)", fontSize = 12.sp)
-                        Text(
-                            "One message only. No attachments or automatic retry.",
-                            color = Color(0xFF786C85), fontSize = 11.sp,
-                        )
-                    }
-                }
             }
 
             if (pendingAttachments.isNotEmpty()) {

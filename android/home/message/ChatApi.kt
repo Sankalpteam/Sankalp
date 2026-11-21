@@ -29,23 +29,6 @@ data class ChatResponse(
     val reply: String,
     val actionChips: List<ActionChip> = emptyList(),
     val sources: List<ChatSource> = emptyList(),
-    val agentRunId: String? = null,
-    val agentStatus: String? = null,
-)
-
-// The authenticated /api/agent approval workflow is separate from /api/chat chips.
-data class AgentApproval(
-    val runId: String,
-    val tool: String,
-    val payload: String,
-    val status: String,
-    val expiresAt: String,
-)
-
-data class AgentApprovalOutcome(
-    val runId: String,
-    val status: String,
-    val requiresManualReview: Boolean,
 )
 
 // One page a research answer came from.
@@ -397,30 +380,18 @@ private const val READ_TIMEOUT_MS = 300_000
     //
     // Deltas are handed to the caller on the Main thread, because they land in Compose
     // state. The socket stays on IO. A stream that ends without its final event is an
-    // error, not a short answer. Never resend to a second transport.
+    // error, not a short answer: the caller falls back to the durable worker.
     suspend fun streamMessage(
         message: String,
         conversationId: String?,
-        clientTurnId: String? = null,
-        expectedUserId: String? = null,
         onMeta: suspend (String) -> Unit = {},
         onDelta: suspend (String) -> Unit = {},
     ): ChatResponse {
-        if (clientTurnId != null) {
-            require(Regex("^turn_[a-fA-F0-9]{32}$").matches(clientTurnId)) {
-                "A valid turn ID is required."
-            }
-        }
         val token = requireAuthToken()
-        if (expectedUserId != null &&
-            FirebaseAuth.getInstance().currentUser?.uid != expectedUserId) {
-            throw ChatApiException("Account changed before stream dispatch; nothing was sent.")
-        }
         val backendUrl = requireBackendUrl()
         val payload = JSONObject().apply {
             put("message", message)
             if (!conversationId.isNullOrBlank()) put("conversation_id", conversationId)
-            if (clientTurnId != null) put("client_turn_id", clientTurnId)
         }.toString()
 
         return withContext(Dispatchers.IO) {
@@ -489,161 +460,6 @@ private const val READ_TIMEOUT_MS = 300_000
             } finally {
                 connection.disconnect()
             }
-        }
-    }
-
-    /** Never offer LangGraph chat mode until this authenticated backend enables it. */
-    suspend fun chatAgentModeAvailable(): Boolean = withContext(Dispatchers.IO) {
-        runCatching { approvalGet("/api/chat/agent-mode").optBoolean("enabled", false) }
-            .getOrDefault(false)
-    }
-
-    /**
-     * Exactly ONE authenticated /api/chat POST with an idempotency claim.
-     * No automatic retries or stream-to-blocking fallback after a timeout.
-     * A successful write is never inferred from a lost HTTP response.
-     */
-    suspend fun sendLangGraphMessage(
-        message: String,
-        conversationId: String?,
-        clientTurnId: String,
-        expectedUserId: String,
-    ): ChatResponse = withContext(Dispatchers.IO) {
-        require(Regex("^turn_[a-fA-F0-9]{32}$").matches(clientTurnId)) {
-            "A stable agent turn ID is required."
-        }
-        val payload = JSONObject().apply {
-            put("message", message)
-            if (!conversationId.isNullOrBlank()) put("conversation_id", conversationId)
-            put("execution_mode", "langgraph")
-            put("client_turn_id", clientTurnId)
-        }
-        // Bind the request to the account which selected Agent mode. An auth
-        // switch while waiting for a Firebase ID token must fail BEFORE dispatch.
-        val account = FirebaseAuth.getInstance().currentUser
-            ?: throw ChatApiException("Please sign in to use Agent mode.")
-        if (expectedUserId.isBlank() || account.uid != expectedUserId) {
-            throw ChatApiException("Account changed before Agent mode request; nothing was sent.")
-        }
-        val token = Tasks.await(account.getIdToken(false)).token
-            ?.takeIf { it.isNotBlank() }
-            ?: throw ChatApiException("Could not authenticate the agent request.")
-        if (FirebaseAuth.getInstance().currentUser?.uid != expectedUserId) {
-            throw ChatApiException("Account changed before Agent mode request; nothing was sent.")
-        }
-        val connection = openConnection(
-            requireBackendUrl() + "/api/chat",
-            token,
-        )
-        try {
-            val text = executeJson(connection, payload.toString())
-            val json = JSONObject(text)
-            val reply = json.optString("reply")
-            val id = json.optString("conversation_id")
-            if (id.isBlank() || reply.isBlank()) {
-                throw ChatApiException("Sankalp could not verify the agent response.")
-            }
-            val sources = parseSources(json.optJSONArray("sources"))
-            ChatResponse(
-                conversationId = id,
-                reply = withSources(reply, sources),
-                actionChips = parseActionChips(json.optJSONArray("action_chips")),
-                sources = sources,
-                agentRunId = json.optString("agent_run_id").takeIf { it.isNotBlank() },
-                agentStatus = json.optString("agent_status").takeIf { it.isNotBlank() },
-            )
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    // A server-side feature flag may keep this list empty. Never turn chat chips
-    // into agent approval requests; only official, already-paused runs appear.
-    suspend fun listAgentApprovals(): List<AgentApproval> = withContext(Dispatchers.IO) {
-        val json = approvalGet("/api/agent/approvals")
-        val items = json.optJSONArray("approvals") ?: JSONArray()
-        buildList {
-            for (index in 0 until items.length()) {
-                parseAgentApproval(items.optJSONObject(index))?.let { add(it) }
-            }
-        }
-    }
-
-    suspend fun getAgentApproval(runId: String): AgentApproval = withContext(Dispatchers.IO) {
-        parseAgentApproval(approvalGet(approvalPath(runId)))
-            ?: throw ChatApiException("This approval is no longer available.")
-    }
-
-    suspend fun decideAgentApproval(runId: String, decision: String): AgentApprovalOutcome =
-        withContext(Dispatchers.IO) {
-            if (decision != "approve" && decision != "deny") {
-                throw ChatApiException("Invalid approval decision.")
-            }
-            val connection = openConnection(
-                requireBackendUrl() + approvalPath(runId),
-                requireAuthToken(),
-            ).apply {
-                readTimeout = 35_000
-            }
-            try {
-                // Exactly one POST. The provider may have received a write even
-                // if this connection times out: NEVER retry this request.
-                val body = executeJson(connection, JSONObject().put("decision", decision).toString())
-                val result = JSONObject(body)
-                AgentApprovalOutcome(
-                    runId = result.optString("run_id"),
-                    status = result.optString("status"),
-                    requiresManualReview = result.optBoolean("requires_manual_review", false),
-                )
-            } finally {
-                connection.disconnect()
-            }
-        }
-
-    private fun approvalPath(runId: String): String {
-        val normalized = runId.trim()
-        val uuid = Regex(
-            "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-        )
-        if (!uuid.matches(normalized)) throw ChatApiException("Invalid agent run identifier.")
-        return "/api/agent/runs/$normalized/approval"
-    }
-
-    private fun parseAgentApproval(json: JSONObject?): AgentApproval? {
-        if (json == null || json.optString("status") != "pending") return null
-        val id = json.optString("run_id")
-        if (runCatching { approvalPath(id) }.isFailure) return null
-        val tool = json.optString("tool").trim()
-        val payload = json.optString("payload")
-        val expiry = json.optString("expires_at")
-        if (tool.isEmpty() || expiry.isBlank()) return null
-        return AgentApproval(id, tool, payload, "pending", expiry)
-    }
-
-    private fun approvalGet(path: String): JSONObject {
-        val connection = (URL(requireBackendUrl() + path).openConnection() as HttpURLConnection)
-            .apply {
-                requestMethod = "GET"
-                connectTimeout = CONNECT_TIMEOUT_MS
-                readTimeout = 15_000
-                doInput = true
-                doOutput = false
-                useCaches = false
-                instanceFollowRedirects = false
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("Authorization", "Bearer " + requireAuthToken())
-            }
-        try {
-            val code = connection.responseCode
-            if (code !in 200..299) throw ChatApiException(
-                "Could not read agent approvals.", statusCode = code
-            )
-            val text = connection.inputStream.bufferedReader().use { it.readText() }
-            return JSONObject(text)
-        } catch (error: IOException) {
-            throw ChatApiException("Could not reach the approval service.", error)
-        } finally {
-            connection.disconnect()
         }
     }
 
