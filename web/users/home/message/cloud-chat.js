@@ -71,9 +71,6 @@
       throw new Error('Conversation does not belong to this account.');
     }
     const oldTitle = String(existing.title || '').trim();
-    const title = role === 'user' && (!oldTitle || oldTitle === 'New chat')
-      ? text.slice(0, 60)
-      : oldTitle || 'New chat';
 
     const messageRef = conversation.collection('messages').doc();
     const batch = db.batch();
@@ -84,14 +81,19 @@
     // Reading it, adding one and writing it back is a race: the user's turn and the answer to
     // it are appended without waiting for each other, so both reads saw the same number and
     // both wrote it plus one. A two-message thread could end up recorded as one.
-    batch.set(conversation, {
+    const metadata = {
       userId: user,
-      title,
       updatedAt: now,
       messageCount: firebase().fieldValue.increment(1),
       closed: false,
       closedAt: null
-    }, { merge: true });
+    };
+    // Only the first user message may supply the default title. Assistant
+    // saves must not race with user saves or overwrite manual renames.
+    if (role === 'user' && (!oldTitle || oldTitle === 'New chat')) {
+      metadata.title = text.slice(0, 60);
+    }
+    batch.set(conversation, metadata, { merge: true });
 
     await batch.commit();
 
