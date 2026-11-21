@@ -396,3 +396,137 @@ test('web sender does not replay a failed tool stream as a blocking POST', async
   assert.equal(messages.length, 2);
   assert.match(messages[1].text, /outcome could not be confirmed/i);
 });
+
+
+function cloudChatHarness() {
+  const records = new Map();
+  const messages = new Map();
+  const batchSizes = [];
+  const indexActions = [];
+  let currentUid = 'alice';
+  let counter = 0;
+  let backendDeletes = 0;
+  const ensureMessages = id => {
+    if (!messages.has(id)) messages.set(id, new Map());
+    return messages.get(id);
+  };
+  const docRef = id => ({
+    id,
+    async get() {
+      return {
+        exists: records.has(id),
+        data: () => ({ ...(records.get(id) || {}) }),
+        ref: docRef(id),
+      };
+    },
+    async set(data) { records.set(id, { ...(records.get(id) || {}), ...data }); },
+    async update(data) {
+      if (!records.has(id)) throw new Error('not found');
+      records.set(id, { ...records.get(id), ...data });
+    },
+    async delete() { records.delete(id); },
+    collection(name) {
+      assert.equal(name, 'messages');
+      return {
+        doc: () => ({ kind: 'message', conversationId: id, id: String(++counter) }),
+        limit: n => ({
+          get: async () => {
+            const entries = [...ensureMessages(id).keys()].slice(0, n);
+            return { empty: entries.length === 0,
+              docs: entries.map(key => ({ ref: { kind: 'message', conversationId: id, id: key } })) };
+          },
+        }),
+      };
+    },
+    kind: 'conversation',
+  });
+  const db = {
+    collection(name) {
+      assert.equal(name, 'conversations');
+      return { doc: docRef };
+    },
+    batch() {
+      const ops = [];
+      return {
+        set(ref, data) { ops.push({ type: 'set', ref, data }); },
+        delete(ref) { ops.push({ type: 'delete', ref }); },
+        async commit() {
+          batchSizes.push(ops.length);
+          assert.ok(ops.length <= 500, 'Firestore batch write limit exceeded');
+          for (const op of ops) {
+            if (op.ref.kind === 'message') {
+              const children = ensureMessages(op.ref.conversationId);
+              if (op.type === 'delete') children.delete(op.ref.id);
+              else children.set(op.ref.id, op.data);
+            } else if (op.type === 'set') {
+              records.set(op.ref.id, { ...(records.get(op.ref.id) || {}), ...op.data });
+            }
+          }
+        },
+      };
+    },
+  };
+  const path = [];
+  const index = {
+    child(key) { path.push(key); return this; },
+    async set() { indexActions.push(['set', ...path]); },
+    async remove() { indexActions.push(['remove', ...path]); },
+  };
+  const window = {
+    SANKALP_BACKEND: 'https://backend.example',
+    IndooneFirebase: {
+      auth: { get currentUser() { return currentUid ? { uid: currentUid } : null; } },
+      firestore: db,
+      database: { ref: () => index },
+      fieldValue: { serverTimestamp: () => 123, increment: value => value },
+    },
+    firebase: { auth: () => ({ get currentUser() {
+      return currentUid ? { uid: currentUid, getIdToken: async () => 'auth-token' } : null;
+    } }) },
+  };
+  runInNewContext(readFileSync('web/users/home/message/cloud-chat.js', 'utf8'), {
+    window, console, fetch: async () => { backendDeletes += 1; return { ok: false, status: 404 }; },
+  });
+  return { api: window.IndooneCloudChat, records, messages, batchSizes, indexActions,
+    setUid: id => { currentUid = id; }, getBackendDeletes: () => backendDeletes };
+}
+
+test('chat titles survive assistant replies and later user prompts', async () => {
+  const { api, records } = cloudChatHarness();
+  await api.appendMessage('thread-1', 'user', 'First question');
+  assert.equal(records.get('thread-1').title, 'First question');
+  await api.appendMessage('thread-1', 'assistant', 'First response');
+  assert.equal(records.get('thread-1').title, 'First question');
+  await api.renameConversation('thread-1', 'My chosen title');
+  await api.appendMessage('thread-1', 'user', 'Second question');
+  await api.appendMessage('thread-1', 'assistant', 'Second response');
+  assert.equal(records.get('thread-1').title, 'My chosen title');
+});
+
+test('loading, renaming, and deleting another account chat are refused', async () => {
+  const { api, records, messages, setUid } = cloudChatHarness();
+  records.set('bob-chat', { userId: 'bob', title: 'Bob private chat' });
+  messages.set('bob-chat', new Map([['1', { role: 'user', content: 'private' }]]));
+  await assert.rejects(api.loadConversation('bob-chat'), /does not belong/);
+  await assert.rejects(api.renameConversation('bob-chat', 'takeover'), /does not belong/);
+  await assert.rejects(api.deleteConversation('bob-chat'), /does not belong/);
+  assert.equal(records.get('bob-chat').title, 'Bob private chat');
+  await assert.rejects(api.renameConversation('missing', 'orphan'), /does not belong/);
+  assert.equal(records.has('missing'), false);
+  setUid('bob');
+  await api.renameConversation('bob-chat', 'Owner edited');
+  assert.equal(records.get('bob-chat').title, 'Owner edited');
+});
+
+test('deleting a large conversation uses bounded Firestore batches', async () => {
+  const { api, records, messages, batchSizes, getBackendDeletes } = cloudChatHarness();
+  records.set('large', { userId: 'alice', title: 'Big thread' });
+  messages.set('large', new Map(
+    Array.from({ length: 905 }, (_, i) => [String(i), { role: 'user', content: 'message' }])
+  ));
+  await api.deleteConversation('large');
+  assert.equal(records.has('large'), false);
+  assert.equal(messages.get('large').size, 0);
+  assert.deepEqual(batchSizes, [400, 400, 105]);
+  assert.equal(getBackendDeletes(), 1);
+});
