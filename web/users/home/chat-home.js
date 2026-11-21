@@ -354,6 +354,14 @@
 
     window.IndooneInflight?.finish?.();
 
+    // A dispatched request can already have changed GitHub/Gmail or another
+    // connected tool. Never put it back in the composer for an accidental resend.
+    if (record.wasDispatched || record.agentMode) {
+      window.toast?.('A previous request may have completed. Check Chat History and the connected app before sending again.');
+      console.warn('Sankalp: dispatched request outcome needs manual verification.');
+      return;
+    }
+
     const input = document.getElementById('chatInput');
 
     if (input && !input.value.trim()) {
