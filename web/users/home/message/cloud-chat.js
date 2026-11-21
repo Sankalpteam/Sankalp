@@ -120,23 +120,27 @@
 
   async function loadLatest() {
     const db = firestore();
-    const snapshot = await db.collection(COLLECTION)
-      .where('userId', '==', uid())
-      .limit(50)
-      .get();
-
-    if (snapshot.empty) {
-      return null;
+    let snapshot;
+    try {
+      snapshot = await db.collection(COLLECTION)
+        .where('userId', '==', uid())
+        .orderBy('updatedAt', 'desc')
+        .limit(1)
+        .get();
+    } catch (error) {
+      // Existing deployments may lack the userId/updatedAt composite index.
+      console.warn('Sankalp latest chat query requires an index:', error);
+      snapshot = await db.collection(COLLECTION)
+        .where('userId', '==', uid())
+        .limit(50)
+        .get();
     }
 
-    const latest = snapshot.docs
-      .map(doc => ({ id: doc.id, data: doc.data() || {} }))
-      .sort((a, b) => {
-        const at = a.data.updatedAt?.toMillis?.() || 0;
-        const bt = b.data.updatedAt?.toMillis?.() || 0;
-        return bt - at;
-      })[0];
-
+    if (snapshot.empty) return null;
+    const latest = snapshot.docs.slice().sort((a, b) =>
+      (b.data()?.updatedAt?.toMillis?.() || 0) -
+      (a.data()?.updatedAt?.toMillis?.() || 0)
+    )[0];
     return loadConversation(latest.id);
   }
 
