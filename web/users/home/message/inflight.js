@@ -14,18 +14,9 @@
 (() => {
   const KEY = 'indoone_chat_inflight_v1';
 
-  function cacheKey() {
-    const uid = window.IndooneFirebase?.auth?.currentUser?.uid;
-    return uid ? `${KEY}:${uid}` : null;
-  }
-
   function read() {
-    const key = cacheKey();
-    if (!key) return null;
     try {
-      // Global legacy records cannot be attributed to an account.
-      localStorage.removeItem(KEY);
-      const raw = localStorage.getItem(key);
+      const raw = localStorage.getItem(KEY);
 
       if (!raw) {
         return null;
@@ -44,18 +35,16 @@
     }
   }
 
-  function begin({ conversationId, text, hadAttachments = false, agentMode = false, clientTurnId = null }) {
+  function begin({ conversationId, text, hadAttachments = false }) {
     const value = String(text || '').trim();
 
     if (!value) {
       return;
     }
 
-    const key = cacheKey();
-    if (!key) return;
     try {
       localStorage.setItem(
-        key,
+        KEY,
         JSON.stringify({
           conversationId: conversationId || null,
           text: value,
@@ -63,9 +52,6 @@
           // handle to it once the document dies. The record remembers that there was
           // one, so the restore can say so instead of silently sending text only.
           hadAttachments: Boolean(hadAttachments),
-          agentMode: Boolean(agentMode),
-          clientTurnId: clientTurnId || null,
-          wasDispatched: false,
           startedAt: Date.now()
         })
       );
@@ -74,24 +60,9 @@
     }
   }
 
-  // Set before the network request. A browser refresh after dispatch must not
-  // restore a ready-to-resend draft: the remote write may already have happened.
-  function markDispatched() {
-    const key = cacheKey();
-    const record = read();
-    if (!key || !record) return;
-    try {
-      localStorage.setItem(key, JSON.stringify({ ...record, wasDispatched: true }));
-    } catch (error) {
-      console.warn('Sankalp could not mark an in-flight request:', error);
-    }
-  }
-
   function finish() {
-    const key = cacheKey();
-    if (!key) return;
     try {
-      localStorage.removeItem(key);
+      localStorage.removeItem(KEY);
     } catch (error) {
       // Nothing to do: the record is a convenience, not the source of truth.
     }
@@ -103,7 +74,6 @@
 
   window.IndooneInflight = {
     begin,
-    markDispatched,
     finish,
     pending,
     clear: finish

@@ -4,36 +4,13 @@
   const KEY = 'indoone_chat_thread_v1';
   const MAX_MESSAGES = 200;
 
-  function currentUid() {
-    return window.IndooneFirebase?.auth?.currentUser?.uid || null;
-  }
-
-  let ownerUid = null;
-  function ensureOwner() {
-    const uid = currentUid();
-    if (uid !== ownerUid) {
-      conversationId = null;
-      messages = [];
-      ownerUid = uid;
-    }
-    return uid;
-  }
-
-  // Never reuse the previous account's browser cache on a shared device.
-  function cacheKey() {
-    const uid = ensureOwner();
-    return uid ? `${KEY}:${uid}` : null;
-  }
-
   let conversationId = null;
   let messages = [];
 
   function cache() {
-    const key = cacheKey();
-    if (!key) return;
     try {
       localStorage.setItem(
-        key,
+        KEY,
         JSON.stringify({ conversationId, messages })
       );
     } catch (error) {
@@ -42,10 +19,8 @@
   }
 
   function readCache() {
-    const key = cacheKey();
-    if (!key) return null;
     try {
-      const raw = localStorage.getItem(key);
+      const raw = localStorage.getItem(KEY);
 
       if (!raw) {
         return null;
@@ -58,24 +33,15 @@
   }
 
   function signedIn() {
-    return Boolean(ensureOwner());
+    return Boolean(window.IndooneFirebase?.auth?.currentUser);
   }
 
   // Load the account's newest conversation, falling back to the cache when
   // there is nothing in the cloud yet or the account is not reachable.
   async function load() {
-    const uid = ensureOwner();
-    conversationId = null;
-    messages = [];
-    if (!uid) return;
-
-    // A legacy global cache has no identity ownership: never restore it.
-    try { localStorage.removeItem(KEY); } catch {}
-
     if (signedIn() && window.IndooneCloudChat?.loadLatest) {
       try {
         const conversation = await window.IndooneCloudChat.loadLatest();
-        if (currentUid() !== uid) return;
 
         if (conversation) {
           conversationId = conversation.id;
@@ -98,7 +64,6 @@
       }
     }
 
-    if (currentUid() !== uid) return;
     const saved = readCache();
 
     if (saved) {
@@ -108,7 +73,6 @@
   }
 
   function add(message) {
-    if (!ensureOwner()) return message;
     messages.push(message);
 
     if (messages.length > MAX_MESSAGES) {
@@ -120,7 +84,6 @@
   }
 
   function remove(message) {
-    ensureOwner();
     const index = messages.indexOf(message);
 
     if (index >= 0) {
@@ -130,7 +93,6 @@
   }
 
   function clear() {
-    ensureOwner();
     conversationId = null;
     messages = [];
 
@@ -138,15 +100,13 @@
     // answers readCache() with a truthy object, which is how a deleted conversation kept
     // coming back: the store cleared itself, and the next load() restored it from storage.
     try {
-      const key = cacheKey();
-      if (key) localStorage.removeItem(key);
+      localStorage.removeItem(KEY);
     } catch (error) {
       console.warn('Sankalp chat thread could not be cleared:', error);
     }
   }
 
   function ensureConversationId() {
-    if (!ensureOwner()) throw new Error('Please sign in again.');
     if (!conversationId) {
       conversationId = (window.crypto?.randomUUID?.() ||
         `c-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -156,7 +116,6 @@
   }
 
   function replace(next) {
-    if (!ensureOwner()) return;
     messages = Array.isArray(next) ? next.slice(-MAX_MESSAGES) : [];
     cache();
   }
@@ -168,10 +127,9 @@
     remove,
     clear,
     ensureConversationId,
-    getMessages: () => { ensureOwner(); return messages; },
-    getConversationId: () => { ensureOwner(); return conversationId; },
+    getMessages: () => messages,
+    getConversationId: () => conversationId,
     setConversationId: id => {
-      if (!ensureOwner()) return;
       conversationId = id;
       cache();
     }

@@ -15,15 +15,3 @@ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .warnbox{background:#fffaf0;border:1px solid #f0e0c0;color:#8a5a00;font-size:12.5px;line-height:1.5;
 border-radius:6px;padding:9px 11px;margin-top:11px}
 .foot2{display:flex;justify-content:flex-end;gap:8px;padding:0 18px 16px}
-
-/* Owner-bound API key management. No fake rows or prefilled secrets. */
-.key-form{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0}
-.key-form label{font-size:12px;font-weight:600;color:var(--dim)}
-.key-form input,.key-form select{min-height:36px;border:1px solid var(--line);border-radius:6px;padding:7px 10px;max-width:100%;background:#fff;color:inherit;font:inherit}
-.key-form input{width:min(260px,100%)}
-.key-form button:disabled{opacity:.5;cursor:not-allowed}
-.keys-table-wrap{max-width:100%;overflow-x:auto}
-.keys-table-wrap table{min-width:640px}
-.keys-table-wrap td{word-break:break-word}
-.dlg[hidden]{display:none}
-.secret code{white-space:normal;overflow-wrap:anywhere;user-select:all}
