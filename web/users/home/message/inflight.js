@@ -14,9 +14,18 @@
 (() => {
   const KEY = 'indoone_chat_inflight_v1';
 
+  function cacheKey() {
+    const uid = window.IndooneFirebase?.auth?.currentUser?.uid;
+    return uid ? `${KEY}:${uid}` : null;
+  }
+
   function read() {
+    const key = cacheKey();
+    if (!key) return null;
     try {
-      const raw = localStorage.getItem(KEY);
+      // Global legacy records cannot be attributed to an account.
+      localStorage.removeItem(KEY);
+      const raw = localStorage.getItem(key);
 
       if (!raw) {
         return null;
@@ -42,9 +51,11 @@
       return;
     }
 
+    const key = cacheKey();
+    if (!key) return;
     try {
       localStorage.setItem(
-        KEY,
+        key,
         JSON.stringify({
           conversationId: conversationId || null,
           text: value,
@@ -63,8 +74,10 @@
   }
 
   function finish() {
+    const key = cacheKey();
+    if (!key) return;
     try {
-      localStorage.removeItem(KEY);
+      localStorage.removeItem(key);
     } catch (error) {
       // Nothing to do: the record is a convenience, not the source of truth.
     }
