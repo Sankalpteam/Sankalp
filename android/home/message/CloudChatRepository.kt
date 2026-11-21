@@ -79,15 +79,12 @@ class CloudChatRepository(
         val now = FieldValue.serverTimestamp()
 
         // Establish ownership without reading a missing document first. The merge
-        // write creates the parent when needed and, for an existing document,
-        // changes only owner/title/timestamp metadata; it never resets messageCount.
+        // write creates the parent when needed, without replacing existing titles
+        // or resetting messageCount on subsequent messages.
         val parentValues = mutableMapOf<String, Any?>(
             "userId" to userId,
             "updatedAt" to now,
         )
-        if (role == "user") {
-            parentValues["title"] = content.trim().take(60)
-        }
         Tasks.await(conversation.set(parentValues, SetOptions.merge()))
 
         val snapshot = Tasks.await(conversation.get())
@@ -96,6 +93,15 @@ class CloudChatRepository(
         }
         if (snapshot.getString("userId").orEmpty() != userId) {
             throw SecurityException("Conversation does not belong to this account.")
+        }
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat save.")
+        }
+        val previousTitle = snapshot.getString("title").orEmpty().trim()
+        val title = if (role == "user" && (previousTitle.isBlank() || previousTitle == "New chat")) {
+            content.trim().take(60)
+        } else {
+            previousTitle.ifBlank { "New chat" }
         }
 
         val messageRef = conversation.collection("messages").document(UUID.randomUUID().toString())
@@ -118,9 +124,7 @@ class CloudChatRepository(
             conversation,
             mapOf(
                 "userId" to userId,
-                "title" to snapshot.getString("title").orEmpty().ifBlank {
-                    if (role == "user") content.trim().take(60) else "New chat"
-                },
+                "title" to title,
                 "updatedAt" to now,
                 "messageCount" to FieldValue.increment(1),
                 "closed" to false,
@@ -129,6 +133,9 @@ class CloudChatRepository(
             SetOptions.merge(),
         )
         Tasks.await(batch.commit())
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat save.")
+        }
 
         // Realtime Database is only a lightweight index. A transient index failure
         // must not turn a successful Firestore save into a user-visible save error.
@@ -244,15 +251,28 @@ class CloudChatRepository(
 
     suspend fun loadLatestChat(limit: Int = 50): CloudChatConversation? = withContext(Dispatchers.IO) {
         val userId = uid
-        val conversations = Tasks.await(
-            firestore.collection("conversations")
-                .whereEqualTo("userId", userId)
-                .limit(limit.coerceIn(1, 100).toLong())
-                .get(),
-        ).documents.sortedByDescending {
-            it.getTimestamp("updatedAt")?.toDate()?.time ?: 0L
+        val conversations = try {
+            Tasks.await(
+                firestore.collection("conversations")
+                    .whereEqualTo("userId", userId)
+                    .orderBy("updatedAt", Query.Direction.DESCENDING)
+                    .limit(1L)
+                    .get(),
+            ).documents
+        } catch (error: Exception) {
+            // Compatibility with projects missing the compound Firestore index.
+            Tasks.await(
+                firestore.collection("conversations")
+                    .whereEqualTo("userId", userId)
+                    .limit(limit.coerceIn(1, 100).toLong())
+                    .get(),
+            ).documents.sortedByDescending {
+                it.getTimestamp("updatedAt")?.toDate()?.time ?: 0L
+            }
         }
-
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat load.")
+        }
         val document = conversations.firstOrNull() ?: return@withContext null
         val messages = Tasks.await(
             document.reference.collection("messages")
@@ -284,11 +304,27 @@ class CloudChatRepository(
                 throw SecurityException("Conversation does not belong to this account.")
             }
 
-            val messages = Tasks.await(conversation.collection("messages").get()).documents
-            val batch = firestore.batch()
-            messages.forEach { batch.delete(it.reference) }
-            batch.delete(conversation)
-            Tasks.await(batch.commit())
+            // Firestore caps batched writes at 500; delete children in bounded
+            // chunks and only then remove the parent. Interrupted cleanup can retry.
+            while (true) {
+                if (auth.currentUser?.uid != userId) {
+                    throw SecurityException("Account changed during chat deletion.")
+                }
+                val messages = Tasks.await(
+                    conversation.collection("messages").limit(400L).get(),
+                ).documents
+                if (messages.isEmpty()) break
+                val batch = firestore.batch()
+                messages.forEach { batch.delete(it.reference) }
+                Tasks.await(batch.commit())
+            }
+            if (auth.currentUser?.uid != userId) {
+                throw SecurityException("Account changed during chat deletion.")
+            }
+            Tasks.await(conversation.delete())
+        }
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat deletion.")
         }
         Tasks.await(chatIndex(userId).child(conversationId).removeValue())
 
