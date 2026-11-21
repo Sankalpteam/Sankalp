@@ -397,18 +397,30 @@ private const val READ_TIMEOUT_MS = 300_000
     //
     // Deltas are handed to the caller on the Main thread, because they land in Compose
     // state. The socket stays on IO. A stream that ends without its final event is an
-    // error, not a short answer: the caller falls back to the durable worker.
+    // error, not a short answer. Never resend to a second transport.
     suspend fun streamMessage(
         message: String,
         conversationId: String?,
+        clientTurnId: String? = null,
+        expectedUserId: String? = null,
         onMeta: suspend (String) -> Unit = {},
         onDelta: suspend (String) -> Unit = {},
     ): ChatResponse {
+        if (clientTurnId != null) {
+            require(Regex("^turn_[a-fA-F0-9]{32}$").matches(clientTurnId)) {
+                "A valid turn ID is required."
+            }
+        }
         val token = requireAuthToken()
+        if (expectedUserId != null &&
+            FirebaseAuth.getInstance().currentUser?.uid != expectedUserId) {
+            throw ChatApiException("Account changed before stream dispatch; nothing was sent.")
+        }
         val backendUrl = requireBackendUrl()
         val payload = JSONObject().apply {
             put("message", message)
             if (!conversationId.isNullOrBlank()) put("conversation_id", conversationId)
+            if (clientTurnId != null) put("client_turn_id", clientTurnId)
         }.toString()
 
         return withContext(Dispatchers.IO) {
