@@ -228,10 +228,16 @@
       window.toast?.('Secure agent request IDs are not available in this browser.');
       return;
     }
-    // The same ID is the durable admission key on BOTH chat transports.
-    // Agent mode uses exactly one blocking request and never auto-falls back.
-    const agentTurnId = agentSelected ? 'turn_' + crypto.randomUUID().replace(/-/g, '') : null;
-    const agentOwnerUid = agentSelected ? window.firebase?.auth?.().currentUser?.uid : null;
+    // Every eligible user turn carries one admission ID, even in normal chat.
+    // No transport is allowed to replay the same request after an unknown outcome.
+    const clientTurnId = globalThis.crypto?.randomUUID
+      ? 'turn_' + crypto.randomUUID().replace(/-/g, '')
+      : null;
+    const requestOwnerUid = window.firebase?.auth?.().currentUser?.uid || null;
+    if (!requestOwnerUid) {
+      window.toast?.('Please sign in again to send a message.');
+      return;
+    }
     if (agentSelected) window.IndooneAgentMode?.clear?.();
 
     const message = text || (
@@ -290,9 +296,10 @@
       text: message,
       hadAttachments: sentAttachments.length > 0,
       agentMode: agentSelected,
-      clientTurnId: agentTurnId
+      clientTurnId
     });
 
+    let dispatched = false;
     try {
       const api = window.IndooneChatApi;
 
@@ -301,8 +308,8 @@
       }
       // The account may have changed during the 350ms chat activity delay.
       // Do not send an old account's explicit approval intent with a NEW token.
-      if (agentSelected && agentOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
-        throw new Error('Account changed before agent dispatch. No request was sent.');
+      if (requestOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
+        throw new Error('Account changed before dispatch. No request was sent.');
       }
 
       // The stream is preferred: the first delta is the answer starting, so the indicator
@@ -314,14 +321,22 @@
       let streamedMessage = null;
       let latestText = '';
       let thinkingHold = false;
+      let streamActive = true;
 
       if (!agentSelected && !sentAttachments.length && typeof api.streamMessage === 'function') {
         try {
+          window.IndooneInflight?.markDispatched?.();
+          dispatched = true;
           result = await api.streamMessage({
             message,
             conversationId,
+            clientTurnId,
             signal: controller.signal,
-            onMeta: id => store.setConversationId(id),
+            onMeta: id => {
+              if (activeTurnId === turnId && requestOwnerUid === window.firebase?.auth?.().currentUser?.uid) {
+                store.setConversationId(id);
+              }
+            },
             onDelta: (chunk, full) => {
               if (activeTurnId !== turnId) {
                 return;
@@ -341,7 +356,7 @@
                 if (waited < THINKING_MIN_MS) {
                   thinkingHold = true;
                   setTimeout(() => {
-                    if (activeTurnId !== turnId || streamedMessage) {
+                    if (!streamActive || activeTurnId !== turnId || streamedMessage) {
                       return;
                     }
 
@@ -380,33 +395,27 @@
               window.IndooneChatScroll?.toBottom?.();
             }
           });
+          streamActive = false;
         } catch (error) {
-          if (error?.name === 'AbortError') {
-            throw error;
-          }
-
-          // A stream that fails before a single token falls back to the blocking call:
-          // same pipeline, same answer, without the progressive reveal. A partial bubble
-          // is removed so the fallback does not leave half an answer behind.
-          console.warn('Sankalp stream failed, falling back:', error);
-
+          streamActive = false;
           if (streamedMessage) {
             store.remove(streamedMessage);
             streamedMessage = null;
           }
-
-          result = null;
+          // Never replay as /api/chat: an interrupted stream may already have
+          // executed GitHub/Gmail writes before its final event was lost.
+          throw error;
         }
-      }
-
-      if (!result) {
+      } else {
+        window.IndooneInflight?.markDispatched?.();
+        dispatched = true;
         result = await api.send({
           message,
           conversationId,
           attachments,
           signal: controller.signal,
           executionMode: agentSelected ? 'langgraph' : 'default',
-          clientTurnId: agentTurnId
+          clientTurnId
         });
       }
 
@@ -414,8 +423,8 @@
         return;
       }
 
-      if (agentSelected && agentOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
-        throw new Error('Account changed during this agent request. Do not resend the action.');
+      if (requestOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
+        throw new Error('Account changed during the request. Do not resend the action.');
       }
       if (result.agentStatus === 'awaiting_approval') {
         void window.IndooneAgentApprovals?.refresh?.();
@@ -438,23 +447,33 @@
         ?.appendMessage?.(result.conversationId, 'assistant', result.reply)
         .catch(error => console.warn('Sankalp chat save failed:', error));
     } catch (error) {
-      if (error?.name === 'AbortError') {
+      if (error?.name === 'AbortError' && !dispatched) {
+        window.IndooneInflight?.finish();
         return;
       }
 
       console.error('Sankalp chat send failed:', error);
-      window.IndooneInflight?.finish();
-      store.remove(mine);
-      store.add({
-        text: agentSelected
-          ? 'Agent request status could not be confirmed. Do NOT resend automatically. Check Pending agent approvals or the connected provider before creating a new request.'
-          : (
-          error?.message &&
-          !/undefined|not a function|null/i.test(error.message)
+      if (requestOwnerUid !== window.firebase?.auth?.().currentUser?.uid) {
+        // Never display a response (or an error mentioning it) in another account.
+        return;
+      }
+      if (dispatched) {
+        // Unknown provider outcome: retain the original prompt and the
+        // in-flight marker; require inspection rather than an automatic retry.
+        store.add({
+          text: 'Request outcome could not be confirmed. Check Chat History, Pending Approvals and the connected app before sending again.',
+          mine: false
+        });
+      } else {
+        window.IndooneInflight?.finish();
+        store.remove(mine);
+        store.add({
+          text: error?.message && !/undefined|not a function|null/i.test(error.message)
             ? error.message
-            : 'Sankalp could not complete the request.'),
-        mine: false
-      });
+            : 'Sankalp could not complete the request.',
+          mine: false
+        });
+      }
     } finally {
       if (activeAbortController === controller) {
         activeAbortController = null;
