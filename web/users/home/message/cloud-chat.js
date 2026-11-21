@@ -31,9 +31,15 @@
     return db;
   }
 
-  function indexRef(conversationId) {
-    return firebase().database.ref('users').child(uid()).child('chats')
+  function indexRef(conversationId, userId = uid()) {
+    return firebase().database.ref('users').child(userId).child('chats')
       .child(conversationId);
+  }
+
+  function requireCurrentOwner(userId) {
+    if (uid() !== userId) {
+      throw new Error('Account changed during chat operation. Please reload your chats.');
+    }
   }
 
   // The app writes the parent with a merge so it never resets messageCount.
@@ -54,16 +60,20 @@
       updatedAt: now
     };
 
-    if (role === 'user') {
-      parent.title = text.slice(0, 60);
-    }
-
+    // Do not overwrite a user-renamed title each time a new prompt arrives.
+    // The initial title is set only after the owner document exists.
     await conversation.set(parent, { merge: true });
 
     const snapshot = await conversation.get();
+    requireCurrentOwner(user);
     const existing = snapshot.exists ? snapshot.data() || {} : {};
-    const title = String(existing.title || '').trim() ||
-      (role === 'user' ? text.slice(0, 60) : 'New chat');
+    if (existing.userId !== user) {
+      throw new Error('Conversation does not belong to this account.');
+    }
+    const oldTitle = String(existing.title || '').trim();
+    const title = role === 'user' && (!oldTitle || oldTitle === 'New chat')
+      ? text.slice(0, 60)
+      : oldTitle || 'New chat';
 
     const messageRef = conversation.collection('messages').doc();
     const batch = db.batch();
@@ -87,7 +97,8 @@
 
     // The index is only a pointer; a failure here must not fail the save.
     try {
-      await indexRef(conversationId).set(true);
+      requireCurrentOwner(user);
+      await indexRef(conversationId, user).set(true);
     } catch (error) {
       console.warn('Sankalp chat index update failed:', error);
     }
@@ -95,16 +106,22 @@
 
   async function loadConversation(conversationId) {
     const db = firestore();
+    const user = uid();
     const snapshot = await db.collection(COLLECTION).doc(conversationId).get();
+    requireCurrentOwner(user);
 
     if (!snapshot.exists) {
       return null;
+    }
+    if (snapshot.data()?.userId !== user) {
+      throw new Error('Conversation does not belong to this account.');
     }
 
     const messages = await snapshot.ref
       .collection('messages')
       .orderBy('createdAt', 'asc')
       .get();
+    requireCurrentOwner(user);
 
     return {
       id: conversationId,
@@ -145,17 +162,35 @@
   }
 
   async function deleteConversation(conversationId) {
+    if (!conversationId) return;
     const db = firestore();
+    const user = uid();
     const conversation = db.collection(COLLECTION).doc(conversationId);
-    const messages = await conversation.collection('messages').get();
-    const batch = db.batch();
+    const ownerSnapshot = await conversation.get();
+    requireCurrentOwner(user);
+    if (ownerSnapshot.exists && ownerSnapshot.data()?.userId !== user) {
+      throw new Error('Conversation does not belong to this account.');
+    }
 
-    messages.docs.forEach(doc => batch.delete(doc.ref));
-    batch.delete(conversation);
-    await batch.commit();
+    // Firestore allows at most 500 writes per batch. Keep the parent document
+    // until all children are gone, so interrupted cleanup can be retried.
+    if (ownerSnapshot.exists) {
+      while (true) {
+        requireCurrentOwner(user);
+        const messages = await conversation.collection('messages').limit(400).get();
+        requireCurrentOwner(user);
+        if (messages.empty) break;
+        const batch = db.batch();
+        messages.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      }
+      requireCurrentOwner(user);
+      await conversation.delete();
+    }
 
     try {
-      await indexRef(conversationId).remove();
+      requireCurrentOwner(user);
+      await indexRef(conversationId, user).remove();
     } catch (error) {
       console.warn('Sankalp chat index remove failed:', error);
     }
@@ -164,10 +199,11 @@
     // keyed by this id, and it is that copy that answers the next message. Deleting only here
     // left the backend believing the thread was still open.
     try {
-      const user = window.firebase?.auth?.().currentUser;
+      const account = window.firebase?.auth?.().currentUser;
 
-      if (user) {
-        const token = await user.getIdToken(false);
+      if (account && account.uid === user) {
+        const token = await account.getIdToken(false);
+        requireCurrentOwner(user);
         const response = await fetch(
           `${String(window.SANKALP_BACKEND || '').replace(/\/+$/, '')}/api/chat/conversations/${encodeURIComponent(conversationId)}`,
           { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
@@ -234,16 +270,16 @@
 
   async function renameConversation(conversationId, title) {
     const value = String(title || '').trim().slice(0, 120);
-
-    if (!conversationId || !value) {
-      return;
+    if (!conversationId || !value) return;
+    const user = uid();
+    const conversation = firestore().collection(COLLECTION).doc(conversationId);
+    const snapshot = await conversation.get();
+    requireCurrentOwner(user);
+    if (!snapshot.exists || snapshot.data()?.userId !== user) {
+      throw new Error('Conversation does not belong to this account.');
     }
-
-    // Only the title. The count, the timestamp and the owner belong to the messages.
-    await firestore().collection(COLLECTION).doc(conversationId).set(
-      { title: value },
-      { merge: true },
-    );
+    // update() refuses to invent an orphan conversation document.
+    await conversation.update({ title: value });
   }
 
   window.IndooneCloudChat = {
