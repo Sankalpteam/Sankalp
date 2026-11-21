@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - logs</title>
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Logs</h3><small>Every request your keys made, and what it cost.</small></div>
+          <span class="pill">sample rows</span>
+        </div>
+
+        <!-- Filters and the four numbers that say whether the day was healthy, above the rows they
+             apply to. The numbers are recomputed from whatever the filters leave, so they describe
+             what you are looking at rather than the whole account. -->
+        <div class="filters">
+          <div class="field"><label for="lgStatus">Status</label>
+            <select id="lgStatus"><option value="">Any</option><option value="ok">200</option><option value="bad">Error</option></select>
+          </div>
+          <div class="field"><label for="lgModel">Model</label>
+            <select id="lgModel">
+              <option value="">Any</option>
+              <option>sankalp-mini</option><option>sankalp-lite</option><option>sankalp-standard</option>
+              <option>sankalp-pro</option><option>sankalp-max</option>
+            </select>
+          </div>
+          <div class="field"><label for="lgDays">Range</label>
+            <select id="lgDays"><option value="1">Last 24 hours</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select>
+          </div>
+          <div class="field"><label for="lgSearch">Request id or text</label>
+            <input id="lgSearch" type="search" placeholder="req_...">
+          </div>
+        </div>
+
+        <div class="summary">
+          <div><span>Requests</span><b id="lgSumCount">&ndash;</b></div>
+          <div><span>Error rate</span><b id="lgSumErrors">&ndash;</b></div>
+          <div><span>p95 latency</span><b id="lgSumP95">&ndash;</b></div>
+          <div><span>Spend</span><b id="lgSumCost">&ndash;</b></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Request</th>
+              <th>Model</th>
+              <th class="right">In / out</th>
+              <th class="right">Latency</th>
+              <th class="right">Cost</th>
+              <th class="right">Status</th>
+            </tr>
+          </thead>
+          <tbody id="lgBody"></tbody>
+        </table>
+
+        <div class="pager">
+          <span id="lgCount">-</span>
+          <span><button class="btn ghost" type="button" id="lgPrev">Newer</button>
+                <button class="btn ghost" type="button" id="lgNext">Older</button></span>
+        </div>
+
+        <p class="note">
+          These rows are samples until the gateway records real requests. The shape is the one the
+          gateway will write: one row per request, with the prompt and the answer kept only as a
+          preview - a log is for finding a request, not for storing a conversation.
+        </p>
+      </div>
+  </div>
+</main>
+<script src="logs.js?v=20261118a"></script>
+</body>
+</html>

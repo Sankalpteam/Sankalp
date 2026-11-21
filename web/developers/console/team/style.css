@@ -1,0 +1,21 @@
+/* Sankalp console - team: only what this screen has of its own. */
+
+/* Invite: the email, the role, one button. The role sits beside the address because it is part of
+   the same decision, not a setting to fix later. */
+.invite{display:grid;grid-template-columns:1fr 170px auto;gap:10px;align-items:end;margin-bottom:24px;
+max-width:720px}
+@media(max-width:820px){.invite{grid-template-columns:1fr}}
+
+/* A card per person: who, their address, their state, and the role as a control in the card. */
+.mcard{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.mcard-top{display:flex;align-items:center;gap:12px}
+.avatar{width:28px;height:28px;border-radius:50%;background:#000;color:#fff;display:grid;place-items:center;
+font-size:11.5px;font-weight:600;flex:none}
+.mcard-name b{display:block;font-size:13.5px;font-weight:600;letter-spacing:-.1px}
+.mcard-name small{display:block;font-size:12px;color:var(--faint)}
+.mcard-top .spacer{flex:1}
+.role{font-family:inherit;font-size:12.5px;color:#000;background:#fff;border:1px solid var(--line);
+border-radius:6px;padding:6px 9px}
+.role:focus{outline:2px solid #d6e7ff;outline-offset:1px;border-color:var(--blue)}
+.mcard-foot{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:var(--faint)}
+.mcard-foot .btn{margin-left:auto}

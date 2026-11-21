@@ -1,0 +1,15 @@
+/* Sankalp console - projects: only what this screen has of its own. */
+
+/* A card per project: the name and its state on one line, the keys under it, then the two numbers
+   that matter. A project is a thing you scan, not a row you read. */
+.pcard{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:12px}
+.pcard-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pcard-top b{font-size:14.5px;font-weight:600;letter-spacing:-.2px}
+.pcard-top .spacer{flex:1}
+.pcard-keys{font-size:12.5px;color:var(--dim)}
+.pcard-stats{display:flex;gap:18px;margin-top:10px;font-size:12.5px;color:var(--faint)}
+.pcard-foot{margin-top:14px;display:flex;gap:8px}
+
+/* Creating one: the name is the only decision, so it is one field and a button. */
+.newproj{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;max-width:520px;margin-top:18px}
+@media(max-width:820px){.newproj{grid-template-columns:1fr}}

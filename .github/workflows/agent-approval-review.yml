@@ -1,0 +1,58 @@
+name: Agent Approval Web Contract
+
+on:
+  push:
+    branches: ["feat/agent-approval-review-ui-20261120"]
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/users/home/approvals/**"
+      - "web/users/home/message/chat-api.js"
+      - "web/users/home/agent-mode.js"
+      - "web/users/home/send/send.js"
+      - "web/users/home/message/inflight.js"
+      - "web/users/home/chat-home.js"
+      - "web/users/index.html"
+      - "scripts/tests/test_agent_approval_web.mjs"
+      - "scripts/tests/test_developer_console_web.mjs"
+      - "web/developers/console/keys/**"
+      - "web/developers/console/usage/**"
+      - "web/users/menu/plugins/script.js"
+      - ".github/workflows/agent-approval-review.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check browser scripts
+        run: |
+          node --check web/users/home/message/chat-api.js
+          node --check web/users/home/approvals/approval-review.js
+          node --check web/users/home/agent-mode.js
+          node --check web/users/home/send/send.js
+          node --check web/users/home/message/inflight.js
+          node --check web/users/home/chat-home.js
+          node --check web/developers/console/keys/keys.js
+          node --check web/developers/console/usage/usage.js
+          node --check web/users/menu/plugins/script.js
+      - name: Unit-test authenticated approval contract and one-shot decision
+        run: node --test scripts/tests/test_agent_approval_web.mjs
+      - name: Unit-test developer keys and plugin disconnect contracts
+        run: node --test scripts/tests/test_developer_console_web.mjs
+      - name: Ensure approval assets are included in site build
+        run: |
+          python3 scripts/build_site.py
+          test -f site/app/home/approvals/approval-review.js
+          test -f site/app/home/approvals/approval-review.css
+          test -f site/app/developers/console/keys/keys.js
+          test -f site/app/developers/console/usage/usage.js
+          test -f site/app/authentication/firebase-config.js
+          test -f site/app/config.js

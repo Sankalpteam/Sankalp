@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - rate limits</title>
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Rate limits</h3><small>What this account may send, and what has been refused.</small></div>
+          <span class="pill">sample figures</span>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="k">requests / minute</div><div class="v">60</div><div class="d">per key</div></div>
+          <div class="kpi"><div class="k">tokens / minute</div><div class="v">90K</div><div class="d">input + output</div></div>
+          <div class="kpi"><div class="k">concurrent</div><div class="v">8</div><div class="d">open requests</div></div>
+          <div class="kpi"><div class="k">monthly tokens</div><div class="v">2M</div><div class="d">resets 1 Dec</div></div>
+        </div>
+
+        <h2 class="section">Refused requests, last 24 hours</h2>
+        <div class="events">
+          <div class="ev">
+            <span class="when">09:12:55</span>
+            <span class="what"><b>Production server</b> hit the token limit</span>
+            <span class="used mono">64K of 90K used</span>
+            <span class="code"><span class="pill bad">429</span></span>
+          </div>
+          <div class="ev">
+            <span class="when">08:55:31</span>
+            <span class="what"><b>Production server</b> hit requests a minute</span>
+            <span class="used mono">60 of 60 used</span>
+            <span class="code"><span class="pill bad">429</span></span>
+          </div>
+          <div class="ev">
+            <span class="when">08:41:02</span>
+            <span class="what"><b>Production server</b> hit concurrency</span>
+            <span class="used mono">8 of 8 open</span>
+            <span class="code"><span class="pill bad">429</span></span>
+          </div>
+        </div>
+
+        <p class="note">
+          Every refusal with what was hit and how much was used. A count alone tells you that it
+          happened; this tells you which limit to raise. The limits belong to the key rather than the
+          account, so one runaway script cannot stop every other key.
+        </p>
+      </div>
+  </div>
+</main>
+</body>
+</html>

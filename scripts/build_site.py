@@ -21,7 +21,9 @@ them. So the published tree is built, not committed:
 from __future__ import annotations
 
 import datetime
+import hashlib
 import pathlib
+import re
 import shutil
 import sys
 
@@ -103,6 +105,81 @@ def require(paths: list[pathlib.Path]) -> None:
         die("missing required input: " + ", ".join(missing))
 
 
+
+# The console's rail, written into every console page at build time.
+#
+# It was a script the pages fetched, which is one request that a browser can serve from its cache -
+# and did: some screens drew eight items and some twelve, depending on which copy of the script that
+# page had been given. A rail that is part of the page cannot be stale, and there is still only one
+# list, here.
+CONSOLE_TABS = [
+    ("console", "./", "Overview"),
+    ("keys", "keys/", "API keys"),
+    ("usage", "usage/", "Usage"),
+    ("models", "models/", "Models"),
+    ("playground", "playground/", "Playground"),
+    ("logs", "logs/", "Logs"),
+    ("limits", "limits/", "Rate limits"),
+    ("webhooks", "webhooks/", "Webhooks"),
+    ("projects", "projects/", "Projects"),
+    ("team", "team/", "Team"),
+    ("settings", "settings/", "Settings"),
+    ("wallet", "wallet/", "Wallet"),
+]
+
+
+def paint_console_nav() -> int:
+    """Write the tab bar into every console page, and drop the side block it replaces.
+
+    The navigation was a rail of links fetched by a script, which a browser could serve from its
+    cache - and did, so screens disagreed about what the console contained. It is part of the page
+    now, in one place, with the current screen marked.
+    """
+    console = SITE / "app" / "developers" / "console"
+    if not console.exists():
+        return 0
+
+    painted = 0
+
+    for page in sorted(console.rglob("index.html")):
+        html = page.read_text(encoding="utf-8")
+        if 'data-console-nav' not in html and 'class="side"' not in html:
+            continue
+
+        depth = "" if page.parent == console else "../"
+        current = "console" if page.parent == console else page.parent.name
+
+        links = []
+        for tab_id, href, label in CONSOLE_TABS:
+            active = ' class="on"' if tab_id == current else ""
+            links.append(f'    <a{active} href="{depth}{href}">{label}</a>')
+
+        tabs = '<nav class="tabs">\n' + "\n".join(links) + "\n  </nav>"
+
+        # the side block: the account line and the rail placeholder, gone in one piece
+        html = re.sub(r'\s*<div class="side">.*?<div class="nav" data-console-nav></div>\s*</div>',
+                      "", html, flags=re.S)
+        # the tab bar goes directly under the top bar
+        html = html.replace('</header>', '</header>\n\n  ' + tabs, 1)
+
+        html = re.sub(r'\s*<script src="(?:\.\./)?nav\.js[^"]*"></script>', "", html)
+
+        base_css = (console / "base.css").read_bytes()
+        own_css_path = page.parent / "style.css"
+        own_css = own_css_path.read_bytes() if own_css_path.exists() else b""
+
+        base_hash = hashlib.md5(base_css).hexdigest()[:8]
+        own_hash = hashlib.md5(base_css + own_css).hexdigest()[:8]
+
+        html = re.sub(r'base\.css\?v=\w+', f"base.css?v={base_hash}", html)
+        html = re.sub(r'(?<![\w/])style\.css\?v=\w+', f"style.css?v={own_hash}", html)
+
+        page.write_text(html, encoding="utf-8")
+        painted += 1
+
+    return painted
+
+
 def main() -> None:
     require(
         [LANDING / "index.html", LANDING / "style.css", APP / "index.html", APP / "update.json"]
@@ -122,6 +199,8 @@ def main() -> None:
     shutil.copytree(APP, SITE / "app")
     for shared in SHARED:
         shutil.copytree(WEB / shared, SITE / "app" / shared)
+
+    painted = paint_console_nav()
 
     # The same artwork, inside /app/ as well as at the root.
     #

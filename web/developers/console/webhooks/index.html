@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - webhooks</title>
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Webhooks</h3><small>A message to your server when something finishes.</small></div>
+          <span class="pill">sample deliveries</span>
+        </div>
+
+        <div class="panel">
+          <h4>Endpoint</h4>
+          <div class="field">
+            <label for="whUrl">HTTPS address</label>
+            <input id="whUrl" type="url" value="https://example.com/sankalp/webhook" placeholder="https://your-server/hook">
+          </div>
+          <div class="field">
+            <label>Signing secret</label>
+            <div class="secretline"><span>whsec_&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;3f7a</span>
+              <button class="btn btn-sm" type="button">Rotate</button></div>
+            <span class="hintline">Every delivery carries a signature made with this secret, so your
+              server can prove the call came from us. Shown once, then never again.</span>
+          </div>
+          <button class="btn primary" id="whTest" type="button">Send a test delivery</button>
+        </div>
+
+        <!-- Events first: choosing what to be told about is the decision, and the endpoint and the
+             deliveries follow from it. -->
+        <h2 class="section">Events</h2>
+        <div class="panel">
+            <label class="ev">
+              <input type="checkbox" checked>
+              <span class="evname mono">chat.completed</span>
+              <span class="evwhat">an answer finished</span>
+              <span class="evlast">2 minutes ago</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox" checked>
+              <span class="evname mono">chat.failed</span>
+              <span class="evwhat">a request failed</span>
+              <span class="evlast">1 hour ago</span>
+              <span class="tag bad">502</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">wallet.low</span>
+              <span class="evwhat">the balance fell below your threshold</span>
+              <span class="evlast">yesterday</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">key.created</span>
+              <span class="evwhat">a new key was made</span>
+              <span class="evlast">12 Nov</span>
+              <span class="tag ok">200</span>
+            </label>
+            <label class="ev">
+              <input type="checkbox">
+              <span class="evname mono">key.revoked</span>
+              <span class="evwhat">a key was revoked</span>
+              <span class="evlast">never</span>
+              <span class="tag ">&ndash;</span>
+            </label>
+        </div>
+
+        <h2 class="section">Recent deliveries</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Delivery</th>
+              <th class="right">Attempts</th>
+              <th class="right">Your response</th>
+              <th class="right">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mini">09:41</td>
+              <td class="mono">chat.completed</td>
+              <td class="key mono">wh_2f91c4</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 84 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>            <tr>
+              <td class="mini">09:38</td>
+              <td class="mono">chat.completed</td>
+              <td class="key mono">wh_2f91b7</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 61 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>            <tr>
+              <td class="mini">08:55</td>
+              <td class="mono">chat.failed</td>
+              <td class="key mono">wh_2f9140</td>
+              <td class="right">3</td>
+              <td class="right mini">502 after 3 tries</td>
+              <td class="right"><span class="pill ">retrying</span></td>
+            </tr>            <tr>
+              <td class="mini">07:10</td>
+              <td class="mono">chat.completed</td>
+              <td class="key mono">wh_2f8e02</td>
+              <td class="right">1</td>
+              <td class="right mini">200 in 120 ms</td>
+              <td class="right"><span class="pill ok">delivered</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          A delivery is retried with a growing gap for a day before it is dropped, and every attempt
+          is listed with the code your server returned. The body carries ids and counts, not the
+          conversation: an answer already lives in the chat you can read back.
+        </p>
+      </div>
+  </div>
+</main>
+<script src="webhooks.js?v=20261118a"></script>
+</body>
+</html>

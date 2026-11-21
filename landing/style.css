@@ -59,6 +59,13 @@ body{
 .btn--sm{padding:9px 18px;font-size:14px}
 .btn--purple{background:var(--purple);color:#fff;box-shadow:var(--shadow-sm)}
 .btn--purple:hover{background:var(--purple-2)}
+/* Sign in and Sign up, as buttons rather than links: the header's three actions are one shape,
+   so the eye reads them as a set. Green is the page's own accent - the same green as the
+   headline - and blue marks the one that leaves for the console. */
+.btn--green{background:var(--green);color:#fff;box-shadow:var(--shadow-sm)}
+.btn--green:hover{background:#358527}
+.btn--blue{background:#2563eb;color:#fff;box-shadow:var(--shadow-sm)}
+.btn--blue:hover{background:#1d4ed8}
 .btn--ghost{border:1.5px solid var(--border-strong);color:var(--navy);background:var(--surface)}
 
 /* ---------- hero ---------- */
@@ -138,7 +145,10 @@ html,body{overflow-x:hidden}
   .brand__mark{width:34px;height:34px}
   .brand__name{font-size:18px}
   .nav__links{display:none}
-  .btn--sm{padding:9px 15px;font-size:13.5px;margin-left:auto}
+  .btn--sm{padding:9px 13px;font-size:13px;margin-left:0}
+  /* Three buttons in a phone header: the nav links fold away and these three share the row. */
+  .nav__inner{gap:8px;flex-wrap:nowrap}
+  .nav__inner .btn--sm:first-of-type{margin-left:auto}
 
   .hero{padding:38px 0 34px}
   .eyebrow{font-size:10px;letter-spacing:1.4px}
@@ -187,8 +197,10 @@ html,body{overflow-x:hidden}
 
 
 /* The two entry points in the nav. Sign in is quiet, sign up is the one a new visitor wants. */
-.nav__up{color:var(--purple);font-weight:600}
-.nav__up:hover{text-decoration:underline}
+/* The two were plain text links; they are buttons now, so the colour comes from .btn--green.
+   The selector has to be this specific: .nav__links a sets a grey on every link in that list and
+   outranks a bare class, which is why the words stayed dark on a green pill. */
+.nav__links a.nav__in,.nav__links a.nav__up,.nav__in,.nav__up{color:#fff;font-weight:600}
 @media(max-width:1120px){
   .nav__links a[href="#privacy"]{display:none}
 }

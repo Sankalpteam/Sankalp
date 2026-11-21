@@ -1,0 +1,19 @@
+/* Sankalp console - rate limits: only what this screen has of its own. */
+
+/* A refusal is a fact with four parts - when, which key, which limit, how much was used - so it is
+   one row with those four in fixed columns, not a sentence. */
+.events{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:4px}
+.ev{display:grid;grid-template-columns:110px 1fr 170px 70px;gap:14px;align-items:center;
+padding:12px 16px;font-size:13px;border-bottom:1px solid var(--line-soft)}
+.ev:last-child{border-bottom:0}
+.ev:hover{background:var(--grey)}
+.when{color:var(--faint);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+.what b{font-weight:500}
+.used{color:var(--dim);font-size:12.5px;text-align:right}
+.code{text-align:right}
+
+@media(max-width:820px){
+  .ev{grid-template-columns:1fr auto;gap:4px 12px}
+  .when{grid-column:1 / -1}
+  .used{text-align:left}
+}

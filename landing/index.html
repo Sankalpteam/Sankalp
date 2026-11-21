@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/style.css?v=20261118a">
 
 <script type="application/ld+json">
 {
@@ -78,10 +78,12 @@
       <a href="#pricing">Pricing</a>
       <a href="#privacy">Privacy</a>
       <a href="#download">Download</a>
-      <a class="nav__in" href="/app/login/">Sign in</a>
-      <a class="nav__up" href="/app/signup/">Sign up</a>
+      <a class="btn btn--green btn--sm nav__in" href="/app/login/">Sign in</a>
+      <a class="btn btn--green btn--sm nav__up" href="/app/signup/">Sign up</a>
     </nav>
-    <a class="btn btn--purple btn--sm" href="/app/">Open the app</a>
+    <!-- The developer console, not the chat: someone who searched their way here wants the API,
+         and the console sends them through the app's own sign-in. -->
+    <a class="btn btn--blue btn--sm" href="/app/developers/console/">Open the console</a>
   </div>
 </header>
 

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sankalp console - team</title>
+<link rel="stylesheet" href="../base.css?v=20261118a">
+<link rel="stylesheet" href="style.css?v=20261118b">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
+</head>
+<body>
+<header class="dev-top">
+  <img class="dev-mark" src="/assets/mark.png" alt="Sankalp">
+  <span class="dev-wordmark">Sankalp</span>
+  <span class="dev-tag">developers</span>
+  <span class="spacer"></span>
+  <a class="toplink" href="../../docs/">Docs</a>
+  <a class="toplink on" href="../../console/">Console</a>
+</header>
+
+<main class="wrap">
+  <div class="console">
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
+      </div>
+      <div class="main">
+        <div class="mainhead"><div><h3>Team</h3><small>One account, the people in it, and what each may do.</small></div>
+          <span class="pill">sample members</span>
+        </div>
+
+        <div class="invite">
+          <div class="inline-field"><label for="tmEmail">Email</label>
+            <input id="tmEmail" type="email" placeholder="name@company.com"></div>
+          <div class="inline-field"><label for="tmRole">Role</label>
+            <select id="tmRole"><option>Developer</option><option>Billing</option><option>Owner</option></select></div>
+          <button class="btn primary" id="tmInvite" type="button">Invite</button>
+        </div>
+
+        <div class="mcard">
+          <div class="mcard-top">
+            <span class="avatar">Y</span>
+            <div class="mcard-name"><b>Yashwanth</b><small>yashwanthputtarajegowda@gmail.com</small></div>
+            
+            <span class="spacer"></span>
+            <select class="role" aria-label="Role for Yashwanth"><option selected>Owner</option><option>Developer</option><option>Billing</option></select>
+          </div>
+          <div class="mcard-foot"><span>now</span></div>
+        </div>
+        <div class="mcard">
+          <div class="mcard-top">
+            <span class="avatar">A</span>
+            <div class="mcard-name"><b>Ananya</b><small>ananya@example.com</small></div>
+            
+            <span class="spacer"></span>
+            <select class="role" aria-label="Role for Ananya"><option>Owner</option><option selected>Developer</option><option>Billing</option></select>
+          </div>
+          <div class="mcard-foot"><span>2 hours ago</span><button class="btn btn-sm" type="button">Remove</button></div>
+        </div>
+        <div class="mcard">
+          <div class="mcard-top">
+            <span class="avatar">R</span>
+            <div class="mcard-name"><b>Rahul</b><small>rahul@example.com</small></div>
+            
+            <span class="spacer"></span>
+            <select class="role" aria-label="Role for Rahul"><option>Owner</option><option>Developer</option><option selected>Billing</option></select>
+          </div>
+          <div class="mcard-foot"><span>yesterday</span><button class="btn btn-sm" type="button">Remove</button></div>
+        </div>
+        <div class="mcard">
+          <div class="mcard-top">
+            <span class="avatar">?</span>
+            <div class="mcard-name"><b>dev@example.com</b><small>invited 3 days ago</small></div>
+            <span class="pill">pending</span>
+            <span class="spacer"></span>
+            <select class="role" aria-label="Role for dev@example.com"><option>Owner</option><option selected>Developer</option><option>Billing</option></select>
+          </div>
+          <div class="mcard-foot"><span>pending</span><button class="btn btn-sm" type="button">Revoke invite</button></div>
+        </div>
+
+        <p class="note">
+          A role is enforced by the gateway, not by hiding a button: a Developer who opens the wallet's
+          address directly is refused, the same as one who never saw the link.
+        </p>
+      </div>
+  </div>
+</main>
+<script src="team.js?v=20261118a"></script>
+</body>
+</html>

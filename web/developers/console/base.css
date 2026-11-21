@@ -1,0 +1,159 @@
+/* Sankalp console - the shell and the scale.
+   One file, shared by every screen. A screen keeps its own stylesheet for what only it has.
+
+   The look: white, black, and one blue. Hairlines instead of boxes, six-pixel corners, 14px text
+   with bold tight headings, and numbers in tabular figures. Nothing is drawn to look like a
+   container - the design is the spacing and the type.
+
+   The navigation is a row of tabs under the top bar rather than a rail: twelve screens fit, they
+   stay visible on every page, and the content gets the whole width. */
+:root{
+  --line:#eaeaea; --line-soft:#f2f2f2;
+  --ink:#000; --dim:#666; --faint:#8f8f8f;
+  --grey:#fafafa; --blue:#0070f3;
+  --ok:#0a7d43; --ok-bg:#f3fbf5; --ok-line:#d3f0dd;
+  --bad:#c00; --bad-bg:#fff5f5; --bad-line:#ffd9d9;
+  --radius:6px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#fff;color:var(--ink);display:flex;flex-direction:column;
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+
+/* ---------- top bar ---------- */
+.dev-top{display:flex;align-items:center;gap:18px;height:60px;padding:0 24px;flex:none;
+border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+.dev-mark{width:20px;height:20px;object-fit:contain;border-radius:4px;background:#000;padding:2px}
+.dev-wordmark{font-weight:600;font-size:15px;letter-spacing:-.3px;color:var(--ink)}
+.dev-tag{font-size:11px;font-weight:500;color:var(--faint);border:1px solid var(--line);
+border-radius:4px;padding:2px 6px;letter-spacing:0;text-transform:none}
+.dev-top .spacer{flex:1}
+.dev-top a.toplink{font-size:13.5px;color:var(--dim);padding:6px 2px;border-radius:4px}
+.dev-top a.toplink:hover{color:var(--ink)}
+.dev-top a.toplink.on{color:var(--ink);font-weight:500}
+
+/* ---------- shell: tabs, then the page ---------- */
+.wrap{flex:1;min-height:0;display:flex;flex-direction:column;max-width:none;margin:0;padding:0}
+.console{flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;border:0;margin:0}
+
+/* the rail's old parts, kept so nothing that still names them breaks */
+.side,.who,.nav,.dot{display:none}
+
+.tabs{display:flex;gap:2px;overflow-x:auto;flex:none;padding:0 24px;
+border-bottom:1px solid var(--line);background:#fff;position:sticky;top:60px;z-index:19;
+scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:12px 10px;font-size:13.5px;color:var(--dim);white-space:nowrap;
+border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs a:hover{color:var(--ink)}
+.tabs a.on{color:var(--ink);font-weight:500;border-bottom-color:var(--ink)}
+
+.main{flex:1;min-height:0;overflow-y:auto;padding:30px 24px 44px;width:100%;max-width:1160px;margin:0 auto}
+.mainhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px}
+.mainhead h3{margin:0;font-size:24px;font-weight:600;letter-spacing:-.9px}
+.mainhead small{display:block;margin-top:5px;color:var(--dim);font-size:13.5px}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{text-align:left;font-size:12px;font-weight:500;color:var(--faint);padding:0 12px 10px;
+border-bottom:1px solid var(--line);background:#fff}
+td{padding:11px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:hover td{background:var(--grey)}
+tr:last-child td{border-bottom:0}
+th.right,td.right{text-align:right}
+.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:12.5px}
+.key{font-weight:500}
+.mini{font-size:12.5px;color:var(--faint)}
+
+/* ---------- chips ---------- */
+.pill{display:inline-block;font-size:11.5px;font-weight:500;padding:1px 6px;border-radius:4px;
+background:var(--grey);color:var(--dim);border:1px solid var(--line);white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-line)}
+.pill.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-line)}
+.pill.info{background:#f5f9ff;color:var(--blue);border-color:#d6e7ff}
+.status{font-weight:500}
+.status.ok{color:var(--ok)}
+.status.bad{color:var(--bad)}
+
+/* ---------- figures ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;
+margin:0 0 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.kpi{padding:20px 20px 20px 0}
+.kpi + .kpi{border-left:1px solid var(--line);padding-left:20px}
+.kpi .k{display:block;font-size:12.5px;color:var(--dim)}
+.kpi .v{display:block;margin-top:6px;font-size:28px;font-weight:600;letter-spacing:-1.2px}
+.kpi .d{display:block;margin-top:2px;font-size:12px;color:var(--faint)}
+
+/* ---------- surfaces ---------- */
+.card{border:1px solid var(--line);border-radius:8px;padding:20px}
+.panel-plain{border:1px solid var(--line);border-radius:8px;padding:20px;background:#fff}
+.card-tint{background:var(--grey)}
+
+/* ---------- buttons ---------- */
+.btn{font-family:inherit;font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--radius);
+cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);display:inline-block;line-height:1.4}
+.btn:hover{border-color:#999}
+.btn.primary{background:#000;color:#fff;border-color:#000}
+.btn.primary:hover{background:#333;border-color:#333}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{padding:6px 11px;font-size:12.5px}
+.btn-xs{padding:4px 9px;font-size:12px}
+
+/* ---------- text ---------- */
+.note{margin:18px 0 0;font-size:12.5px;color:var(--faint);line-height:1.6;max-width:80ch}
+.note-tight{margin:10px 0 0;font-size:12.5px;color:var(--faint);line-height:1.55}
+.hintline{font-size:12px;color:var(--faint);line-height:1.5}
+.section{margin:26px 0 12px;font-size:16px;font-weight:600;letter-spacing:-.4px}
+.section:first-child{margin-top:0}
+.bignum{font-size:34px;font-weight:600;letter-spacing:-1.4px;line-height:1.1}
+.text-bad{color:var(--bad)}
+
+/* ---------- forms ---------- */
+.inline-field{display:grid;gap:6px;margin:0}
+.inline-field label{font-size:12.5px;color:var(--dim);font-weight:500}
+.inline-field input,.inline-field select,.inline-field textarea{font-family:inherit;font-size:13.5px;
+color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;width:100%}
+.inline-field input:focus,.inline-field select:focus,.inline-field textarea:focus{
+outline:2px solid #d6e7ff;outline-offset:1px;border-color:var(--blue)}
+/* The same field, under the name most screens already use. */
+.field{display:grid;gap:6px;margin:0}
+.field label{font-size:12.5px;color:var(--dim);font-weight:500}
+.field input,.field select,.field textarea{font-family:inherit;font-size:13.5px;color:var(--ink);
+background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;width:100%;box-sizing:border-box}
+.field textarea{min-height:84px;resize:vertical;line-height:1.55}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #d6e7ff;outline-offset:1px;
+border-color:var(--blue)}
+.flush{margin:0}
+.stack-sm{display:grid;gap:10px}
+
+/* ---------- bars ---------- */
+.split{display:grid;gap:12px}
+.row{display:grid;grid-template-columns:140px 1fr 72px;align-items:center;gap:14px;font-size:13px}
+.track{height:6px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+.fill{height:100%;border-radius:99px;background:#000}
+.fill.alt{background:#999}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+
+/* ---------- small screens ---------- */
+@media(max-width:820px){
+  .dev-top{height:52px;padding:0 16px;gap:12px}
+  .dev-wordmark{font-size:14px}
+  .tabs{top:52px;padding:0 16px}
+  .tabs a{padding:11px 8px;font-size:13px}
+  .main{padding:20px 16px 36px}
+  .mainhead{flex-direction:column;align-items:flex-start;gap:8px}
+  .mainhead h3{font-size:21px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi + .kpi{border-left:0}
+  .kpi{padding:16px 0}
+  .kpi:nth-child(even){border-left:1px solid var(--line);padding-left:16px}
+  .kpi:nth-child(n+3){border-top:1px solid var(--line)}
+  .row{grid-template-columns:1fr;gap:6px}
+  table{font-size:12.5px}
+  td,th{padding-left:8px;padding-right:8px}
+}
