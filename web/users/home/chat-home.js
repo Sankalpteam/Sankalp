@@ -7,15 +7,13 @@
     // chat-api.js was written but never listed here, so window.IndooneChatApi
     // was undefined and both the composer and Vibe threw the moment they tried
     // to send. It goes first, because the others call it.
-    'home/message/chat-api.js?v=20261120b',
-    'home/agent-mode.js?v=20261120a',
-    'home/approvals/approval-review.js?v=20261120a',
+    'home/message/chat-api.js?v=20261115a',
     'home/message/cloud-chat.js?v=20261020b',
     'home/message/chat-store.js?v=20261018b',
     // The in-flight record. It has to load with the store, before anything can send.
-    'home/message/inflight.js?v=20261120b',
+    'home/message/inflight.js?v=20261026a',
     'home/message/message.js?v=20261118b',
-    'home/send/send.js?v=20261120b',
+    'home/send/send.js?v=20261118c',
     // Share chat and rename chat: the two actions the app has and the web did not.
     'home/message/chat-actions.js?v=20261117a',
     'home/voice/voice.js?v=20261019f',
@@ -354,14 +352,6 @@
 
     window.IndooneInflight?.finish?.();
 
-    // A dispatched request can already have changed GitHub/Gmail or another
-    // connected tool. Never put it back in the composer for an accidental resend.
-    if (record.wasDispatched || record.agentMode) {
-      window.toast?.('A previous request may have completed. Check Chat History and the connected app before sending again.');
-      console.warn('Sankalp: dispatched request outcome needs manual verification.');
-      return;
-    }
-
     const input = document.getElementById('chatInput');
 
     if (input && !input.value.trim()) {
@@ -375,12 +365,6 @@
     // silently incomplete message.
     if (record.hadAttachments) {
       window.toast?.('Message restored - please re-attach your file');
-    }
-    if (record.agentMode) {
-      window.toast?.('An Agent action may already have run. Do not resend until you check its status.');
-      // No agent-mode selection is automatically restored: each turn needs
-      // a fresh, deliberate opt-in, never a silent replay after refresh.
-      window.IndooneAgentMode?.clear?.();
     }
 
     console.warn('Sankalp: an unfinished message was restored to the composer.');
@@ -408,8 +392,6 @@
     window.IndooneChatScroll = { toBottom: scrollToBottom };
     window.IndoonePlusSheet?.init(document.getElementById('plusSheet'));
     window.IndooneVibe?.init();
-    window.IndooneAgentApprovals?.init();
-    window.IndooneAgentMode?.init();
 
     bindQuickPrompts();
     paintWelcome();

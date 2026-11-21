@@ -159,25 +159,9 @@
     }
   }
 
-  async function send({ message, conversationId, attachments = [], executionMode = 'default', clientTurnId = null, signal }) {
+  async function send({ message, conversationId, attachments = [] }) {
     const media = await buildMediaPayload(attachments);
     const payload = { message };
-    if (executionMode === 'langgraph') {
-      if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId || ''))) {
-        throw new Error('Agent mode requires a fresh, stable turn ID.');
-      }
-      if (attachments.length) {
-        throw new Error('Agent mode does not support attachments yet.');
-      }
-      payload.execution_mode = 'langgraph';
-    }
-
-    if (clientTurnId) {
-      if (!/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId))) {
-        throw new Error('Invalid chat turn ID.');
-      }
-      payload.client_turn_id = clientTurnId;
-    }
 
     if (conversationId) {
       payload.conversation_id = conversationId;
@@ -192,7 +176,7 @@
       payload.attachments = media;
     }
 
-    const json = await postJson('/api/chat', payload, signal);
+    const json = await postJson('/api/chat', payload);
 
     if (!json.conversation_id) {
       throw new Error('Sankalp could not start this chat just now. Please try again.');
@@ -213,9 +197,7 @@
       // Follow-ups the backend offered with this reply. Empty for most answers; a held
       // write carries Confirm/Cancel so the user presses a button instead of typing a
       // word the reply had to spell out.
-      chips: Array.isArray(json.action_chips) ? json.action_chips : [],
-      agentRunId: typeof json.agent_run_id === 'string' ? json.agent_run_id : null,
-      agentStatus: typeof json.agent_status === 'string' ? json.agent_status : null
+      chips: Array.isArray(json.action_chips) ? json.action_chips : []
     };
   }
 
@@ -240,13 +222,8 @@
   // that carries the finished reply and the chips it offered. Reading them here means the
   // caller can show the first words immediately and clear its "thinking" indicator on the
   // first delta instead of waiting for the whole answer.
-  async function streamMessage({ message, conversationId, clientTurnId = null, signal, onMeta, onDelta }) {
+  async function streamMessage({ message, conversationId, signal, onMeta, onDelta }) {
     const token = await authToken();
-    if (clientTurnId && !/^turn_[a-f0-9]{32}$/i.test(String(clientTurnId))) {
-      throw new Error('Invalid chat turn ID.');
-    }
-    const payload = { message, conversation_id: conversationId };
-    if (clientTurnId) payload.client_turn_id = clientTurnId;
 
     const response = await fetch(`${backendBase()}/api/chat/stream`, {
       method: 'POST',
@@ -255,7 +232,7 @@
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream'
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ message, conversation_id: conversationId }),
       signal
     });
 
@@ -331,74 +308,10 @@
     return final;
   }
 
-  async function chatAgentModeEnabled() {
-    try {
-      const result = await getApprovalJson('/api/chat/agent-mode');
-      return result?.enabled === true;
-    } catch (error) {
-      // Older backends or feature-off deployments must not advertise the UI.
-      return false;
-    }
-  }
-
-  // LangGraph's /api/agent review flow is independent of /api/chat action chips.
-  // All three calls use the SAME Firebase bearer identity as normal chat.
-  function approvalPath(runId) {
-    const id = String(runId || '').trim();
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      throw new Error('Invalid agent run identifier.');
-    }
-    return '/api/agent/runs/' + encodeURIComponent(id) + '/approval';
-  }
-
-  async function getApprovalJson(path) {
-    const token = await authToken();
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    try {
-      const response = await fetch(backendBase() + path, {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' },
-        cache: 'no-store',
-        signal: controller.signal
-      });
-      if (!response.ok) {
-        const error = new Error('Could not load pending approvals.');
-        error.status = response.status;
-        throw error;
-      }
-      return response.json();
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  async function listAgentApprovals() {
-    const data = await getApprovalJson('/api/agent/approvals');
-    return Array.isArray(data?.approvals) ? data.approvals : [];
-  }
-
-  function getAgentApproval(runId) {
-    return getApprovalJson(approvalPath(runId));
-  }
-
-  // Writes NEVER retry on timeout or 409. A network failure can mean the
-  // provider received the action; only a separate read may reconcile status.
-  function decideAgentApproval(runId, decision) {
-    if (decision !== 'approve' && decision !== 'deny') {
-      throw new Error('Invalid approval decision.');
-    }
-    return postJson(approvalPath(runId), { decision });
-  }
-
   window.IndooneChatApi = {
     send,
     streamMessage,
     uploadFile,
-    chatAgentModeEnabled,
-    listAgentApprovals,
-    getAgentApproval,
-    decideAgentApproval,
     backendUrl: backendBase()
   };
 })();

@@ -502,7 +502,7 @@ window.initMenuPlugins = function () {
     draw();
 
     try {
-      await window.IndoonePlugins.call(provider.disconnect, { method: 'POST', body: JSON.stringify({ user_id: window.IndoonePlugins.userId() }) });
+      await window.IndoonePlugins.call(provider.disconnect, { method: 'POST', body: JSON.stringify({}) });
       state[provider.id].connected = false;
       state[provider.id].account = '';
       state[provider.id].healthy = false;

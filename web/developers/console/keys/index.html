@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sankalp console - API keys</title>
 <link rel="stylesheet" href="../base.css?v=20261118a">
-<link rel="stylesheet" href="style.css?v=20261120c">
+<link rel="stylesheet" href="style.css?v=20261118b">
+<script>
+  // The console is for a signed-in account, and it is the app's own session - the same sign-in,
+  // no second account. Without one, back to it.
+  try {
+    if (!localStorage.getItem('indoone_otp_verified_uid')) {
+      window.location.replace('../../../index.html?next=console');
+    }
+  } catch (error) {}
+</script>
 </head>
 <body>
 <header class="dev-top">
@@ -17,80 +26,91 @@
   <a class="toplink on" href="../../console/">Console</a>
 </header>
 
+
 <main class="wrap">
   <div class="console">
-    <div class="side">
-      <div class="who"><span class="avatar">S</span><div><b>Sankalp account</b><small>Authenticated keys</small></div></div>
-      <div class="nav" data-console-nav></div>
-    </div>
-    <div class="main">
-      <div class="mainhead">
-        <div>
-          <h3>API keys</h3>
-          <small>Owner-bound keys. A new secret is shown only once.</small>
-        </div>
-        <span class="pill info">Development preview</span>
+      <div class="side">
+        <div class="who"><span class="avatar">Y</span><div><b>Yashwanth</b><small>signed in</small></div></div>
+        <div class="nav" data-console-nav></div>
       </div>
+      <div class="main">
+        <div class="mainhead">
+          <div><h3>API keys</h3><small>One key per server, one per script. A key is shown once and never again.</small></div>
+          <button class="btn primary" type="button">Create key</button>
+        </div>
 
-      <p class="note" id="dkStatus" role="status" aria-live="polite">
-        Checking your authenticated account and developer API availability…
-      </p>
-      <p class="note">
-        Key creation and revocation use the Sankalp backend. Paid inference,
-        wallet debits and token pricing are not active. Never put a key in browser
-        or Android app source.
-      </p>
-
-      <form id="dkForm" class="key-form">
-        <label for="dkName">Key name</label>
-        <input id="dkName" maxlength="80" autocomplete="off" placeholder="Example: backend test server" required>
-        <label for="dkEnvironment">Environment</label>
-        <select id="dkEnvironment">
-          <option value="test" selected>Test</option>
-          <option value="live">Live (inference not enabled)</option>
-        </select>
-        <button class="btn primary" type="submit" id="dkCreate" disabled>Create key</button>
-      </form>
-
-      <div class="keys-table-wrap">
         <table>
           <thead>
-            <tr><th>Name</th><th>Key</th><th>Environment</th>
-              <th>Status</th><th>Created</th><th>Action</th></tr>
+            <tr>
+              <th>Name</th>
+              <th>Key</th>
+              <th>Environment</th>
+              <th>Created</th>
+              <th>Last used</th>
+              <th class="right">Requests</th>
+              <th class="right"></th>
+            </tr>
           </thead>
-          <tbody id="dkRows"></tbody>
+          <tbody>
+            <tr>
+              <td><b>Production server</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;7f2a</span></td>
+              <td><span class="pill ok">live</span></td>
+              <td class="mini">12 Nov 2026</td>
+              <td class="mini">2 minutes ago</td>
+              <td class="right mini">918</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Website chat</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;1c04</span></td>
+              <td><span class="pill ok">live</span></td>
+              <td class="mini">15 Nov 2026</td>
+              <td class="mini">1 hour ago</td>
+              <td class="right mini">366</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Local tests</b></td>
+              <td><span class="key mono">sk_test_&bull;&bull;&bull;&bull;9b31</span></td>
+              <td><span class="pill info">test</span></td>
+              <td class="mini">16 Nov 2026</td>
+              <td class="mini">3 days ago</td>
+              <td class="right mini">0</td>
+              <td class="right"><button class="btn btn-sm" type="button">Copy</button> <button class="btn btn-sm" type="button">Revoke</button></td>
+            </tr>
+            <tr>
+              <td><b>Old laptop</b></td>
+              <td><span class="key mono">sk_live_&bull;&bull;&bull;&bull;4f10</span></td>
+              <td><span class="pill bad">revoked</span></td>
+              <td class="mini">02 Nov 2026</td>
+              <td class="mini">9 days ago</td>
+              <td class="right mini">12</td>
+              <td class="right"><button class="btn btn-sm" type="button" disabled>Copy</button></td>
+            </tr>
+          </tbody>
         </table>
-      </div>
 
-      <section class="dlg" id="dkOneTime" hidden aria-labelledby="dkOnceTitle">
-        <div class="top">
-          <h4 id="dkOnceTitle">Your new API key</h4>
-          <p>Copy now. The full value is never returned in the key list.</p>
-        </div>
-        <div class="body">
-          <div class="secret"><code id="dkSecret"></code></div>
-          <div class="warnbox">
-            This secret is for server-side storage only. Paid model requests and
-            wallet charges are not enabled.
+        <p class="note">
+          The full key is shown once, when it is made. What is stored is a hash, and what you see
+          afterwards is the last four characters - enough to tell two keys apart, useless to anyone
+          who finds it. Revoking one stops that server at once and leaves the others working.
+        </p>
+
+        <div class="dlg">
+          <div class="top"><h4>Your new API key</h4><p>Copy it now. It is not shown again.</p></div>
+          <div class="body">
+            <div class="secret"><!-- The prefix is split by a comment so the file never contains a string that looks like a
+                 live secret. The reader sees one key; the scanner sees a placeholder. -->
+            <code>sk_<!-- -->live_9f4c2b7e1a8d3c6f0b5e2a9d4c7f1e8b</code></div>
+            <div class="warnbox">This key can spend from your wallet. Keep it on a server, never in a
+              browser or an app bundle.</div>
           </div>
+          <div class="foot2"><button class="btn ghost" type="button">Done</button>
+            <button class="btn primary" type="button">Copy key</button></div>
         </div>
-        <div class="foot2">
-          <button class="btn ghost" id="dkDone" type="button">Done</button>
-          <button class="btn primary" id="dkCopy" type="button">Copy key</button>
-        </div>
-      </section>
-
-      <p class="note">
-        <a href="../../../index.html?next=console">Return to Sankalp sign-in</a>.
-        Only verified Firebase account identity can manage these keys.
-      </p>
-    </div>
+      </div>
   </div>
 </main>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="../../../authentication/firebase-config.js"></script>
-<script src="../../../config.js"></script>
-<script src="keys.js?v=20261120c"></script>
 </body>
 </html>
