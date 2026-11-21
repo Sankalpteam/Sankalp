@@ -13,6 +13,8 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import java.util.Collections
+import java.util.IdentityHashMap
 
 data class CloudChatMessage(
     val role: String,
@@ -42,25 +44,41 @@ class CloudChatRepository(
     private fun chatIndex(userId: String = uid): DatabaseReference =
         realtimeDatabase.reference.child("users").child(userId).child("chats")
 
+    // A listener must be removed from the SAME account reference it was
+    // attached to, even if FirebaseAuth switches accounts in the meantime.
+    private val listenerReferences = Collections.synchronizedMap(
+        IdentityHashMap<ValueEventListener, DatabaseReference>(),
+    )
+
     fun addConversationIdListener(
         onChanged: (Set<String>) -> Unit,
         onError: (String) -> Unit,
     ): ValueEventListener {
+        val owner = uid
+        val reference = chatIndex(owner)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                onChanged(snapshot.children.mapNotNull { it.key }.toSet())
+                if (auth.currentUser?.uid == owner) {
+                    onChanged(snapshot.children.mapNotNull { it.key }.toSet())
+                } else {
+                    removeConversationIdListener(this)
+                }
             }
 
             override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                onError(error.message.ifBlank { "Chat sync could not be loaded right now." })
+                if (auth.currentUser?.uid == owner) {
+                    onError(error.message.ifBlank { "Chat sync could not be loaded right now." })
+                }
+                removeConversationIdListener(this)
             }
         }
-        chatIndex().addValueEventListener(listener)
+        listenerReferences[listener] = reference
+        reference.addValueEventListener(listener)
         return listener
     }
 
     fun removeConversationIdListener(listener: ValueEventListener) {
-        chatIndex().removeEventListener(listener)
+        listenerReferences.remove(listener)?.removeEventListener(listener)
     }
 
     suspend fun appendMessage(
@@ -191,6 +209,9 @@ class CloudChatRepository(
             it.getTimestamp("updatedAt")?.toDate()?.time ?: 0L
         }
 
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat history load.")
+        }
         val indexedIds = documents.map { it.id }.toSet()
         val currentIndex = Tasks.await(chatIndex(userId).get()).children.mapNotNull { it.key }.toSet()
         val missingIds = indexedIds - currentIndex
@@ -202,6 +223,9 @@ class CloudChatRepository(
             )
         }
 
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat history load.")
+        }
         documents.map { document ->
             CloudChatConversation(
                 id = document.id,
@@ -233,6 +257,9 @@ class CloudChatRepository(
             val role = message.getString("role") ?: return@mapNotNull null
             val content = message.getString("content") ?: return@mapNotNull null
             CloudChatMessage(role, content)
+        }
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat load.")
         }
 
         CloudChatConversation(
@@ -278,6 +305,9 @@ class CloudChatRepository(
             val role = message.getString("role") ?: return@mapNotNull null
             val content = message.getString("content") ?: return@mapNotNull null
             CloudChatMessage(role, content)
+        }
+        if (auth.currentUser?.uid != userId) {
+            throw SecurityException("Account changed during chat load.")
         }
 
         CloudChatConversation(
