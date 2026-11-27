@@ -19,8 +19,19 @@ class IndooneAuthService(
     private val apiBase = "https://indoverification-production.up.railway.app"
     private val appId = "indoone"
 
-    private var loginPending: LoginPending? = null
-    private var signupPending: SignupPending? = null
+    // Held on the companion, not on the instance. AuthActivity builds this service inside a
+    // remember { }, so rotating the phone made a new instance with both fields null - the OTP
+    // screen was still showing (its own state is remembered) and the challenge behind it was
+    // gone, so the code that had just been mailed could not be verified. The companion keeps
+    // it across the recreation. A killed process still loses it, which is what the "signup
+    // session expired" message is for.
+    private var loginPending: LoginPending?
+        get() = sharedLoginPending
+        set(value) { sharedLoginPending = value }
+
+    private var signupPending: SignupPending?
+        get() = sharedSignupPending
+        set(value) { sharedSignupPending = value }
 
     suspend fun loginWithPassword(identifier: String, password: String): String {
         val raw = identifier.trim()
@@ -293,6 +304,11 @@ class IndooneAuthService(
         val digits = normalized.filter(Char::isDigit)
         val ten = digits.takeLast(10)
         return linkedSetOf(normalized, "+91$ten", ten, "91$ten").filter { it.isNotBlank() }
+    }
+
+    private companion object {
+        var sharedLoginPending: LoginPending? = null
+        var sharedSignupPending: SignupPending? = null
     }
 
     private fun post(path: String, body: JSONObject): JSONObject {

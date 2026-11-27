@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -41,12 +42,16 @@ class AuthActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                var showingSignup by remember { mutableStateOf(false) }
+                // rememberSaveable, not remember: rotating the phone recreated the activity
+                // and dropped every one of these, so a person half-way through signup was
+                // returned to the identifier step with the code they had just received
+                // pointing at a challenge nobody could reach any more.
+                var showingSignup by rememberSaveable { mutableStateOf(false) }
                 var busyAction by remember { mutableStateOf<AuthBusyAction?>(null) }
-                var otpVisible by remember { mutableStateOf(false) }
-                var otpEmail by remember { mutableStateOf("") }
-                var status by remember { mutableStateOf("") }
-                var error by remember { mutableStateOf("") }
+                var otpVisible by rememberSaveable { mutableStateOf(false) }
+                var otpEmail by rememberSaveable { mutableStateOf("") }
+                var status by rememberSaveable { mutableStateOf("") }
+                var error by rememberSaveable { mutableStateOf("") }
                 val scope = rememberCoroutineScope()
                 val service = remember { IndooneAuthService(auth, FirebaseDatabase.getInstance()) }
 
