@@ -97,12 +97,18 @@ class ProfileViewModel : ViewModel() {
                     "users/${user.uid}/profile/updatedAt" to now,
                     "mobileIndex/${encode(value)}" to mapOf("uid" to user.uid, "email" to (user.email ?: ""), "updatedAt" to now),
                 )
-                if (oldMobile.isNotBlank() && oldMobile != value) updates["mobileIndex/${encode(oldMobile)}"] = null
                 database.updateChildren(updates).addOnCompleteListener { task ->
                     _state.value = if (task.isSuccessful) {
                         _state.value.copy(busy = false, mobile = value, message = "Mobile number updated.")
                     } else {
                         _state.value.copy(busy = false, error = task.exception?.message ?: "Could not change mobile number.")
+                    }
+                    // The old entry is cleared afterwards and on its own. In the same update
+                    // it decides whether the change happens at all: a stale entry under the
+                    // old number that names another uid is refused by the rules, and that
+                    // refusal takes the profile change with it.
+                    if (task.isSuccessful && oldMobile.isNotBlank() && oldMobile != value) {
+                        database.child("mobileIndex").child(encode(oldMobile)).removeValue()
                     }
                     onFinished()
                 }
