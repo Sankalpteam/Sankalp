@@ -19,14 +19,15 @@
   </div>
 
   <div class="field" id="forgotPasswordEmailField">
-    <label>EMAIL ID</label>
+    <label>EMAIL OR MOBILE NUMBER</label>
     <input
       id="forgotPasswordEmail"
-      type="email"
-      autocomplete="email"
+      type="text"
+      inputmode="email"
+      autocomplete="username"
       autocapitalize="none"
       spellcheck="false"
-      placeholder="you@example.com"
+      placeholder="you@example.com or 98765 43210"
     />
   </div>
 
@@ -65,6 +66,15 @@
       id="forgotPasswordVerify"
     >
       Verify OTP
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      id="forgotPasswordResend"
+      disabled
+    >
+      Resend OTP
     </button>
   </div>
 
