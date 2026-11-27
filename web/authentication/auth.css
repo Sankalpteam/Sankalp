@@ -21,7 +21,14 @@
   max-width: none;
   display: flex;
   justify-content: center;
+  /* `center` in a scrolling flex container clips the overflow at the START edge: when the
+     card is taller than the window - a small phone, a large font setting, the signup form
+     with its extra field - the top of it sits above the scroll origin and cannot be reached.
+     The heading and the first field are simply gone, with no way to scroll to them.
+     `safe center` centres when it fits and falls back to the top when it does not. The line
+     above it is what a browser without `safe` uses, which is the old behaviour, not worse. */
   align-items: center;
+  align-items: safe center;
   padding: 24px 18px;
   overflow-y: auto;
   background: linear-gradient(
