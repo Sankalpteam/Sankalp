@@ -2,7 +2,6 @@ package com.indoone.authentication
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
