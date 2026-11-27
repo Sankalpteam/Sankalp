@@ -410,12 +410,33 @@
         .catch(error => console.warn('Sankalp chat save failed:', error));
     } catch (error) {
       if (error?.name === 'AbortError') {
+        // Stopping a reply is a finished turn, not an abandoned one. The record stayed behind
+        // otherwise, and the next page load found it and put the message the person had
+        // already sent - and then stopped - back into the composer with a "Message restored"
+        // toast, as though it had never gone out.
+        window.IndooneInflight?.finish();
         return;
       }
 
       console.error('Sankalp chat send failed:', error);
       window.IndooneInflight?.finish();
       store.remove(mine);
+
+      // The text goes back where it came from. Removing the message and leaving an error
+      // bubble meant the sentence the person had just written was gone, and the only way to
+      // try again was to type it out a second time. The reload path already restores it; this
+      // is the same restore without the reload.
+      const composer = document.getElementById('chatInput');
+
+      if (composer && !composer.value.trim() && text) {
+        composer.value = text;
+        composer.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      if (sentAttachments.length) {
+        window.toast?.('Please re-attach your file');
+      }
+
       store.add({
         text:
           error?.message &&
