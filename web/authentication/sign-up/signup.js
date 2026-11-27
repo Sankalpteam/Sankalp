@@ -34,7 +34,7 @@
           autocomplete="tel"
           autocapitalize="none"
           spellcheck="false"
-          maxlength="13"
+          maxlength="16"
           placeholder="98765 43210"
         />
       </div>
@@ -255,7 +255,19 @@
     }
 
     mobile.addEventListener('input', () => {
-      const digits = mobile.value.replace(/\D/g, '').slice(0, 10);
+      // A pasted number usually arrives with its country code. Drop it before the ten-digit
+      // cap: capping first kept "91" and threw away the last two digits of the number, so
+      // "+91 98765 43210" was stored as +919198765432 - an account nobody can sign in to by
+      // mobile, created from a number that was perfectly correct when it was pasted.
+      const all = mobile.value.replace(/\D/g, '');
+      // Every prefix a person might type or paste, removed before the ten-digit cap: the
+      // international "00", then the country "91", then the trunk "0" people write at home.
+      // Capping first is what turned "+91 98765 43210" into 9198765432.
+      let local = all;
+      if (local.length > 12 && local.startsWith('00')) local = local.slice(2);
+      if (local.length > 10 && local.startsWith('91')) local = local.slice(2);
+      if (local.length > 10 && local.startsWith('0')) local = local.slice(1);
+      const digits = local.slice(0, 10);
 
       if (mobile.value !== digits) {
         mobile.value = digits;

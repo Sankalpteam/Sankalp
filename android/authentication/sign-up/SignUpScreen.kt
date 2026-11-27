@@ -244,7 +244,20 @@ fun SignUpScreen(
         AuthFieldLabel("MOBILE NUMBER")
         AuthTextField(
             value = mobile,
-            onValueChange = { mobile = it.filter { char -> char.isDigit() }.take(10) },
+            onValueChange = { typed ->
+                // A pasted number arrives with its country code more often than not. Dropping
+                // it before the ten-digit cap matters: capping first kept "91" and cut the last
+                // two digits, so "+91 98765 43210" became 9198765432 and the account was
+                // saved as +919198765432 - unreachable by the number that was pasted.
+                val digits = typed.filter { char -> char.isDigit() }
+                // "91" in front, or the trunk "0" people write at home: both are prefixes and
+                // both have to go before the ten-digit cap.
+                var local = digits
+                if (local.length > 12 && local.startsWith("00")) local = local.drop(2)
+                if (local.length > 10 && local.startsWith("91")) local = local.drop(2)
+                if (local.length > 10 && local.startsWith("0")) local = local.drop(1)
+                mobile = local.take(10)
+            },
             placeholder = "98765 43210",
             enabled = !busy,
             leadingContent = if (hasMobile) {
