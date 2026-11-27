@@ -55,7 +55,17 @@ class AuthActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 val service = remember { IndooneAuthService(auth, FirebaseDatabase.getInstance()) }
 
+                // Runs when the person switches between sign-up and sign-in - not on the
+                // first composition, which is also what a rotation is. Running there reset
+                // otpVisible straight after rememberSaveable had restored it, so a rotation
+                // still dropped the code step: the state was saved and then cleared by this
+                // effect a frame later.
+                var firstSignupEffect by rememberSaveable { mutableStateOf(true) }
                 LaunchedEffect(showingSignup) {
+                    if (firstSignupEffect) {
+                        firstSignupEffect = false
+                        return@LaunchedEffect
+                    }
                     busyAction = null
                     otpVisible = false
                     otpEmail = ""
