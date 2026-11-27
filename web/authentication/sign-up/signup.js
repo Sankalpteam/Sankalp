@@ -241,6 +241,36 @@
   }
 
   // The app keeps only digits in the mobile field and stops at ten.
+  /**
+   * Put a filtered value back without losing the caret.
+   *
+   * Assigning to input.value moves the cursor to the end. On a field that is rewritten on
+   * every keystroke that means a person cannot correct a digit in the middle of their own
+   * number: each press sends them to the end. The caret is counted in digits before the
+   * change and restored after that many digits in the new value, which is where the person
+   * was looking.
+   */
+  function setFilteredValue(input, next) {
+    if (input.value === next) return;
+
+    const before = input.value.slice(0, input.selectionStart ?? input.value.length);
+    const digitsBefore = before.replace(/\D/g, '').length;
+
+    input.value = next;
+
+    let seen = 0;
+    let caret = next.length;
+    for (let i = 0; i < next.length; i += 1) {
+      if (/\d/.test(next[i])) seen += 1;
+      if (seen === digitsBefore) { caret = i + 1; break; }
+    }
+    try {
+      input.setSelectionRange(caret, caret);
+    } catch (error) {
+      // A field that cannot hold a selection is not worth failing over.
+    }
+  }
+
   function bindMobileFilter(root) {
     const mobile = root.querySelector('#signupMobile');
 
@@ -269,9 +299,7 @@
       if (local.length > 10 && local.startsWith('0')) local = local.slice(1);
       const digits = local.slice(0, 10);
 
-      if (mobile.value !== digits) {
-        mobile.value = digits;
-      }
+      setFilteredValue(mobile, digits);
 
       applyRules(root);
     });
@@ -362,7 +390,7 @@
       otpInput.dataset.digitFilterBound = 'true';
       otpInput.addEventListener('input', () => {
         const digits = otpInput.value.replace(/\D/g, '').slice(0, 6);
-        if (otpInput.value !== digits) otpInput.value = digits;
+        setFilteredValue(otpInput, digits);
         applyRules(root);
       });
     }
