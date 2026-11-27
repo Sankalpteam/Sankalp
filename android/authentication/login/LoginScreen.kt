@@ -335,7 +335,7 @@ private fun LoginEntryPage(
     Spacer(Modifier.height(10.dp))
     ConsentRow(
         agreed = agreed,
-        onAgreedChange = { agreed = it },
+        onAgreedChange = onAgreedChange,
         onOpenTerms = onOpenTerms,
         onOpenPrivacy = onOpenPrivacy,
         enabled = !busy,
