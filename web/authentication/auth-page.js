@@ -357,6 +357,8 @@
         const email = await auth.startLoginOtp(readLoginIdentifier());
         window.IndooneLoginFeature?.otpEmail?.(email, scope);
         showLogin('otp');
+        // One went out just now, so the resend button waits a minute before offering another.
+        window.IndooneLoginFeature?.startResendCooldown?.(scope);
       } else if (action === 'login-continue-password') {
         showLogin('password');
       } else if (action === 'login-verify') {
@@ -367,6 +369,7 @@
         const email = await auth.resendLoginOtp();
         window.IndooneLoginFeature?.otpEmail?.(email, scope);
         setStatus('New OTP sent to your email.');
+        window.IndooneLoginFeature?.startResendCooldown?.(scope);
       } else if (action === 'login-complete') {
         button.textContent = 'Logging in…';
         await auth.loginWithPassword(

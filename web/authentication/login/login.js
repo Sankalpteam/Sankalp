@@ -242,9 +242,44 @@
   // Complete Login once both fields have something in them. The two Continue
   // buttons on the identifier step are gated on the identifier being filled in
   // (LoginScreen.kt: actionEnabled = !busy && identifier.isNotBlank()).
+  // Sixty seconds between OTP sends, because the thing that happens without it is worse than
+  // waiting: a person taps Resend three times, Firebase answers TOO_MANY_REQUESTS, and the
+  // address is locked out for far longer than a minute. The countdown is shown on the button
+  // so the wait is visible instead of the button looking broken.
+  const RESEND_COOLDOWN_MS = 60_000;
+  let resendUntil = 0;
+  let resendTicker = null;
+
+  function resendSecondsLeft() {
+    return Math.max(0, Math.ceil((resendUntil - Date.now()) / 1000));
+  }
+
+  function startResendCooldown(root = document) {
+    resendUntil = Date.now() + RESEND_COOLDOWN_MS;
+    if (resendTicker) return;
+    resendTicker = window.setInterval(() => {
+      if (resendSecondsLeft() <= 0) {
+        window.clearInterval(resendTicker);
+        resendTicker = null;
+        resendUntil = 0;
+      }
+      applyRules(document);
+    }, 1000);
+    applyRules(root);
+  }
+
   function applyRules(root) {
     const otp = root.querySelector('#loginOtp');
     const verify = buttonFor(root, 'login-verify');
+
+    // The resend button: disabled and counting down, or ready again.
+    const resend = buttonFor(root, 'login-resend');
+    if (resend) {
+      const left = resendSecondsLeft();
+      resend.disabled = left > 0;
+      resend.textContent = left > 0 ? `Resend in ${left}s` : 'Resend OTP';
+      resend.setAttribute('aria-live', 'polite');
+    }
 
     if (verify && otp) {
       verify.disabled = otp.value.replace(/\D/g, '').length !== 6;
@@ -377,6 +412,7 @@
     showStep,
     otpEmail,
     applyRules,
+    startResendCooldown,
     stopWelcome,
     show: () => window.IndooneAuthUI?.showLogin?.()
   };
