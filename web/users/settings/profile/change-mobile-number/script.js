@@ -169,13 +169,21 @@ window.initMenuChangeMobile = function () {
         }
       };
 
-      if (oldMobile && oldMobile !== value) {
-        updates[
-          `mobileIndex/${encodeURIComponent(oldMobile)}`
-        ] = null;
-      }
-
+      // The old entry is cleared afterwards and on its own. In the same update it would
+      // decide whether the change goes through at all: a stale entry under the old number
+      // that names some other uid is refused by the rules, and that refusal takes the whole
+      // update with it - profile, new index entry and all.
       await db.ref().update(updates);
+
+      if (oldMobile && oldMobile !== value) {
+        try {
+          await db
+            .ref(`mobileIndex/${encodeURIComponent(oldMobile)}`)
+            .remove();
+        } catch (error) {
+          // the number is already changed; a stale entry is not worth failing over
+        }
+      }
       // The app keeps the change screen open and shows the message inline
       // (ProfileViewModel: message = "Mobile number updated."), so the web does
       // the same rather than toasting and navigating away.
