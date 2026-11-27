@@ -13,7 +13,7 @@
     // The in-flight record. It has to load with the store, before anything can send.
     'home/message/inflight.js?v=20261026a',
     'home/message/message.js?v=20261128a',
-    'home/send/send.js?v=20261118c',
+    'home/send/send.js?v=20261128a',
     // Share chat and rename chat: the two actions the app has and the web did not.
     'home/message/chat-actions.js?v=20261117a',
     'home/voice/voice.js?v=20261019f',
