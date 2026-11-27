@@ -389,6 +389,9 @@
       await validateLoginProfile(user.uid, email, raw);
       await syncProfile(user, { email });
       setAuthSession(user.uid);
+      // Nothing is recorded here. A person signing in has not seen a consent box on this
+      // screen, and writing one for them would be a consent record that says something that
+      // did not happen. The two signup paths record it; login checks it.
       window.__indooneAuthPending = false;
       window.IndooneAuthUI?.close?.();
 
@@ -409,10 +412,16 @@
 
   // -------------------------------------------------------------- signup
 
-  async function startSignup({ email, mobile, password }) {
+  async function startSignup({ email, mobile, password, agreed }) {
     const cleanEmailValue = cleanEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const secret = String(password || '');
+
+    // The button is disabled until the box is ticked; this is the second check, for the
+    // caller that reaches here without going through the button.
+    if (!agreed) {
+      throw new Error('Please agree to the Terms of Use and Privacy Policy.');
+    }
 
     if (!cleanEmailValue.includes('@')) {
       throw new Error('Enter a valid email address.');
@@ -527,6 +536,9 @@
       }
 
       setAuthSession(user.uid);
+      // The tick was made before the account existed, so it could not be written then.
+      // This is the first moment there is a uid to write it against.
+      await window.SankalpConsent?.recordConsent?.({ ageConfirmed: true }).catch(() => {});
       writePending(SIGNUP_PENDING_KEY, null);
       window.__indooneAuthPending = false;
       window.IndooneAuthUI?.close?.();
@@ -548,10 +560,14 @@
   }
 
   // Sign up with the password directly, no OTP - the app's other signup path.
-  async function createSignupWithPassword({ email, mobile, password }) {
+  async function createSignupWithPassword({ email, mobile, password, agreed }) {
     const cleanEmailValue = cleanEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const secret = String(password || '');
+
+    if (!agreed) {
+      throw new Error('Please agree to the Terms of Use and Privacy Policy.');
+    }
 
     if (!cleanEmailValue.includes('@')) {
       throw new Error('Enter a valid email address.');
@@ -587,6 +603,9 @@
         mobile: cleanMobile
       });
       setAuthSession(user.uid);
+      // The tick was made before the account existed, so it could not be written then.
+      // This is the first moment there is a uid to write it against.
+      await window.SankalpConsent?.recordConsent?.({ ageConfirmed: true }).catch(() => {});
       window.__indooneAuthPending = false;
       window.IndooneAuthUI?.close?.();
 
