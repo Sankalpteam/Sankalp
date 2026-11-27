@@ -70,7 +70,18 @@ class AuthActivity : ComponentActivity() {
                 // sent and about to be typed, the whole flow was gone. The screen has its own
                 // back arrow; this makes the gesture and the hardware key do the same thing,
                 // and only leaves the app from the first step.
+                // BackHandler runs before the keyboard sees the press. Without the check
+                // below, the first back on the signup form - the one a person presses to put
+                // the keyboard away - left the form entirely and landed on sign-in. That is
+                // why it looked intermittent: it only happened while a field was focused.
+                val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+                val imeVisible = androidx.compose.foundation.layout.WindowInsets.isImeVisible
+
                 BackHandler(enabled = true) {
+                    if (imeVisible) {
+                        keyboard?.hide()
+                        return@BackHandler
+                    }
                     when {
                         busy -> Unit
                         otpVisible -> {
