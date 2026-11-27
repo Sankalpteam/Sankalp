@@ -509,14 +509,21 @@
         setTimeout(clearAuthScreenIfSignedIn, delay)
       );
 
+      // Five seconds is enough for Firebase to restore a session it is going to restore.
+      // If it still reports nobody, the flag in localStorage is a memory of a session that no
+      // longer exists - expired, revoked, or this browser has been offline the whole time -
+      // and it must not be the reason the sign-in screen stays away. It used to be exactly
+      // that: the condition refused to draw the screen while the flag was there, and the flag
+      // is only cleared on a path that had already given up. The result was an app with
+      // nothing working and no way in.
       setTimeout(() => {
-        if (
-          !authStateResolved &&
-          !auth.currentUser &&
-          !localStorage.getItem('indoone_otp_verified_uid')
-        ) {
-          renderLoginNow();
-        }
+        if (authStateResolved || auth.currentUser) return;
+
+        localStorage.removeItem('indoone_otp_verified_uid');
+        localStorage.removeItem('indoone_authenticated_uid');
+        sessionStorage.removeItem('indoone_otp_verified_uid');
+        sessionStorage.removeItem('indoone_authenticated_uid');
+        renderLoginNow();
       }, 5000);
     } else {
       renderLoginNow();
