@@ -109,7 +109,9 @@ fun LoginScreen(
                             identifier = identifier,
                             busy = busy,
                             actionEnabled = !busy && identifier.isNotBlank(),
-                            onIdentifierChanged = { identifier = it },
+                            // The web caps this at 320; nothing capped it here, so a paste
+                            // went to Firebase whole. The longest legal address is 254.
+                            onIdentifierChanged = { identifier = it.take(MAX_IDENTIFIER_LENGTH) },
                             onSendOtp = { onSendOtp(identifier) },
                             onContinueWithPassword = { page = LoginPage.PASSWORD },
                             onCreateAccount = onCreateAccount,
@@ -139,8 +141,10 @@ fun LoginScreen(
                             busy = busy,
                             busyAction = busyAction,
                             passwordVisible = passwordVisible,
-                            onIdentifierChanged = { identifier = it },
-                            onPasswordChanged = { password = it },
+                            // The web caps this at 320; nothing capped it here, so a paste
+                            // went to Firebase whole. The longest legal address is 254.
+                            onIdentifierChanged = { identifier = it.take(MAX_IDENTIFIER_LENGTH) },
+                            onPasswordChanged = { password = it.take(MAX_PASSWORD_LENGTH) },
                             onPasswordVisibilityChanged = { passwordVisible = !passwordVisible },
                             onCompleteLogin = { onPasswordLogin(identifier, password) },
                             onBack = { page = LoginPage.LOGIN },
@@ -334,6 +338,12 @@ private fun LoginEntryPage(
 
 /** The wait between OTP sends. The web uses the same number, in login.js. */
 private const val RESEND_COOLDOWN_SECONDS = 60
+
+/** The longest address RFC 5321 allows, and the same cap the web puts on the field. */
+private const val MAX_IDENTIFIER_LENGTH = 320
+
+/** Long enough for any passphrase a person will type, short enough to not be a payload. */
+private const val MAX_PASSWORD_LENGTH = 128
 
 @Composable
 private fun LoginOtpPage(

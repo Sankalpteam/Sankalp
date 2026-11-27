@@ -129,7 +129,7 @@ fun SignUpScreen(
         AuthFieldLabel("EMAIL ID")
         AuthTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it.take(320) },
             placeholder = "you@example.com",
             enabled = !busy,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -152,7 +152,7 @@ fun SignUpScreen(
         AuthFieldLabel("PASSWORD")
         AuthTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { password = it.take(128) },
             placeholder = "Create a strong password",
             enabled = !busy,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
