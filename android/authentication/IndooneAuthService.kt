@@ -19,8 +19,19 @@ class IndooneAuthService(
     private val apiBase = "https://indoverification-production.up.railway.app"
     private val appId = "indoone"
 
-    private var loginPending: LoginPending? = null
-    private var signupPending: SignupPending? = null
+    // Held on the companion, not on the instance. AuthActivity builds this service inside a
+    // remember { }, so rotating the phone made a new instance with both fields null - the OTP
+    // screen was still showing (its own state is remembered) and the challenge behind it was
+    // gone, so the code that had just been mailed could not be verified. The companion keeps
+    // it across the recreation. A killed process still loses it, which is what the "signup
+    // session expired" message is for.
+    private var loginPending: LoginPending?
+        get() = sharedLoginPending
+        set(value) { sharedLoginPending = value }
+
+    private var signupPending: SignupPending?
+        get() = sharedSignupPending
+        set(value) { sharedSignupPending = value }
 
     suspend fun loginWithPassword(identifier: String, password: String): String {
         val raw = identifier.trim()
@@ -68,6 +79,10 @@ class IndooneAuthService(
 
     suspend fun verifyLoginOtp(otp: String) {
         val pending = loginPending ?: throw AuthException("Please request a new OTP.")
+        if (isStale(pending.requestedAt)) {
+            loginPending = null
+            throw AuthException("That code has expired. Please request a new OTP.")
+        }
         val code = otp.filter(Char::isDigit)
         if (code.length != 6) throw AuthException("Enter the 6-digit OTP.")
 
@@ -125,7 +140,10 @@ class IndooneAuthService(
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a new challenge ID.")
-            loginPending = pending.copy(challengeId = challengeId)
+            loginPending = pending.copy(
+                challengeId = challengeId,
+                requestedAt = System.currentTimeMillis(),
+            )
         }
         return pending.email
     }
@@ -141,7 +159,7 @@ class IndooneAuthService(
         // The screen compares them; this is the second check, where the account is made.
         if (password != confirmPassword) throw AuthException("The two passwords do not match.")
         if (!email.contains('@')) throw AuthException("Enter a valid email address.")
-        if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
+        if (!mobile.matches(Regex("\\+91[6-9]\\d{9}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
         if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
 
         withContext(Dispatchers.IO) {
@@ -167,7 +185,7 @@ class IndooneAuthService(
         val mobile = normalizeMobile(mobileValue)
         if (password != confirmPassword) throw AuthException("The two passwords do not match.")
         if (!email.contains('@')) throw AuthException("Enter a valid email address.")
-        if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
+        if (!mobile.matches(Regex("\\+91[6-9]\\d{9}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
         if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
 
         return withContext(Dispatchers.IO) {
@@ -186,7 +204,23 @@ class IndooneAuthService(
         }
     }
 
+    /**
+     * Forget a signup that is being abandoned.
+     *
+     * The pending record holds the password in clear until the account exists or the attempt
+     * is thrown away. It is on the companion, so it outlived the screen that created it - a
+     * person who changed their mind and signed in instead left their password sitting in a
+     * static field until the process died.
+     */
+    fun clearSignupPending() {
+        signupPending = null
+    }
+
     suspend fun resendSignupOtp(): String {
+        // No staleness check here on purpose: asking for another code is exactly what a person
+        // does once the first one has expired, and refusing them at that moment sends them back
+        // to the start of the form for no reason. The verify path is where a stale challenge
+        // must not be used.
         val pending = signupPending ?: throw AuthException("Signup session expired. Enter your details again.")
         withContext(Dispatchers.IO) {
             val result = post("/api/auth/resend-otp", JSONObject().apply {
@@ -195,13 +229,20 @@ class IndooneAuthService(
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a new challenge ID.")
-            signupPending = pending.copy(challengeId = challengeId)
+            signupPending = pending.copy(
+                challengeId = challengeId,
+                requestedAt = System.currentTimeMillis(),
+            )
         }
         return pending.email
     }
 
     suspend fun verifySignupOtp(otp: String): String {
         val pending = signupPending ?: throw AuthException("Signup session expired. Enter your details again.")
+        if (isStale(pending.requestedAt)) {
+            signupPending = null
+            throw AuthException("That code has expired. Enter your details again.")
+        }
         val code = otp.filter(Char::isDigit)
         if (code.length != 6) throw AuthException("Enter the 6-digit OTP.")
 
@@ -295,6 +336,11 @@ class IndooneAuthService(
         return linkedSetOf(normalized, "+91$ten", ten, "91$ten").filter { it.isNotBlank() }
     }
 
+    private companion object {
+        var sharedLoginPending: LoginPending? = null
+        var sharedSignupPending: SignupPending? = null
+    }
+
     private fun post(path: String, body: JSONObject): JSONObject {
         val connection = (URL(apiBase + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
@@ -351,7 +397,28 @@ class IndooneAuthService(
     private suspend fun <T> await(task: Task<T>): T = withContext(Dispatchers.IO) { Tasks.await(task) }
 
     data class AuthException(override val message: String) : Exception(message)
-    private data class LoginPending(val email: String, val challengeId: String)
-    private data class SignupPending(val email: String, val mobile: String, val password: String, val challengeId: String)
+    private data class LoginPending(
+        val email: String,
+        val challengeId: String,
+        val requestedAt: Long = System.currentTimeMillis(),
+    )
+
+    private data class SignupPending(
+        val email: String,
+        val mobile: String,
+        val password: String,
+        val challengeId: String,
+        val requestedAt: Long = System.currentTimeMillis(),
+    )
+
+    /**
+     * How long a challenge may be used, the same ten minutes the web gives it.
+     *
+     * Without this the record lived as long as the process did: the app could sit in the
+     * background overnight and still send yesterday's challengeId, and the answer was whatever
+     * the service says about an expired challenge rather than "request a new code".
+     */
+    private fun isStale(requestedAt: Long): Boolean =
+        System.currentTimeMillis() - requestedAt > 10 * 60 * 1000
     private data class MobileIdentity(val email: String, val uid: String)
 }

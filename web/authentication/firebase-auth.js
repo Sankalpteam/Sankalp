@@ -12,7 +12,13 @@
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/network-request-failed': 'Network error. Check your connection and try again.',
       'auth/email-already-in-use': 'An account already exists with this email.',
-      'auth/weak-password': 'Password should be at least 6 characters.'
+      'auth/weak-password': 'Password should be at least 6 characters.',
+      // The one code that is not an auth/ code. It arrives from the database read that turns
+      // a mobile number into the email the account is filed under, and it used to be mapped
+      // here and in firebase-auth-otp.js. Consolidating the map dropped it from this file and
+      // deleted the other copy, so the screen started showing "PERMISSION_DENIED: Permission
+      // denied" - a code with no sentence.
+      'PERMISSION_DENIED': 'Sankalp account data is temporarily unavailable. Please try again or use your email address.'
     };
     return map[error?.code] || window.sankalpError?.fromError(error) || 'Authentication failed.';
   }

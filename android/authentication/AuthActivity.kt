@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -41,16 +42,30 @@ class AuthActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                var showingSignup by remember { mutableStateOf(false) }
+                // rememberSaveable, not remember: rotating the phone recreated the activity
+                // and dropped every one of these, so a person half-way through signup was
+                // returned to the identifier step with the code they had just received
+                // pointing at a challenge nobody could reach any more.
+                var showingSignup by rememberSaveable { mutableStateOf(false) }
                 var busyAction by remember { mutableStateOf<AuthBusyAction?>(null) }
-                var otpVisible by remember { mutableStateOf(false) }
-                var otpEmail by remember { mutableStateOf("") }
-                var status by remember { mutableStateOf("") }
-                var error by remember { mutableStateOf("") }
+                var otpVisible by rememberSaveable { mutableStateOf(false) }
+                var otpEmail by rememberSaveable { mutableStateOf("") }
+                var status by rememberSaveable { mutableStateOf("") }
+                var error by rememberSaveable { mutableStateOf("") }
                 val scope = rememberCoroutineScope()
                 val service = remember { IndooneAuthService(auth, FirebaseDatabase.getInstance()) }
 
+                // Runs when the person switches between sign-up and sign-in - not on the
+                // first composition, which is also what a rotation is. Running there reset
+                // otpVisible straight after rememberSaveable had restored it, so a rotation
+                // still dropped the code step: the state was saved and then cleared by this
+                // effect a frame later.
+                var firstSignupEffect by rememberSaveable { mutableStateOf(true) }
                 LaunchedEffect(showingSignup) {
+                    if (firstSignupEffect) {
+                        firstSignupEffect = false
+                        return@LaunchedEffect
+                    }
                     busyAction = null
                     otpVisible = false
                     otpEmail = ""
@@ -65,7 +80,23 @@ class AuthActivity : ComponentActivity() {
                 // sent and about to be typed, the whole flow was gone. The screen has its own
                 // back arrow; this makes the gesture and the hardware key do the same thing,
                 // and only leaves the app from the first step.
+                // BackHandler runs before the keyboard sees the press. Without the check
+                // below, the first back on the signup form - the one a person presses to put
+                // the keyboard away - left the form entirely and landed on sign-in. That is
+                // why it looked intermittent: it only happened while a field was focused.
+                val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+                // Asked of the platform rather than of Compose: WindowInsets.isImeVisible is
+                // not resolvable in this Compose version, and a guess about whether the
+                // keyboard is up is what put a person on the sign-in screen in the first place.
+                val view = androidx.compose.ui.platform.LocalView.current
+
                 BackHandler(enabled = true) {
+                    val insets = androidx.core.view.ViewCompat.getRootWindowInsets(view)
+                    val imeUp = insets?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
+                    if (imeUp) {
+                        keyboard?.hide()
+                        return@BackHandler
+                    }
                     when {
                         busy -> Unit
                         otpVisible -> {
@@ -175,7 +206,19 @@ class AuthActivity : ComponentActivity() {
                                 busyAction = null
                             }
                         },
-                        onLogin = { showingSignup = false },
+                        onLogin = {
+                            // Leaving signup for sign-in throws the attempt away, password and
+                            // all. It used to stay in a static field until the process died.
+                            service.clearSignupPending()
+                            showingSignup = false
+                        },
+                        onBackToDetails = {
+                            // The fields keep what was typed; only the code step is left.
+                            otpVisible = false
+                            otpEmail = ""
+                            status = ""
+                            error = ""
+                        },
                     )
                 } else {
                     LoginScreen(

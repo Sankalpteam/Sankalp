@@ -32,9 +32,12 @@
 
     if (!node) return;
 
-    node.textContent = message;
+    // Unhide before writing. A live region that is hidden when its text changes is not
+    // announced - the screen reader saw an element appear with content already in it, which is
+    // not a change. Showing it first and then filling it is the order that speaks.
     node.hidden = !message;
     node.dataset.error = error ? 'true' : 'false';
+    node.textContent = message;
   }
 
   function showShell(html) {
@@ -260,11 +263,21 @@
   }
 
   function fallbackSignupHtml() {
+    // Shown when the signup script itself did not load. It cannot offer a form, but it must
+    // offer a way out: without this the person was on a dead screen with no link and no
+    // button, and reloading was the only way back to signing in.
     return `
       <div class="auth-copy">
         <h1>Get started with Sankalp</h1>
         <p>The sign-up screen could not be loaded.</p>
       </div>
+      <button
+        type="button"
+        class="secondary auth-action-button"
+        data-auth-action="login"
+      >
+        Back to Login
+      </button>
     `;
   }
 
@@ -334,7 +347,13 @@
     const scope = root();
 
     if (action === 'signup') return showSignup();
-    if (action === 'login') return showLogin();
+    if (action === 'login') {
+      // Leaving signup throws the attempt away, password and all, and stops the title timer
+      // that would otherwise tick against a screen that is no longer there.
+      window.IndooneFirebaseAuth?.clearSignupPending?.();
+      window.IndooneSignupFeature?.stop?.();
+      return showLogin();
+    }
     if (action === 'forgot-password') return showForgotPassword();
     if (action === 'login-back') return showLogin('identifier');
     if (action === 'signup-back') return showSignup('details');
@@ -443,6 +462,10 @@
   }
 
   function close() {
+    // Signup was the screen on display, so its timers stop with it. Closing straight after a
+    // successful signup is the common case and it used to leave the title interval running.
+    window.IndooneSignupFeature?.stop?.();
+
     $('overlay')?.classList.remove(AUTH_CLASS);
     $('overlay')?.classList.add('hidden');
 
