@@ -347,7 +347,11 @@
     const scope = root();
 
     if (action === 'signup') return showSignup();
-    if (action === 'login') return showLogin();
+    if (action === 'login') {
+      // Leaving signup throws the attempt away, password and all.
+      window.IndooneFirebaseAuth?.clearSignupPending?.();
+      return showLogin();
+    }
     if (action === 'forgot-password') return showForgotPassword();
     if (action === 'login-back') return showLogin('identifier');
     if (action === 'signup-back') return showSignup('details');

@@ -204,6 +204,18 @@ class IndooneAuthService(
         }
     }
 
+    /**
+     * Forget a signup that is being abandoned.
+     *
+     * The pending record holds the password in clear until the account exists or the attempt
+     * is thrown away. It is on the companion, so it outlived the screen that created it - a
+     * person who changed their mind and signed in instead left their password sitting in a
+     * static field until the process died.
+     */
+    fun clearSignupPending() {
+        signupPending = null
+    }
+
     suspend fun resendSignupOtp(): String {
         // No staleness check here on purpose: asking for another code is exactly what a person
         // does once the first one has expired, and refusing them at that moment sends them back

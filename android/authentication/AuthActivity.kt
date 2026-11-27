@@ -191,7 +191,12 @@ class AuthActivity : ComponentActivity() {
                                 busyAction = null
                             }
                         },
-                        onLogin = { showingSignup = false },
+                        onLogin = {
+                            // Leaving signup for sign-in throws the attempt away, password and
+                            // all. It used to stay in a static field until the process died.
+                            service.clearSignupPending()
+                            showingSignup = false
+                        },
                         onBackToDetails = {
                             // The fields keep what was typed; only the code step is left.
                             otpVisible = false

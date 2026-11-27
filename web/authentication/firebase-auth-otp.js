@@ -643,6 +643,10 @@
   }
 
   window.IndooneFirebaseAuth = {
+    // Forget a signup that is being abandoned. The pending record holds the password in clear
+    // in sessionStorage; leaving it there for the life of the tab is not something a signup
+    // that was cancelled should do.
+    clearSignupPending: () => writePending(SIGNUP_PENDING_KEY, null),
     resolveLoginEmail,
     startLoginOtp,
     verifyLoginOtp,
