@@ -383,6 +383,8 @@
         );
         window.IndooneSignupFeature?.otpEmail?.(email, scope);
         showSignup('otp');
+        // An OTP just went out, so the resend button waits a minute.
+        window.IndooneSignupFeature?.startResendCooldown?.(scope);
       } else if (action === 'signup-password') {
         button.textContent = 'Creating account…';
         await auth.createSignupWithPassword(
@@ -398,6 +400,7 @@
         const email = await auth.resendSignupOtp();
         window.IndooneSignupFeature?.otpEmail?.(email, scope);
         setStatus('New OTP sent to your email.');
+        window.IndooneSignupFeature?.startResendCooldown?.(scope);
       }
     } catch (error) {
       // The shared mapper first: a Firebase error object carries a code, and the code has a
