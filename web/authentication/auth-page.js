@@ -487,20 +487,22 @@
   window.IndooneAuthUI = api;
 
   function init() {
-    if (localStorage.getItem('indoone_otp_verified_uid')) return;
-
-    // A session can already be live by the time this runs - Firebase restores
-    // it asynchronously - so never raise the sign-in screen over a signed-in
-    // user. events.js takes it down again if it slips through, but the right
-    // place to not do it is here.
-    if (window.IndooneFirebase?.auth?.currentUser) return;
-
-    // The landing page links to /app/login/ and /app/signup/, and those addresses hand the app
-    // ?screen=. Without this the app would always open on sign-in, so a person who clicked
-    // "Create an account" would be shown the sign-in form and have to find the link themselves.
+    // An explicit ?screen= is a request from a person, not a default. The landing page links
+    // /app/login/ and /app/signup/ here, and so does any support message that says "sign in".
+    // Those have to work even when this browser still holds a session - which is exactly the
+    // case that used to do nothing at all, because both session checks below returned first
+    // and the parameter was never read.
     const wanted = new URLSearchParams(location.search).get('screen');
     if (wanted === 'signup') return showSignup();
     if (wanted === 'forgot-password') return showForgotPassword();
+    if (wanted === 'login') return showLogin();
+
+    // With nothing asked for, keep the old rule: never raise the sign-in screen over a
+    // signed-in user. A session can already be live by the time this runs - Firebase restores
+    // it asynchronously - so events.js would take it down again, and the right place to not
+    // put it up is here.
+    if (localStorage.getItem('indoone_otp_verified_uid')) return;
+    if (window.IndooneFirebase?.auth?.currentUser) return;
 
     showLogin();
   }
