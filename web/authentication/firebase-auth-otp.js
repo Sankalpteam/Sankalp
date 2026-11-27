@@ -47,23 +47,14 @@
     ].filter(Boolean)));
   }
 
+  // One map, in firebase-auth.js, which loads first and owns the wording. This file and the
+  // recovery screen used to carry their own copies, and the three had drifted: the same
+  // wrong password read "Email or password is incorrect." here and "That email or password is
+  // not correct." in the shared mapper, and 'auth/user-disabled' was missing from two of them.
   function errorMessage(error) {
-    // The app's own strings, from IndooneAuthService.normalizeError. The app has
-    // no user-disabled case, so that entry is gone; PERMISSION_DENIED is the
-    // app's Firebase-database message.
-    const map = {
-      'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Sankalp account was found.',
-      'auth/wrong-password': 'Email or password is incorrect.',
-      'auth/invalid-credential': 'Email or password is incorrect.',
-      'auth/email-already-in-use': 'An account already exists with this email.',
-      'auth/weak-password': 'Password should be at least 6 characters.',
-      'auth/too-many-requests': 'Too many attempts. Please try again later.',
-      'auth/network-request-failed': 'Network error. Check your connection and try again.',
-      'PERMISSION_DENIED': 'Sankalp account data is temporarily unavailable. Please try again or use your email address.'
-    };
-
-    return map[error?.code] || window.sankalpError?.fromError(error) || 'Authentication failed.';
+    const base = window.IndooneFirebaseAuthBase?.errorMessage;
+    if (typeof base === 'function') return base(error);
+    return window.sankalpError?.fromError(error) || 'Authentication failed.';
   }
 
   function db() {
@@ -213,12 +204,29 @@
     }
   }
 
+  // Reading was guarded and writing was not. sessionStorage throws - Safari in private
+  // browsing, storage disabled by policy, a full quota - and the throw landed in the middle of
+  // startLoginOtp, so signing in by OTP failed with whatever the exception happened to say.
+  // A person cannot fix their browser storage from a sign-in screen, but they can be told what
+  // is wrong instead of being shown a failure with no cause.
   function writePending(key, value) {
-    if (value) {
-      sessionStorage.setItem(key, JSON.stringify(value));
-    } else {
-      sessionStorage.removeItem(key);
+    try {
+      if (value) {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } else {
+        sessionStorage.removeItem(key);
+      }
+      return true;
+    } catch (error) {
+      return false;
     }
+  }
+
+  function storageUnavailable() {
+    return new Error(
+      'Your browser is blocking storage, which this sign-in needs. Turn off private ' +
+      'browsing or allow site data for sankalp.indoworkspace.in, then try again.'
+    );
   }
 
   // --------------------------------------------------------------- login
@@ -238,21 +246,36 @@
       throw new Error('OTP service did not return a challenge ID.');
     }
 
-    writePending(LOGIN_PENDING_KEY, {
+    if (!writePending(LOGIN_PENDING_KEY, {
       email,
       rawIdentifier: raw,
       challengeId: result.challengeId,
       requestedAt: Date.now()
-    });
+    })) {
+      throw storageUnavailable();
+    }
 
     return email;
+  }
+
+  // How long a challenge may be used. The verification service expires its own, but by then
+  // the person has typed six digits and waited for a round trip to be told something we
+  // already knew: a code requested yesterday cannot be the one they just read. requestedAt was
+  // written in four places and read in none, so a stale pending record looked valid forever.
+  const OTP_CHALLENGE_TTL_MS = 10 * 60 * 1000;
+
+  function challengeIsStale(pending) {
+    const asked = Number(pending?.requestedAt || 0);
+    if (!asked) return true;
+    return Date.now() - asked > OTP_CHALLENGE_TTL_MS;
   }
 
   async function verifyLoginOtp(otp) {
     const pending = readPending(LOGIN_PENDING_KEY);
 
-    if (!pending?.challengeId) {
-      throw new Error('Please request a new OTP.');
+    if (!pending?.challengeId || challengeIsStale(pending)) {
+      writePending(LOGIN_PENDING_KEY, null);
+      throw new Error('That code has expired. Please request a new OTP.');
     }
 
     const code = String(otp || '').replace(/\D/g, '');
@@ -335,7 +358,9 @@
 
     pending.challengeId = result.challengeId;
     pending.requestedAt = Date.now();
-    writePending(LOGIN_PENDING_KEY, pending);
+    if (!writePending(LOGIN_PENDING_KEY, pending)) {
+      throw storageUnavailable();
+    }
 
     return pending.email;
   }
@@ -411,13 +436,15 @@
       throw new Error('OTP service did not return a challenge ID.');
     }
 
-    writePending(SIGNUP_PENDING_KEY, {
+    if (!writePending(SIGNUP_PENDING_KEY, {
       email: cleanEmailValue,
       mobile: cleanMobile,
       password: secret,
       challengeId: result.challengeId,
       requestedAt: Date.now()
-    });
+    })) {
+      throw storageUnavailable();
+    }
 
     return cleanEmailValue;
   }
@@ -445,7 +472,8 @@
   async function finishSignupAfterOtp(otp) {
     const pending = readPending(SIGNUP_PENDING_KEY);
 
-    if (!pending?.challengeId) {
+    if (!pending?.challengeId || challengeIsStale(pending)) {
+      writePending(SIGNUP_PENDING_KEY, null);
       throw new Error('Signup session expired. Enter your details again.');
     }
 
@@ -578,6 +606,7 @@
   }
 
   window.IndooneFirebaseAuth = {
+    resolveLoginEmail,
     startLoginOtp,
     verifyLoginOtp,
     resendLoginOtp,

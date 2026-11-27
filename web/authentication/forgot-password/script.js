@@ -18,16 +18,14 @@ window.IndooneForgotPassword = (() => {
     status.dataset.error = error ? 'true' : 'false';
   }
 
+  // The same one map as the rest of the auth screens (firebase-auth.js). A third copy lived
+  // here and had already drifted - no 'auth/user-disabled', and no 'auth/invalid-credential'
+  // at all, so a wrong password on recovery said something different from a wrong password
+  // on sign-in.
   function errorMessage(error) {
-    const map = {
-      'auth/invalid-email': 'Enter a valid email address.',
-      'auth/user-not-found': 'No Sankalp account was found.',
-      'auth/too-many-requests': 'Too many attempts. Please try again later.',
-      'auth/network-request-failed': 'Network error. Check your connection and try again.',
-      'auth/weak-password': 'Password should be at least 6 characters.'
-    };
-
-    return map[error?.code] || window.sankalpError?.fromError(error) || 'Unable to continue password recovery.';
+    const base = window.IndooneFirebaseAuthBase?.errorMessage;
+    if (typeof base === 'function') return base(error);
+    return window.sankalpError?.fromError(error) || 'Unable to continue password recovery.';
   }
 
   function setBusy(button, text) {
@@ -57,8 +55,31 @@ window.IndooneForgotPassword = (() => {
 
   async function requestOtp(root, button) {
     const input = root.querySelector('#forgotPasswordEmail');
-    const email = String(input?.value || '').trim().toLowerCase();
+    const raw = String(input?.value || '').trim();
     const verification = window.IndooneIndoVerification;
+
+    if (!raw) {
+      setStatus(root, 'Enter your email or mobile number.', true);
+      input?.focus();
+      return;
+    }
+
+    // Recovery used to accept an email address and nothing else, while sign-in accepted
+    // either. A person who signed up with a mobile number, forgot the password and still has
+    // the mobile in their hand was told "Enter a valid email address" - on the one screen that
+    // exists to get them back in. The same resolver login uses turns a mobile into the email
+    // the account is filed under.
+    let email = '';
+    try {
+      const resolver = window.IndooneFirebaseAuth?.resolveLoginEmail;
+      email = resolver
+        ? await resolver(raw)
+        : String(raw).trim().toLowerCase();
+    } catch (error) {
+      setStatus(root, errorMessage(error), true);
+      input?.focus();
+      return;
+    }
 
     if (!email || !email.includes('@')) {
       setStatus(root, 'Enter a valid email address.', true);
@@ -98,6 +119,8 @@ window.IndooneForgotPassword = (() => {
       otpArea.hidden = false;
       button.textContent = 'OTP Sent';
       setStatus(root, 'OTP sent. Enter the 6-digit code from your email.');
+      // A code just went out, so the resend button waits before offering another.
+      startResendCooldown(root);
       otpInput.focus();
     } catch (error) {
       setStatus(root, errorMessage(error), true);
@@ -234,12 +257,76 @@ window.IndooneForgotPassword = (() => {
     }
   }
 
+  // The recovery screen had no way to ask for a second code. A mail that did not arrive left
+  // the person reloading the page, which throws away the challenge and starts again. Same
+  // sixty seconds as sign-in and sign-up, for the same reason.
+  const RESEND_COOLDOWN_MS = 60_000;
+  let resendUntil = 0;
+  let resendTicker = null;
+
+  function resendSecondsLeft() {
+    return Math.max(0, Math.ceil((resendUntil - Date.now()) / 1000));
+  }
+
+  function paintResend(root) {
+    const button = root.querySelector('#forgotPasswordResend');
+    if (!button) return;
+    const left = resendSecondsLeft();
+    button.disabled = left > 0;
+    button.textContent = left > 0 ? `Resend in ${left}s` : 'Resend OTP';
+    button.setAttribute('aria-live', 'polite');
+  }
+
+  function startResendCooldown(root) {
+    resendUntil = Date.now() + RESEND_COOLDOWN_MS;
+    paintResend(root);
+    if (resendTicker) return;
+    resendTicker = window.setInterval(() => {
+      if (resendSecondsLeft() <= 0) {
+        window.clearInterval(resendTicker);
+        resendTicker = null;
+        resendUntil = 0;
+      }
+      paintResend(root);
+    }, 1000);
+  }
+
+  async function resendOtp(root, button) {
+    if (resendSecondsLeft() > 0) return;
+    if (!state.challengeId) {
+      setStatus(root, 'Request a code first.', true);
+      return;
+    }
+
+    const previousText = setBusy(button, 'Sending…');
+    setStatus(root);
+
+    try {
+      const verification = window.IndooneIndoVerification;
+      const result = await verification.requestForgotPasswordOtp(state.email);
+
+      if (!result?.challengeId) {
+        throw new Error('OTP service did not return a challenge ID.');
+      }
+
+      state.challengeId = result.challengeId;
+      setStatus(root, 'New OTP sent to your email.');
+      startResendCooldown(root);
+    } catch (error) {
+      setStatus(root, errorMessage(error), true);
+    } finally {
+      clearBusy(button, previousText);
+      paintResend(root);
+    }
+  }
+
   function bind(root) {
     if (!root || root.dataset.forgotPasswordBound === 'true') return;
 
     const continueButton = root.querySelector('#forgotPasswordContinue');
     const verifyButton = root.querySelector('#forgotPasswordVerify');
     const saveButton = root.querySelector('#forgotPasswordSave');
+    const resendButton = root.querySelector('#forgotPasswordResend');
 
     if (!continueButton || !verifyButton || !saveButton) return;
 
@@ -261,6 +348,12 @@ window.IndooneForgotPassword = (() => {
       event.preventDefault();
       event.stopPropagation();
       void resetPassword(root, saveButton);
+    });
+
+    resendButton?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      void resendOtp(root, resendButton);
     });
 
     const emailInput = root.querySelector('#forgotPasswordEmail');
