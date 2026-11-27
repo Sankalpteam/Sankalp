@@ -31,12 +31,7 @@
   align-items: safe center;
   padding: 24px 18px;
   overflow-y: auto;
-  background: linear-gradient(
-    180deg,
-    #ece7de 0%,
-    #e2dcd2 55%,
-    #d9d1c6 100%
-  );
+  background: #eef0f5;
   pointer-events: auto;
 }
 
@@ -75,9 +70,9 @@
   justify-content: flex-start;
   padding: 24px 22px;
   border-radius: 18px;
-  background: linear-gradient(180deg, #fffdf7 0%, #f7f0e3 100%);
-  border: 1px solid #d8cbb8;
-  box-shadow: 0 14px 40px #4a3a1f24;
+  background: #ffffff;
+  border: 1px solid #f0eef5;
+  box-shadow: 0 10px 30px #211D2714;
   position: relative;
   z-index: 102;
   pointer-events: auto;
@@ -248,7 +243,7 @@
   margin: 0;
   border: 0;
   border-radius: 13px;
-  background: linear-gradient(90deg, #6330db, #9147ed);
+  background: linear-gradient(90deg, #703be2, #6d35e8);
   color: #fff;
   font-size: 14px;
   font-weight: 800;
@@ -295,8 +290,8 @@
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f1ece1;
-  color: #6b6355;
+  background: #faf9fc;
+  color: #5f5966;
   font-size: 12px;
   line-height: 18px;
 }
@@ -313,7 +308,7 @@
 .auth-footer {
   margin: 18px 0 0;
   text-align: center;
-  color: #96908a;
+  color: #77717f;
   font-size: 11px;
   line-height: 1.5;
 }
@@ -379,7 +374,7 @@
 }
 
 .auth-page .password-toggle:hover {
-  background: #f1ece1;
+  background: #faf9fc;
 }
 
 /* ------------------------------------------- the animated welcome line */
@@ -397,7 +392,7 @@
 }
 
 .auth-page .auth-welcome.is-gradient {
-  background: linear-gradient(90deg, #6330db, #9147ed);
+  background: linear-gradient(90deg, #703be2, #6d35e8);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -462,7 +457,7 @@
 }
 
 .auth-page .auth-note-gradient {
-  background: linear-gradient(90deg, #6330db, #9147ed);
+  background: linear-gradient(90deg, #703be2, #6d35e8);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -583,7 +578,7 @@
 }
 
 .auth-page .primary:disabled {
-  background: linear-gradient(90deg, #b9a6e6, #cbb9ee);
+  background: linear-gradient(90deg, #cbbfe8, #d8cdf0);
 }
 
 .auth-page .secondary:disabled {
