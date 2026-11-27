@@ -132,6 +132,10 @@ fun SignUpScreen(
     var agreed by rememberSaveable { mutableStateOf(false) }
     var openDocument by rememberSaveable { mutableStateOf("") }
     val otpFocusRequester = FocusRequester()
+    // ImeAction.Next does not move focus by itself. Three fields asked for it and none of them
+    // passed a handler, so the Next key on the keyboard did nothing at all - the same shape as
+    // the Done key before it was wired.
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
     val hasMobile = mobile.filter(Char::isDigit).isNotEmpty()
     // Ten digits, not "not blank". The field caps at ten and drops anything that is not a
@@ -238,6 +242,9 @@ fun SignUpScreen(
             placeholder = "you@example.com",
             enabled = !busy,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         Spacer(Modifier.height(14.dp))
@@ -264,6 +271,9 @@ fun SignUpScreen(
                 { Text("+91", fontSize = 13.sp) }
             } else null,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         Spacer(Modifier.height(14.dp))
@@ -280,6 +290,9 @@ fun SignUpScreen(
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         // The recovery screen has asked for the new password twice since it existed; signup,
