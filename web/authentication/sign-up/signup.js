@@ -107,6 +107,21 @@
         ${passwordField()}
       </div>
 
+      <!-- The agreement, once, at the moment an account is created. The two documents are
+           the ones already published at /legal/ - no new page, so a change to either reaches
+           this screen and every other place that links it. -->
+      <div class="auth-consent">
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupConsent" data-signup-consent />
+          <span>
+            I am 18 or older and I agree to the
+            <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
+            and the
+            <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+          </span>
+        </label>
+      </div>
+
       <div
         class="auth-step auth-signup-actions"
         data-signup-step="details"
@@ -195,6 +210,12 @@
 
     mobile.dataset.digitFilterBound = 'true';
 
+    const consent = root.querySelector('#signupConsent');
+    if (consent && consent.dataset.consentBound !== 'true') {
+      consent.dataset.consentBound = 'true';
+      consent.addEventListener('change', () => applyRules(root));
+    }
+
     mobile.addEventListener('input', () => {
       const digits = mobile.value.replace(/\D/g, '').slice(0, 10);
 
@@ -245,15 +266,17 @@
     const email = (root.querySelector('#signupEmail')?.value || '').trim();
     const mobile = (root.querySelector('#signupMobile')?.value || '').trim();
     const password = root.querySelector('#signupPassword')?.value || '';
-    // An Indian mobile is ten digits. The field already strips everything else and caps at
-    // ten, but nothing required the tenth - so one digit enabled both buttons, and the account
-    // was created with the mobile "+911". That account can never be found by mobile again,
-    // because the lookup searches for a ten-digit number.
+    // An Indian mobile is ten digits. The field strips everything else and caps at ten, but
+    // nothing required the tenth, so one digit enabled both buttons and the person met the
+    // service's refusal instead of a disabled button. (The service checks the format too, so
+    // no bad number was ever stored - this is about when the answer arrives.)
     const mobileDigits = mobile.replace(/\D/g, '');
+    const agreed = Boolean(root.querySelector('#signupConsent')?.checked);
     const ready =
       Boolean(email) &&
       mobileDigits.length === 10 &&
-      password.length >= 6;
+      password.length >= 6 &&
+      agreed;
 
     ['signup-submit', 'signup-password'].forEach(action => {
       const button = buttonFor(root, action);
@@ -385,7 +408,8 @@
     return {
       email: root.querySelector('#signupEmail')?.value || '',
       mobile: root.querySelector('#signupMobile')?.value || '',
-      password: root.querySelector('#signupPassword')?.value || ''
+      password: root.querySelector('#signupPassword')?.value || '',
+      agreed: Boolean(root.querySelector('#signupConsent')?.checked)
     };
   }
 

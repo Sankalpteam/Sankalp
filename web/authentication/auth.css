@@ -589,3 +589,36 @@
 .auth-page .secondary:disabled {
   color: #a9a2ad;
 }
+
+/* ------------------------------------------------------------ the agreement */
+
+/* One row, above the buttons that create an account. It has to be readable and it has to be
+   tappable: a checkbox a thumb misses is a signup that stops for no visible reason. */
+.auth-consent {
+  margin: 4px 0 12px;
+}
+
+.auth-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 19px;
+  color: #4a4458;
+  cursor: pointer;
+}
+
+.auth-consent-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: #472D8D;
+  cursor: pointer;
+}
+
+.auth-consent-row a {
+  color: #472D8D;
+  font-weight: 600;
+  text-decoration: underline;
+}
