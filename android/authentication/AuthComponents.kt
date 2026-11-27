@@ -42,6 +42,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import com.indoone.R
 
 private val IndoonePurple = Color(0xFF6330DB)
@@ -309,6 +312,10 @@ fun AuthStatus(text: String, error: Boolean) {
         lineHeight = 18.sp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
+            .padding(top = 8.dp)
+            // Announced as soon as it appears. The text arrives after a request, when the
+            // person is not looking at this part of the screen and TalkBack has no reason to
+            // go there on its own.
+            .semantics { liveRegion = LiveRegionMode.Polite },
     )
 }

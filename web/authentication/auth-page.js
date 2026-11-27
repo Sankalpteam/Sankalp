@@ -32,9 +32,12 @@
 
     if (!node) return;
 
-    node.textContent = message;
+    // Unhide before writing. A live region that is hidden when its text changes is not
+    // announced - the screen reader saw an element appear with content already in it, which is
+    // not a change. Showing it first and then filling it is the order that speaks.
     node.hidden = !message;
     node.dataset.error = error ? 'true' : 'false';
+    node.textContent = message;
   }
 
   function showShell(html) {

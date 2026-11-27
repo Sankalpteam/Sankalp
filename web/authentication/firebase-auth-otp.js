@@ -433,7 +433,10 @@
       throw new Error('Enter a valid email address.');
     }
 
-    if (!/^\+91\d{10}$/.test(cleanMobile)) {
+    // 6, 7, 8 and 9 are the only first digits an Indian mobile number can have. Without that
+    // check any ten digits passed - "+911234567890" was accepted, stored, and then could never
+    // be found by the mobile lookup, because nobody types a number they do not have.
+    if (!/^\+91[6-9]\d{9}$/.test(cleanMobile)) {
       throw new Error('Enter a valid 10-digit Indian mobile number.');
     }
 
@@ -585,7 +588,10 @@
       throw new Error('Enter a valid email address.');
     }
 
-    if (!/^\+91\d{10}$/.test(cleanMobile)) {
+    // 6, 7, 8 and 9 are the only first digits an Indian mobile number can have. Without that
+    // check any ten digits passed - "+911234567890" was accepted, stored, and then could never
+    // be found by the mobile lookup, because nobody types a number they do not have.
+    if (!/^\+91[6-9]\d{9}$/.test(cleanMobile)) {
       throw new Error('Enter a valid 10-digit Indian mobile number.');
     }
 

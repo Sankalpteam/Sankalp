@@ -388,8 +388,6 @@ fun SignUpScreen(
                 enabled = actionEnabled && resendSecondsLeft == 0,
                 onClick = { onResendOtp() },
             )
-
-            AuthStatus(status, error = false)
         }
 
         // On screen for both steps, and under them: inside the details block it vanished the
@@ -404,6 +402,11 @@ fun SignUpScreen(
             enabled = !busy,
         )
 
+        // Both lines outside the step blocks. status used to live inside the code step, so a
+        // message set on the details step - "New OTP sent" after a resend is not the only kind
+        // there can be - would have been set and never shown. The web writes both to the same
+        // place outside the panels; this matches it.
+        AuthStatus(status, error = false)
         AuthStatus(error, error = true)
         Spacer(Modifier.height(10.dp))
         AuthSecondaryButton(

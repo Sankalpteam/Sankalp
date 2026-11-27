@@ -84,7 +84,7 @@
       ></p>
 
       <div class="field">
-        <label>EMAIL ID</label>
+        <label for="signupEmail">EMAIL ID</label>
         <input
           id="signupEmail"
           name="email"
@@ -97,12 +97,12 @@
       </div>
 
       <div class="field">
-        <label>MOBILE NUMBER</label>
+        <label for="signupMobile">MOBILE NUMBER</label>
         ${mobileField()}
       </div>
 
       <div class="field">
-        <label>PASSWORD</label>
+        <label for="signupPassword">PASSWORD</label>
         ${passwordField()}
       </div>
 
@@ -110,7 +110,7 @@
            which is where the password is chosen for the first time, asked once. A typo here
            makes an account whose password nobody knows. -->
       <div class="field">
-        <label>CONFIRM PASSWORD</label>
+        <label for="signupConfirmPassword">CONFIRM PASSWORD</label>
         <div class="password-wrap">
           <input
             id="signupConfirmPassword"
@@ -174,7 +174,7 @@
         </p>
 
         <div class="field">
-          <label>VERIFICATION OTP</label>
+          <label for="signupOtp">VERIFICATION OTP</label>
           <input
             id="signupOtp"
             name="one-time-code"
