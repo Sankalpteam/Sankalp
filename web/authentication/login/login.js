@@ -80,6 +80,23 @@
           ${mobileField()}
         </div>
 
+        <!-- The same agreement the signup screen asks for, and asked here too: a person
+             coming back to an account they already have still has to accept the terms they are
+             signing in under. Nothing is recorded from this box - the record belongs to signup,
+             and writing one here would be a record of an agreement made on a different screen.
+             It sits above the buttons because it gates them. -->
+        <div class="auth-consent">
+          <label class="auth-consent-row">
+            <input type="checkbox" id="loginConsent" />
+            <span>
+              I am 18 or older and I agree to the
+              <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
+              and the
+              <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+            </span>
+          </label>
+        </div>
+
         <div class="auth-button-row">
           <button
             type="button"
@@ -106,6 +123,7 @@
           Create Account
         </button>
       </div>
+
 
       <div class="auth-step" data-login-step="otp" hidden>
         <button
@@ -271,6 +289,11 @@
     const otp = root.querySelector('#loginOtp');
     const verify = buttonFor(root, 'login-verify');
 
+    // Every action on this screen waits for the box. It is on screen the whole time, so it
+    // can be unticked on the code step too - and if it can be unticked, the buttons have to
+    // answer it there as well.
+    const agreed = Boolean(root.querySelector('#loginConsent')?.checked);
+
     // The resend button: disabled and counting down, or ready again.
     const resend = buttonFor(root, 'login-resend');
     if (resend) {
@@ -281,7 +304,7 @@
     }
 
     if (verify && otp) {
-      verify.disabled = otp.value.replace(/\D/g, '').length !== 6;
+      verify.disabled = otp.value.replace(/\D/g, '').length !== 6 || !agreed;
     }
 
     const identifier = root.querySelector('#loginIdentifier');
@@ -296,7 +319,7 @@
         ''
       ).trim();
 
-      complete.disabled = !identifierValue || !(password?.value || '');
+      complete.disabled = !identifierValue || !(password?.value || '') || !agreed;
     }
 
     const identifierBlank = !(
@@ -309,7 +332,7 @@
       const button = buttonFor(root, action);
 
       if (button) {
-        button.disabled = identifierBlank;
+        button.disabled = identifierBlank || !agreed;
       }
     });
   }
@@ -318,6 +341,12 @@
     if (!root?.querySelector) return;
 
     bindMirror(root);
+
+    const consent = root.querySelector('#loginConsent');
+    if (consent && consent.dataset.consentBound !== 'true') {
+      consent.dataset.consentBound = 'true';
+      consent.addEventListener('change', () => applyRules(root));
+    }
 
     ['#loginOtp', '#loginPassword', '#loginIdentifier',
       '#loginPasswordIdentifier'].forEach(selector => {

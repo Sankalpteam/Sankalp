@@ -2,15 +2,23 @@
 // what the app does; localStorage is only a cache so a reload is instant.
 (() => {
   const KEY = 'indoone_chat_thread_v1';
+
+  // Cache is per Firebase identity: never restore one account's chat in another session.
+  function cacheKey() {
+    const user = window.IndooneFirebase?.auth?.currentUser;
+    return user?.uid ? `${KEY}:${user.uid}` : null;
+  }
   const MAX_MESSAGES = 200;
 
   let conversationId = null;
   let messages = [];
 
   function cache() {
+    const key = cacheKey();
+    if (!key) return;
     try {
       localStorage.setItem(
-        KEY,
+        key,
         JSON.stringify({ conversationId, messages })
       );
     } catch (error) {
@@ -19,8 +27,10 @@
   }
 
   function readCache() {
+    const key = cacheKey();
+    if (!key) return null;
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(key);
 
       if (!raw) {
         return null;
@@ -39,6 +49,11 @@
   // Load the account's newest conversation, falling back to the cache when
   // there is nothing in the cloud yet or the account is not reachable.
   async function load() {
+    // An unauthenticated session must not inherit in-memory messages from a prior user.
+    conversationId = null;
+    messages = [];
+    if (!signedIn()) return;
+
     if (signedIn() && window.IndooneCloudChat?.loadLatest) {
       try {
         const conversation = await window.IndooneCloudChat.loadLatest();
@@ -100,7 +115,8 @@
     // answers readCache() with a truthy object, which is how a deleted conversation kept
     // coming back: the store cleared itself, and the next load() restored it from storage.
     try {
-      localStorage.removeItem(KEY);
+      const key = cacheKey();
+      if (key) localStorage.removeItem(key);
     } catch (error) {
       console.warn('Sankalp chat thread could not be cleared:', error);
     }
