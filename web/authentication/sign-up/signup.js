@@ -367,6 +367,31 @@
       });
     }
 
+    // Enter submits, the way it does in every other form on the web. There is no <form>
+    // element here - the buttons are type="button" - so nothing does it for us, and a person
+    // who typed their details and pressed Enter got nothing at all.
+    const onEnter = event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const otpPanel = root.querySelector('[data-signup-step="otp"]');
+      const onCodeStep = otpPanel && !otpPanel.hidden;
+      const target = root.querySelector(
+        onCodeStep
+          ? '[data-auth-action="signup-verify"]'
+          : '[data-auth-action="signup-submit"]'
+      );
+      if (target && !target.disabled) target.click();
+    };
+
+    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword', '#signupOtp']
+      .forEach(selector => {
+        const input = root.querySelector(selector);
+        if (input && input.dataset.enterBound !== 'true') {
+          input.dataset.enterBound = 'true';
+          input.addEventListener('keydown', onEnter);
+        }
+      });
+
     // The confirm field belongs in this list. Without it nothing re-evaluated the form when a
     // person finished typing the second password, so the buttons that had been disabled while
     // the two did not match stayed disabled - the form could not be completed at all.
