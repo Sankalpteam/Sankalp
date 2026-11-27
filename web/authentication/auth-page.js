@@ -42,15 +42,17 @@
 
   function showShell(html) {
     const overlay = $('overlay');
-    const modal = $('modal');
-
-    if (!overlay || !modal) return false;
 
     // The card goes into the overlay's own child, and the overlay is the
     // backdrop. The overlay belongs to the sign-in screen and to nothing else.
+    //
+    // This used to also require #modal, which is the chat screen's own dialog and is never
+    // used here - the card is written into #accountDialog. So the sign-in screen refused to
+    // appear if an element from an unrelated part of the app was renamed, and it refused
+    // silently: no error, no message, a blank page and no way in.
     const card = host();
 
-    if (!card) return false;
+    if (!overlay || !card) return false;
 
     overlay.classList.remove('hidden');
     overlay.classList.add(AUTH_CLASS);
