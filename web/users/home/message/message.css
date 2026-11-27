@@ -47,14 +47,6 @@
 }
 
 /* The app puts the Sankalp mark beside every reply of its own. */
-.chat-logo {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  margin-right: 8px;
-  align-self: flex-end;
-}
-
 .chat-bubble {
   padding: 12px 15px;
   font-size: 15px;

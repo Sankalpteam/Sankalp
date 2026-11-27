@@ -42,13 +42,6 @@
 
   const REPLY_LINK_PATTERN = /https?:\/\/\S+/g;
 
-  function logo() {
-    const mark = document.createElement('span');
-    mark.className = 'chat-logo';
-    mark.setAttribute('aria-hidden', 'true');
-    return mark;
-  }
-
   function isImage(item) {
     const file = item.file;
     const type = file?.type || item.type || '';
@@ -626,10 +619,6 @@
     const row = document.createElement('div');
     row.className = message.mine ? 'chat-row mine' : 'chat-row theirs';
 
-    if (!message.mine) {
-      row.appendChild(logo());
-    }
-
     const column = document.createElement('div');
     column.className = 'chat-column';
 
@@ -695,7 +684,6 @@
   function activityBubble(state) {
     const row = document.createElement('div');
     row.className = 'chat-row theirs';
-    row.appendChild(logo());
 
     const column = document.createElement('div');
     column.className = 'chat-column';
