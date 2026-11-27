@@ -20,13 +20,17 @@
             ".write": "auth != null && (auth.uid === $uid || (newData.val() === null && data.child('email').val() === auth.token.email))",
             ".validate": "newData.hasChildren(['id','name','secret','digits','period','algorithm','updatedAt','deletedAt','purgeAt']) && newData.child('id').val() === $accountId * 1 && newData.child('digits').val() in [6,8] && newData.child('period').val() in [30,60] && newData.child('algorithm').val() in ['SHA1','SHA256','SHA512'] && newData.child('purgeAt').val() === newData.child('deletedAt').val() + 2592000000 && newData.child('deletedAt').val() <= now"
           }
+        },
+        "consent": {
+          ".validate": "newData.hasChildren(['termsVersion','termsAcceptedAt','privacyVersion','privacyAcceptedAt','updatedAt']) && newData.child('termsVersion').isString() && newData.child('privacyVersion').isString() && newData.child('termsAcceptedAt').isNumber() && newData.child('privacyAcceptedAt').isNumber() && newData.child('updatedAt').isNumber() && newData.child('termsAcceptedAt').val() > 0 && newData.child('privacyAcceptedAt').val() > 0"
         }
       }
     },
     "mobileIndex": {
       "$mobile": {
         ".read": true,
-        ".write": "auth != null"
+        ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['uid','email','updatedAt']) && newData.child('uid').val() === auth.uid"
       }
     }
   }
