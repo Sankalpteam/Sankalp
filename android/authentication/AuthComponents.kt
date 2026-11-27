@@ -318,6 +318,7 @@ fun AuthStatus(text: String, error: Boolean) {
     )
 }
 
+@Composable
 fun ConsentRow(
     agreed: Boolean,
     onAgreedChange: (Boolean) -> Unit,

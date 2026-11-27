@@ -53,7 +53,6 @@ import kotlinx.coroutines.isActive
  * which means no new imports: a duplicate import in a Kotlin file is what turned main red twice
  * today.
  */
-@Composable
 /** The wait between OTP sends, the same number the login screen and the web use. */
 private const val SIGNUP_RESEND_COOLDOWN_SECONDS = 60
 
