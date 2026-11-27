@@ -348,15 +348,61 @@
       consent.addEventListener('change', () => applyRules(root));
     }
 
-    ['#loginOtp', '#loginPassword', '#loginIdentifier',
-      '#loginPasswordIdentifier'].forEach(selector => {
-      const input = root.querySelector(selector);
+    // The code field holds digits and nothing else, the way the signup screen's does. Left
+    // alone it accepted "12a34b" - six characters, four digits, and a Verify button that
+    // stayed disabled with nothing on screen explaining why.
+    const otpInput = root.querySelector('#loginOtp');
+    if (otpInput && otpInput.dataset.digitFilterBound !== 'true') {
+      otpInput.dataset.digitFilterBound = 'true';
+      otpInput.addEventListener('input', () => {
+        const digits = otpInput.value.replace(/\D/g, '').slice(0, 6);
+        const shared = window.IndooneAuthUI?.setFilteredValue;
+        if (shared) {
+          shared(otpInput, digits);
+        } else if (otpInput.value !== digits) {
+          otpInput.value = digits;
+        }
+        applyRules(root);
+      });
+    }
 
-      if (input && input.dataset.rulesBound !== 'true') {
-        input.dataset.rulesBound = 'true';
-        input.addEventListener('input', () => applyRules(root));
-      }
-    });
+    // Enter submits, the way it does on the signup screen. There is no <form> here either.
+    const onEnter = event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const otpPanel = root.querySelector('[data-login-step="otp"]');
+      const passwordPanel = root.querySelector('[data-login-step="password"]');
+      const onCodeStep = otpPanel && !otpPanel.hidden;
+      const onPasswordStep = passwordPanel && !passwordPanel.hidden;
+      const action = onCodeStep
+        ? 'login-verify'
+        : onPasswordStep
+          ? 'login-complete'
+          : 'login-continue-otp';
+      const target = root.querySelector(`[data-auth-action="${action}"]`);
+      if (target && !target.disabled) target.click();
+    };
+
+    // #loginOtp is not in this list: its own filter above already re-evaluates the form.
+    ['#loginPassword', '#loginIdentifier', '#loginPasswordIdentifier']
+      .forEach(selector => {
+        const input = root.querySelector(selector);
+
+        if (input && input.dataset.rulesBound !== 'true') {
+          input.dataset.rulesBound = 'true';
+          input.addEventListener('input', () => applyRules(root));
+        }
+      });
+
+    ['#loginIdentifier', '#loginPasswordIdentifier', '#loginPassword', '#loginOtp']
+      .forEach(selector => {
+        const input = root.querySelector(selector);
+
+        if (input && input.dataset.enterBound !== 'true') {
+          input.dataset.enterBound = 'true';
+          input.addEventListener('keydown', onEnter);
+        }
+      });
 
     applyRules(root);
   }
