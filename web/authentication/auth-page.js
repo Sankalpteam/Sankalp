@@ -348,8 +348,10 @@
 
     if (action === 'signup') return showSignup();
     if (action === 'login') {
-      // Leaving signup throws the attempt away, password and all.
+      // Leaving signup throws the attempt away, password and all, and stops the title timer
+      // that would otherwise tick against a screen that is no longer there.
       window.IndooneFirebaseAuth?.clearSignupPending?.();
+      window.IndooneSignupFeature?.stop?.();
       return showLogin();
     }
     if (action === 'forgot-password') return showForgotPassword();
@@ -460,6 +462,10 @@
   }
 
   function close() {
+    // Signup was the screen on display, so its timers stop with it. Closing straight after a
+    // successful signup is the common case and it used to leave the title interval running.
+    window.IndooneSignupFeature?.stop?.();
+
     $('overlay')?.classList.remove(AUTH_CLASS);
     $('overlay')?.classList.add('hidden');
 

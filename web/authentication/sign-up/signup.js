@@ -549,6 +549,13 @@
     otpEmail,
     values,
     applyRules,
+    // The title alternates on an interval that never ends by itself. Leaving signup for
+    // sign-in used to leave it running against a DOM that no longer had the element: one timer
+    // per visit, ticking every two seconds for the life of the tab.
+    stop: () => {
+      stopTitle();
+      stopTyping();
+    },
     startResendCooldown,
     show: () => window.IndooneAuthUI?.showSignup?.()
   };
