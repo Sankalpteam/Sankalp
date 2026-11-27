@@ -670,11 +670,6 @@ private fun RowScope.QuickPromptChip(
 }
 
 @Composable
-private fun IndooneHomeLogo(modifier: Modifier = Modifier) {
-    // One logo, one definition: this used to be a second copy of the old diamond.
-    IndooneTopBarLogo(modifier = modifier)
-}
-
 @Composable
 fun HomeScreen(
     onMenuClick: () -> Unit,
@@ -1944,12 +1939,6 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.Bottom,
                         ) {
-                            IndooneHomeLogo(
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .size(24.dp)
-                                    .align(Alignment.Bottom),
-                            )
 
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 // No bubble: the reply is the page, plain text on the
@@ -2096,12 +2085,6 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.Bottom,
                         ) {
-                            IndooneHomeLogo(
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .size(24.dp)
-                                    .align(Alignment.Bottom),
-                            )
                             Surface(
                                 shape = RoundedCornerShape(
                                     topStart = 18.dp,
