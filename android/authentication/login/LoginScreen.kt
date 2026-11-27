@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.indoone.authentication.AuthBrand
 import com.indoone.authentication.AuthBusyAction
+import com.indoone.authentication.ConsentRow
 import com.indoone.authentication.AuthFieldLabel
 import com.indoone.authentication.AuthPage
 import com.indoone.authentication.AuthPrimaryButton
@@ -83,9 +84,35 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var otp by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    // The same agreement the signup screen asks for. A person coming back to an account they
+    // already have still has to accept the terms they are signing in under.
+    var agreed by rememberSaveable { mutableStateOf(false) }
+    var openDocument by rememberSaveable { mutableStateOf("") }
     var page by rememberSaveable { mutableStateOf(LoginPage.LOGIN) }
 
     val otpFocusRequester = FocusRequester()
+
+    // While a document is open, back closes it rather than leaving the form behind it.
+    androidx.activity.compose.BackHandler(enabled = openDocument.isNotEmpty()) {
+        openDocument = ""
+    }
+
+    // The same live pages the signup screen and the menu open, not copies.
+    when (openDocument) {
+        "terms" -> com.indoone.menu.legal.LegalWebScreen(
+            title = "Terms of Use",
+            path = "/legal/terms-of-use.html",
+            assetFile = "legal/terms-of-use.html",
+            onBack = { openDocument = "" },
+        )
+        "privacy" -> com.indoone.menu.legal.LegalWebScreen(
+            title = "Privacy Policy",
+            path = "/legal/privacy-policy.html",
+            assetFile = "legal/privacy-policy.html",
+            onBack = { openDocument = "" },
+        )
+        else -> Unit
+    }
 
     LaunchedEffect(otpVisible) {
         if (otpVisible) {
@@ -296,36 +323,30 @@ private fun LoginEntryPage(
         } else null,
     )
 
-    Spacer(Modifier.height(18.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        androidx.compose.foundation.layout.Box(
-            modifier = Modifier.weight(1f),
-        ) {
-            AuthPrimaryButton(
-                text = if (busy && actionEnabled) "Sending…" else "Continue with OTP",
-                enabled = actionEnabled,
-                onClick = onSendOtp,
-                fontSize = 12.sp,
-                fillMaxWidth = true,
-            )
-        }
+    Spacer(Modifier.height(10.dp))
+    ConsentRow(
+        agreed = agreed,
+        onAgreedChange = { agreed = it },
+        onOpenTerms = { openDocument = "terms" },
+        onOpenPrivacy = { openDocument = "privacy" },
+        enabled = !busy,
+    )
 
-        androidx.compose.foundation.layout.Box(
-            modifier = Modifier.weight(1f),
-        ) {
-            AuthPrimaryButton(
-                text = "Continue with Password",
-                enabled = actionEnabled,
-                onClick = onContinueWithPassword,
-                fontSize = 12.sp,
-                fillMaxWidth = true,
-            )
-        }
-    }
+    Spacer(Modifier.height(18.dp))
+    // One under the other, full width. Side by side they had to shrink their own labels to
+    // 12sp to fit a phone, and the second one still ran to the edges of its button.
+    AuthPrimaryButton(
+        text = if (busy && actionEnabled) "Sending…" else "Continue with OTP",
+        enabled = actionEnabled && agreed,
+        onClick = onSendOtp,
+    )
+
+    Spacer(Modifier.height(8.dp))
+    AuthPrimaryButton(
+        text = "Continue with Password",
+        enabled = actionEnabled && agreed,
+        onClick = onContinueWithPassword,
+    )
 
     Spacer(Modifier.height(18.dp))
     AuthSecondaryButton(
@@ -405,7 +426,7 @@ private fun LoginOtpPage(
     Spacer(Modifier.height(16.dp))
     AuthPrimaryButton(
         text = if (busyAction == AuthBusyAction.VERIFY_OTP) "Verifying…" else "Verify & Login",
-        enabled = !busy && otp.length == 6,
+        enabled = !busy && otp.length == 6 && agreed,
         onClick = onVerifyOtp,
     )
 
