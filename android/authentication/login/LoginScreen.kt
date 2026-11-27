@@ -136,6 +136,10 @@ fun LoginScreen(
                             identifier = identifier,
                             busy = busy,
                             actionEnabled = !busy && identifier.isNotBlank(),
+                            agreed = agreed,
+                            onAgreedChange = { agreed = it },
+                            onOpenTerms = { openDocument = "terms" },
+                            onOpenPrivacy = { openDocument = "privacy" },
                             // The web caps this at 320; nothing capped it here, so a paste
                             // went to Firebase whole. The longest legal address is 254.
                             onIdentifierChanged = { identifier = it.take(MAX_IDENTIFIER_LENGTH) },
@@ -151,6 +155,7 @@ fun LoginScreen(
                             busyAction = busyAction,
                             otpEmail = otpEmail,
                             otp = otp,
+                            agreed = agreed,
                             status = status,
                             error = error,
                             otpFocusRequester = otpFocusRequester,
@@ -240,6 +245,10 @@ private fun LoginEntryPage(
     identifier: String,
     busy: Boolean,
     actionEnabled: Boolean,
+    agreed: Boolean,
+    onAgreedChange: (Boolean) -> Unit,
+    onOpenTerms: () -> Unit,
+    onOpenPrivacy: () -> Unit,
     onIdentifierChanged: (String) -> Unit,
     onSendOtp: () -> Unit,
     onContinueWithPassword: () -> Unit,
@@ -327,8 +336,8 @@ private fun LoginEntryPage(
     ConsentRow(
         agreed = agreed,
         onAgreedChange = { agreed = it },
-        onOpenTerms = { openDocument = "terms" },
-        onOpenPrivacy = { openDocument = "privacy" },
+        onOpenTerms = onOpenTerms,
+        onOpenPrivacy = onOpenPrivacy,
         enabled = !busy,
     )
 
@@ -372,6 +381,7 @@ private fun LoginOtpPage(
     busyAction: AuthBusyAction?,
     otpEmail: String,
     otp: String,
+    agreed: Boolean,
     status: String,
     error: String,
     otpFocusRequester: FocusRequester,
