@@ -235,13 +235,18 @@
   border-radius: 12px;
   background: #fbfafc;
   color: #17151d;
-  font-size: 14px;
+  /* 16px is not a style choice here. Safari on iOS zooms the page in when a field it focuses
+     renders below 16px - by 16 divided by the font size, so 14px gives about 1.14x - and it
+     does not zoom back out when the field is left. Every field on both screens was 14px, so
+     tapping any of them left the page magnified with half of it off screen. max() keeps the
+     floor and still lets the field grow where the surrounding text is larger. */
+  font-size: max(16px, 1em);
   outline: none;
 }
 
 .auth-page .field input::placeholder {
   color: #8a8490;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .auth-page .field input:focus,
