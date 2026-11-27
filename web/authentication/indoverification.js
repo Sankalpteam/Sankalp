@@ -43,13 +43,18 @@
     })();
 
     inFlight.set(requestKey, promise);
+    // A success keeps its slot for a few seconds, which is what stops a double tap from
+    // sending two codes. A failure must not: it was being replayed from here for three
+    // seconds, so a person who read the error and pressed the button again got the same
+    // sentence back instantly, from a request that never left the browser. It looked like the
+    // button had stopped working.
     void promise.then(
       () => window.setTimeout(() => {
         if (inFlight.get(requestKey) === promise) inFlight.delete(requestKey);
       }, REQUEST_DEDUPE_MS),
-      () => window.setTimeout(() => {
+      () => {
         if (inFlight.get(requestKey) === promise) inFlight.delete(requestKey);
-      }, REQUEST_DEDUPE_MS),
+      },
     );
     return promise;
   }

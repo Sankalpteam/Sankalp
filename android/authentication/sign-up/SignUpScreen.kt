@@ -117,6 +117,7 @@ fun SignUpScreen(
     onVerifyOtp: (otp: String) -> Unit,
     onResendOtp: () -> Unit,
     onLogin: () -> Unit,
+    onBackToDetails: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var mobile by rememberSaveable { mutableStateOf("") }
@@ -131,6 +132,10 @@ fun SignUpScreen(
     var agreed by rememberSaveable { mutableStateOf(false) }
     var openDocument by rememberSaveable { mutableStateOf("") }
     val otpFocusRequester = FocusRequester()
+    // ImeAction.Next does not move focus by itself. Three fields asked for it and none of them
+    // passed a handler, so the Next key on the keyboard did nothing at all - the same shape as
+    // the Done key before it was wired.
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
     val hasMobile = mobile.filter(Char::isDigit).isNotEmpty()
     // Ten digits, not "not blank". The field caps at ten and drops anything that is not a
@@ -142,6 +147,13 @@ fun SignUpScreen(
         password.length >= 6 &&
         password == confirmPassword &&
         agreed
+
+    // Back closes the document first. Compose gives the press to the innermost enabled
+    // handler, so this one wins over the activity's while a page is open - without it, reading
+    // the terms and pressing back threw away the half-filled form behind them.
+    androidx.activity.compose.BackHandler(enabled = openDocument.isNotEmpty()) {
+        openDocument = ""
+    }
 
     // The menu's own screens, not copies of them: LegalWebScreen draws the live page and falls
     // back to the snapshot bundled in the APK.
@@ -180,7 +192,7 @@ fun SignUpScreen(
             }
 
             LaunchedEffect(Unit) {
-                val description = "Securely create a Sankalp account for your authenticator vault."
+                val description = "Create your Sankalp account and start asking anything, in Kannada or English."
                 val delayPerCharacter = 2000L / description.length.coerceAtLeast(1)
                 for (index in 1..description.length) {
                     kotlinx.coroutines.delay(delayPerCharacter)
@@ -213,7 +225,7 @@ fun SignUpScreen(
                     )
                 }
             }
-            val description = "Securely create a Sankalp account for your authenticator vault."
+            val description = "Create your Sankalp account and start asking anything, in Kannada or English."
             Text(
                 description.take(descriptionVisibleChars),
                 color = androidx.compose.ui.graphics.Color(0xFF77717F),
@@ -230,19 +242,38 @@ fun SignUpScreen(
             placeholder = "you@example.com",
             enabled = !busy,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         Spacer(Modifier.height(14.dp))
         AuthFieldLabel("MOBILE NUMBER")
         AuthTextField(
             value = mobile,
-            onValueChange = { mobile = it.filter { char -> char.isDigit() }.take(10) },
+            onValueChange = { typed ->
+                // A pasted number arrives with its country code more often than not. Dropping
+                // it before the ten-digit cap matters: capping first kept "91" and cut the last
+                // two digits, so "+91 98765 43210" became 9198765432 and the account was
+                // saved as +919198765432 - unreachable by the number that was pasted.
+                val digits = typed.filter { char -> char.isDigit() }
+                // "91" in front, or the trunk "0" people write at home: both are prefixes and
+                // both have to go before the ten-digit cap.
+                var local = digits
+                if (local.length > 12 && local.startsWith("00")) local = local.drop(2)
+                if (local.length > 10 && local.startsWith("91")) local = local.drop(2)
+                if (local.length > 10 && local.startsWith("0")) local = local.drop(1)
+                mobile = local.take(10)
+            },
             placeholder = "98765 43210",
             enabled = !busy,
             leadingContent = if (hasMobile) {
                 { Text("+91", fontSize = 13.sp) }
             } else null,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         Spacer(Modifier.height(14.dp))
@@ -259,6 +290,9 @@ fun SignUpScreen(
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Next) },
+            ),
         )
 
         // The recovery screen has asked for the new password twice since it existed; signup,
@@ -289,14 +323,6 @@ fun SignUpScreen(
         )
 
         if (!otpVisible) {
-            Spacer(Modifier.height(4.dp))
-            ConsentRow(
-                agreed = agreed,
-                onAgreedChange = { agreed = it },
-                onOpenTerms = { openDocument = "terms" },
-                onOpenPrivacy = { openDocument = "privacy" },
-                enabled = !busy,
-            )
         }
 
         Spacer(Modifier.height(20.dp))
@@ -312,33 +338,12 @@ fun SignUpScreen(
                 enabled = actionEnabled,
                 onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password, confirmPassword) },
             )
-        } else {
-            // The same sixty seconds as the login screen. Without it a person taps Resend
-            // while the first mail is still in flight, and the third answer from Firebase is
-            // TOO_MANY_REQUESTS - a lockout far longer than the minute this waits.
-            var resendSecondsLeft by rememberSaveable {
-                mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
-            }
-            LaunchedEffect(otpVisible) {
-                if (!otpVisible) return@LaunchedEffect
-                resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
-                while (resendSecondsLeft > 0) {
-                    kotlinx.coroutines.delay(1_000)
-                    resendSecondsLeft -= 1
-                }
-            }
-            AuthPrimaryButton(
-                text = when {
-                    busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
-                    resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
-                    else -> "Resend OTP"
-                },
-                enabled = actionEnabled && resendSecondsLeft == 0,
-                onClick = { onResendOtp() },
-            )
         }
 
         if (otpVisible) {
+            TextButton(onClick = onBackToDetails, enabled = !busy) {
+                Text("← Back", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
             Spacer(Modifier.height(6.dp))
             Text(
                 buildAnnotatedString {
@@ -357,18 +362,64 @@ fun SignUpScreen(
                 modifier = Modifier.focusRequester(otpFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
-                    onDone = { if (!busy && otp.length == 6) onVerifyOtp(otp) },
+                    onDone = { if (!busy && otp.length == 6 && agreed) onVerifyOtp(otp) },
                 ),
             )
             Spacer(Modifier.height(4.dp))
             AuthPrimaryButton(
                 text = if (busyAction == AuthBusyAction.VERIFY_OTP) "Verifying…" else "Verify & Create Account",
-                enabled = !busy && otp.length == 6,
+                // The box is still on this screen and can still be unticked; Verify honours
+                // it, so a withdrawn tick cannot end in a consent record saying otherwise.
+                enabled = !busy && otp.length == 6 && agreed,
                 onClick = { onVerifyOtp(otp) },
             )
-            AuthStatus(status, error = false)
+
+            // The same sixty seconds as the login screen. Without it a person taps Resend
+            // while the first mail is still in flight, and the third answer from Firebase is
+            // TOO_MANY_REQUESTS - a lockout far longer than the minute this waits.
+            var resendSecondsLeft by rememberSaveable {
+                mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
+            }
+            // Keyed on the status as well: a successful resend changes it, and the countdown
+            // has to start again from there. Keyed on otpVisible alone it never restarted, so
+            // the button was ready to press the instant the new code went out - the exact
+            // tapping the cooldown exists to prevent.
+            LaunchedEffect(otpVisible, status) {
+                if (!otpVisible) return@LaunchedEffect
+                resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
+                while (resendSecondsLeft > 0) {
+                    kotlinx.coroutines.delay(1_000)
+                    resendSecondsLeft -= 1
+                }
+            }
+            AuthPrimaryButton(
+                text = when {
+                    busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
+                    resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
+                    else -> "Resend OTP"
+                },
+                enabled = actionEnabled && resendSecondsLeft == 0,
+                onClick = { onResendOtp() },
+            )
         }
 
+        // On screen for both steps, and under them: inside the details block it vanished the
+        // moment a code was requested, and the two clients disagreed about whether the box
+        // existed on that screen.
+        Spacer(Modifier.height(4.dp))
+        ConsentRow(
+            agreed = agreed,
+            onAgreedChange = { agreed = it },
+            onOpenTerms = { openDocument = "terms" },
+            onOpenPrivacy = { openDocument = "privacy" },
+            enabled = !busy,
+        )
+
+        // Both lines outside the step blocks. status used to live inside the code step, so a
+        // message set on the details step - "New OTP sent" after a resend is not the only kind
+        // there can be - would have been set and never shown. The web writes both to the same
+        // place outside the panels; this matches it.
+        AuthStatus(status, error = false)
         AuthStatus(error, error = true)
         Spacer(Modifier.height(10.dp))
         AuthSecondaryButton(

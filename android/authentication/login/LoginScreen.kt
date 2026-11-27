@@ -416,7 +416,10 @@ private fun LoginOtpPage(
     var resendSecondsLeft by rememberSaveable(otpEmail) {
         mutableStateOf(RESEND_COOLDOWN_SECONDS)
     }
-    LaunchedEffect(otpEmail) {
+    // Keyed on the status as well as the address: a resend answers with the same address, so
+    // otpEmail does not change and the countdown never restarted - the button was ready again
+    // the moment the new code went out.
+    LaunchedEffect(otpEmail, status) {
         // Arriving here means an OTP was just sent, so the clock starts now.
         resendSecondsLeft = RESEND_COOLDOWN_SECONDS
         while (resendSecondsLeft > 0) {

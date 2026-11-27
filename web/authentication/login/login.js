@@ -66,7 +66,6 @@
         ${logoMarkup()}
         <div>
           <strong>Sankalp</strong>
-          <small>Authenticator</small>
         </div>
       </div>
 

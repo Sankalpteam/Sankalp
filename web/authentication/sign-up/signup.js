@@ -11,7 +11,7 @@
     { text: 'Creating your account', purple: false }
   ];
   const DESCRIPTION =
-    'Securely create a Sankalp account for your authenticator vault.';
+    'Create your Sankalp account and start asking anything, in Kannada or English.';
   const DESCRIPTION_MS = 2000;
 
   function logoMarkup() {
@@ -34,7 +34,7 @@
           autocomplete="tel"
           autocapitalize="none"
           spellcheck="false"
-          maxlength="13"
+          maxlength="16"
           placeholder="98765 43210"
         />
       </div>
@@ -68,7 +68,6 @@
         ${logoMarkup()}
         <div>
           <strong>Sankalp</strong>
-          <small>Authenticator</small>
         </div>
       </div>
 
@@ -85,7 +84,7 @@
       ></p>
 
       <div class="field">
-        <label>EMAIL ID</label>
+        <label for="signupEmail">EMAIL ID</label>
         <input
           id="signupEmail"
           name="email"
@@ -98,12 +97,12 @@
       </div>
 
       <div class="field">
-        <label>MOBILE NUMBER</label>
+        <label for="signupMobile">MOBILE NUMBER</label>
         ${mobileField()}
       </div>
 
       <div class="field">
-        <label>PASSWORD</label>
+        <label for="signupPassword">PASSWORD</label>
         ${passwordField()}
       </div>
 
@@ -111,7 +110,7 @@
            which is where the password is chosen for the first time, asked once. A typo here
            makes an account whose password nobody knows. -->
       <div class="field">
-        <label>CONFIRM PASSWORD</label>
+        <label for="signupConfirmPassword">CONFIRM PASSWORD</label>
         <div class="password-wrap">
           <input
             id="signupConfirmPassword"
@@ -133,18 +132,6 @@
       <!-- The agreement, once, at the moment an account is created. The two documents are
            the ones already published at /legal/ - no new page, so a change to either reaches
            this screen and every other place that links it. -->
-      <div class="auth-consent">
-        <label class="auth-consent-row">
-          <input type="checkbox" id="signupConsent" data-signup-consent />
-          <span>
-            I am 18 or older and I agree to the
-            <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
-            and the
-            <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
-          </span>
-        </label>
-      </div>
-
       <div
         class="auth-step auth-signup-actions"
         data-signup-step="details"
@@ -171,12 +158,15 @@
         data-signup-step="otp"
         hidden
       >
+        <!-- The handler for this has existed in auth-page.js since the screen was written and
+             nothing ever had the attribute, so it was dead code: a person who typed their
+             email wrong could only go back to Login and start again. -->
         <button
           type="button"
-          class="primary auth-action-button"
-          data-auth-action="signup-resend"
+          class="auth-back auth-action-button"
+          data-auth-action="signup-back"
         >
-          Resend OTP
+          ← Back
         </button>
 
         <p class="auth-note auth-note-tight">
@@ -184,7 +174,7 @@
         </p>
 
         <div class="field">
-          <label>VERIFICATION OTP</label>
+          <label for="signupOtp">VERIFICATION OTP</label>
           <input
             id="signupOtp"
             name="one-time-code"
@@ -202,6 +192,31 @@
         >
           Verify &amp; Create Account
         </button>
+
+        <!-- Resend belongs under Verify: the screen is asking for a code, and the way to get
+             another one comes after the way to use the one you have. It sat above the field,
+             which read as the first thing to do. -->
+        <button
+          type="button"
+          class="secondary auth-action-button"
+          data-auth-action="signup-resend"
+        >
+          Resend OTP
+        </button>
+      </div>
+
+      <!-- Shown on both steps, and placed under them: it sat between the fields and the
+           step panels, so on the code step the box appeared above the Back button. -->
+      <div class="auth-consent">
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupConsent" data-signup-consent />
+          <span>
+            I am 18 or older and I agree to the
+            <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
+            and the
+            <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+          </span>
+        </label>
       </div>
 
       <button
@@ -226,6 +241,36 @@
   }
 
   // The app keeps only digits in the mobile field and stops at ten.
+  /**
+   * Put a filtered value back without losing the caret.
+   *
+   * Assigning to input.value moves the cursor to the end. On a field that is rewritten on
+   * every keystroke that means a person cannot correct a digit in the middle of their own
+   * number: each press sends them to the end. The caret is counted in digits before the
+   * change and restored after that many digits in the new value, which is where the person
+   * was looking.
+   */
+  function setFilteredValue(input, next) {
+    if (input.value === next) return;
+
+    const before = input.value.slice(0, input.selectionStart ?? input.value.length);
+    const digitsBefore = before.replace(/\D/g, '').length;
+
+    input.value = next;
+
+    let seen = 0;
+    let caret = next.length;
+    for (let i = 0; i < next.length; i += 1) {
+      if (/\d/.test(next[i])) seen += 1;
+      if (seen === digitsBefore) { caret = i + 1; break; }
+    }
+    try {
+      input.setSelectionRange(caret, caret);
+    } catch (error) {
+      // A field that cannot hold a selection is not worth failing over.
+    }
+  }
+
   function bindMobileFilter(root) {
     const mobile = root.querySelector('#signupMobile');
 
@@ -233,18 +278,22 @@
 
     mobile.dataset.digitFilterBound = 'true';
 
-    const consent = root.querySelector('#signupConsent');
-    if (consent && consent.dataset.consentBound !== 'true') {
-      consent.dataset.consentBound = 'true';
-      consent.addEventListener('change', () => applyRules(root));
-    }
-
     mobile.addEventListener('input', () => {
-      const digits = mobile.value.replace(/\D/g, '').slice(0, 10);
+      // A pasted number usually arrives with its country code. Drop it before the ten-digit
+      // cap: capping first kept "91" and threw away the last two digits of the number, so
+      // "+91 98765 43210" was stored as +919198765432 - an account nobody can sign in to by
+      // mobile, created from a number that was perfectly correct when it was pasted.
+      const all = mobile.value.replace(/\D/g, '');
+      // Every prefix a person might type or paste, removed before the ten-digit cap: the
+      // international "00", then the country "91", then the trunk "0" people write at home.
+      // Capping first is what turned "+91 98765 43210" into 9198765432.
+      let local = all;
+      if (local.length > 12 && local.startsWith('00')) local = local.slice(2);
+      if (local.length > 10 && local.startsWith('91')) local = local.slice(2);
+      if (local.length > 10 && local.startsWith('0')) local = local.slice(1);
+      const digits = local.slice(0, 10);
 
-      if (mobile.value !== digits) {
-        mobile.value = digits;
-      }
+      setFilteredValue(mobile, digits);
 
       applyRules(root);
     });
@@ -315,7 +364,10 @@
     const verify = buttonFor(root, 'signup-verify');
 
     if (verify && otp) {
-      verify.disabled = otp.value.replace(/\D/g, '').length !== 6;
+      // The box is still on this screen and can still be unticked. Verify honours it, so a
+      // withdrawn tick cannot end in a consent record that says the opposite.
+      const stillAgreed = Boolean(root.querySelector('#signupConsent')?.checked);
+      verify.disabled = otp.value.replace(/\D/g, '').length !== 6 || !stillAgreed;
     }
   }
 
@@ -324,7 +376,58 @@
 
     bindMobileFilter(root);
 
-    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupOtp']
+    // Its own binding, not a line inside the mobile filter. It lived there, behind that
+    // function's early return, so a missing mobile field would have left the checkbox with no
+    // listener at all - ticked, and the buttons beside it still disabled.
+    const consent = root.querySelector('#signupConsent');
+    if (consent && consent.dataset.consentBound !== 'true') {
+      consent.dataset.consentBound = 'true';
+      consent.addEventListener('change', () => applyRules(root));
+    }
+
+    // The code field holds digits and nothing else, the way the app's does. Left alone it
+    // accepted "12a34b" - six characters, four digits, a disabled button and a screen that
+    // looks like it has six of them.
+    const otpInput = root.querySelector('#signupOtp');
+    if (otpInput && otpInput.dataset.digitFilterBound !== 'true') {
+      otpInput.dataset.digitFilterBound = 'true';
+      otpInput.addEventListener('input', () => {
+        const digits = otpInput.value.replace(/\D/g, '').slice(0, 6);
+        setFilteredValue(otpInput, digits);
+        applyRules(root);
+      });
+    }
+
+    // Enter submits, the way it does in every other form on the web. There is no <form>
+    // element here - the buttons are type="button" - so nothing does it for us, and a person
+    // who typed their details and pressed Enter got nothing at all.
+    const onEnter = event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const otpPanel = root.querySelector('[data-signup-step="otp"]');
+      const onCodeStep = otpPanel && !otpPanel.hidden;
+      const target = root.querySelector(
+        onCodeStep
+          ? '[data-auth-action="signup-verify"]'
+          : '[data-auth-action="signup-submit"]'
+      );
+      if (target && !target.disabled) target.click();
+    };
+
+    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword', '#signupOtp']
+      .forEach(selector => {
+        const input = root.querySelector(selector);
+        if (input && input.dataset.enterBound !== 'true') {
+          input.dataset.enterBound = 'true';
+          input.addEventListener('keydown', onEnter);
+        }
+      });
+
+    // The confirm field belongs in this list. Without it nothing re-evaluated the form when a
+    // person finished typing the second password, so the buttons that had been disabled while
+    // the two did not match stayed disabled - the form could not be completed at all.
+    // #signupOtp is not here: its own filter above already re-evaluates the form.
+    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword']
       .forEach(selector => {
         const input = root.querySelector(selector);
 
@@ -446,6 +549,13 @@
     otpEmail,
     values,
     applyRules,
+    // The title alternates on an interval that never ends by itself. Leaving signup for
+    // sign-in used to leave it running against a DOM that no longer had the element: one timer
+    // per visit, ticking every two seconds for the life of the tab.
+    stop: () => {
+      stopTitle();
+      stopTyping();
+    },
     startResendCooldown,
     show: () => window.IndooneAuthUI?.showSignup?.()
   };
