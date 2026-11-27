@@ -342,7 +342,10 @@
 
     bindMobileFilter(root);
 
-    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupOtp']
+    // The confirm field belongs in this list. Without it nothing re-evaluated the form when a
+    // person finished typing the second password, so the buttons that had been disabled while
+    // the two did not match stayed disabled - the form could not be completed at all.
+    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword', '#signupOtp']
       .forEach(selector => {
         const input = root.querySelector(selector);
 
