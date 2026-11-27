@@ -257,6 +257,11 @@
   margin: 0;
   border: 0;
   border-radius: 13px;
+  /* style.css gives .primary a purple glow - box-shadow: 0 7px 16px #7137df22 - and the
+     class is the same one these buttons use. It survived the change to a grey disabled
+     background, so a disabled button was grey with a purple halo round it, and the halo read
+     as a soft edge that was neither a border nor a shadow. Flat here, both states. */
+  box-shadow: none;
   background: linear-gradient(90deg, #703be2, #6d35e8);
   color: #fff;
   font-size: 14px;
