@@ -263,11 +263,21 @@
   }
 
   function fallbackSignupHtml() {
+    // Shown when the signup script itself did not load. It cannot offer a form, but it must
+    // offer a way out: without this the person was on a dead screen with no link and no
+    // button, and reloading was the only way back to signing in.
     return `
       <div class="auth-copy">
         <h1>Get started with Sankalp</h1>
         <p>The sign-up screen could not be loaded.</p>
       </div>
+      <button
+        type="button"
+        class="secondary auth-action-button"
+        data-auth-action="login"
+      >
+        Back to Login
+      </button>
     `;
   }
 
