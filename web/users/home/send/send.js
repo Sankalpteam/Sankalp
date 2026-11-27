@@ -210,7 +210,7 @@
     return node;
   }
 
-  async function send() {
+  async function send({ retryCount = 0 } = {}) {
     const input = document.getElementById('chatInput');
     const text = (input?.value || '').trim();
     const attachments = pending.slice();
@@ -234,6 +234,10 @@
     const mine = store.add({
       text,
       mine: true,
+      // Carried on the message itself. The retry cap counted replies in the thread instead,
+      // and retry removes the old reply before the new one arrives, so the count was always
+      // one and the cap could never be reached.
+      retryCount,
       attachments: sentAttachments
     });
 
