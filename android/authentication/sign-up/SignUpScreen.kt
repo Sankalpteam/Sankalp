@@ -36,6 +36,9 @@ import com.indoone.authentication.AuthStatus
 import com.indoone.authentication.AuthTextField
 import kotlinx.coroutines.isActive
 
+/** The wait between OTP sends, the same number the login screen and the web use. */
+private const val SIGNUP_RESEND_COOLDOWN_SECONDS = 60
+
 @Composable
 fun SignUpScreen(
     busy: Boolean,
@@ -174,9 +177,27 @@ fun SignUpScreen(
                 onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password) },
             )
         } else {
+            // The same sixty seconds as the login screen. Without it a person taps Resend
+            // while the first mail is still in flight, and the third answer from Firebase is
+            // TOO_MANY_REQUESTS - a lockout far longer than the minute this waits.
+            var resendSecondsLeft by rememberSaveable {
+                mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
+            }
+            LaunchedEffect(otpVisible) {
+                if (!otpVisible) return@LaunchedEffect
+                resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
+                while (resendSecondsLeft > 0) {
+                    kotlinx.coroutines.delay(1_000)
+                    resendSecondsLeft -= 1
+                }
+            }
             AuthPrimaryButton(
-                text = if (busyAction == AuthBusyAction.RESEND_OTP) "Sending…" else "Resend OTP",
-                enabled = actionEnabled,
+                text = when {
+                    busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
+                    resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
+                    else -> "Resend OTP"
+                },
+                enabled = actionEnabled && resendSecondsLeft == 0,
                 onClick = { onResendOtp() },
             )
         }
