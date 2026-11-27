@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -200,6 +201,10 @@ fun AuthTextField(
     placeholder: String,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    // Screens were asking for ImeAction.Done and never passing a handler, so the key the
+    // keyboard showed did nothing at all: a person typed six digits, tapped Done, and watched
+    // the keyboard sit there. Passing the action through lets each field say what Done means.
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     leadingContent: (@Composable (() -> Unit))? = null,
@@ -213,6 +218,7 @@ fun AuthTextField(
         singleLine = true,
         enabled = enabled,
         keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         leadingIcon = leadingContent,
         trailingIcon = trailingContent,
