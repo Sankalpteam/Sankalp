@@ -148,7 +148,6 @@ fun AuthBrand() {
                 fontWeight = FontWeight.Bold,
                 lineHeight = 19.sp,
             )
-
         }
     }
 }

@@ -181,7 +181,7 @@ fun SignUpScreen(
             }
 
             LaunchedEffect(Unit) {
-                val description = "Securely create a Sankalp account for your authenticator vault."
+                val description = "Create your Sankalp account and start asking anything, in Kannada or English."
                 val delayPerCharacter = 2000L / description.length.coerceAtLeast(1)
                 for (index in 1..description.length) {
                     kotlinx.coroutines.delay(delayPerCharacter)
@@ -214,7 +214,7 @@ fun SignUpScreen(
                     )
                 }
             }
-            val description = "Securely create a Sankalp account for your authenticator vault."
+            val description = "Create your Sankalp account and start asking anything, in Kannada or English."
             Text(
                 description.take(descriptionVisibleChars),
                 color = androidx.compose.ui.graphics.Color(0xFF77717F),
@@ -290,14 +290,6 @@ fun SignUpScreen(
         )
 
         if (!otpVisible) {
-            Spacer(Modifier.height(4.dp))
-            ConsentRow(
-                agreed = agreed,
-                onAgreedChange = { agreed = it },
-                onOpenTerms = { openDocument = "terms" },
-                onOpenPrivacy = { openDocument = "privacy" },
-                enabled = !busy,
-            )
         }
 
         Spacer(Modifier.height(20.dp))
@@ -337,13 +329,15 @@ fun SignUpScreen(
                 modifier = Modifier.focusRequester(otpFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
-                    onDone = { if (!busy && otp.length == 6) onVerifyOtp(otp) },
+                    onDone = { if (!busy && otp.length == 6 && agreed) onVerifyOtp(otp) },
                 ),
             )
             Spacer(Modifier.height(4.dp))
             AuthPrimaryButton(
                 text = if (busyAction == AuthBusyAction.VERIFY_OTP) "Verifying…" else "Verify & Create Account",
-                enabled = !busy && otp.length == 6,
+                // The box is still on this screen and can still be unticked; Verify honours
+                // it, so a withdrawn tick cannot end in a consent record saying otherwise.
+                enabled = !busy && otp.length == 6 && agreed,
                 onClick = { onVerifyOtp(otp) },
             )
 
@@ -373,6 +367,18 @@ fun SignUpScreen(
 
             AuthStatus(status, error = false)
         }
+
+        // On screen for both steps, and under them: inside the details block it vanished the
+        // moment a code was requested, and the two clients disagreed about whether the box
+        // existed on that screen.
+        Spacer(Modifier.height(4.dp))
+        ConsentRow(
+            agreed = agreed,
+            onAgreedChange = { agreed = it },
+            onOpenTerms = { openDocument = "terms" },
+            onOpenPrivacy = { openDocument = "privacy" },
+            enabled = !busy,
+        )
 
         AuthStatus(error, error = true)
         Spacer(Modifier.height(10.dp))

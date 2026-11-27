@@ -11,7 +11,7 @@
     { text: 'Creating your account', purple: false }
   ];
   const DESCRIPTION =
-    'Securely create a Sankalp account for your authenticator vault.';
+    'Create your Sankalp account and start asking anything, in Kannada or English.';
   const DESCRIPTION_MS = 2000;
 
   function logoMarkup() {
@@ -68,7 +68,6 @@
         ${logoMarkup()}
         <div>
           <strong>Sankalp</strong>
-          <small>Authenticator</small>
         </div>
       </div>
 
@@ -133,18 +132,6 @@
       <!-- The agreement, once, at the moment an account is created. The two documents are
            the ones already published at /legal/ - no new page, so a change to either reaches
            this screen and every other place that links it. -->
-      <div class="auth-consent">
-        <label class="auth-consent-row">
-          <input type="checkbox" id="signupConsent" data-signup-consent />
-          <span>
-            I am 18 or older and I agree to the
-            <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
-            and the
-            <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
-          </span>
-        </label>
-      </div>
-
       <div
         class="auth-step auth-signup-actions"
         data-signup-step="details"
@@ -216,6 +203,20 @@
         >
           Resend OTP
         </button>
+      </div>
+
+      <!-- Shown on both steps, and placed under them: it sat between the fields and the
+           step panels, so on the code step the box appeared above the Back button. -->
+      <div class="auth-consent">
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupConsent" data-signup-consent />
+          <span>
+            I am 18 or older and I agree to the
+            <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
+            and the
+            <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+          </span>
+        </label>
       </div>
 
       <button
@@ -329,7 +330,10 @@
     const verify = buttonFor(root, 'signup-verify');
 
     if (verify && otp) {
-      verify.disabled = otp.value.replace(/\D/g, '').length !== 6;
+      // The box is still on this screen and can still be unticked. Verify honours it, so a
+      // withdrawn tick cannot end in a consent record that says the opposite.
+      const stillAgreed = Boolean(root.querySelector('#signupConsent')?.checked);
+      verify.disabled = otp.value.replace(/\D/g, '').length !== 6 || !stillAgreed;
     }
   }
 
