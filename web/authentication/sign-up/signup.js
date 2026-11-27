@@ -245,7 +245,15 @@
     const email = (root.querySelector('#signupEmail')?.value || '').trim();
     const mobile = (root.querySelector('#signupMobile')?.value || '').trim();
     const password = root.querySelector('#signupPassword')?.value || '';
-    const ready = Boolean(email) && Boolean(mobile) && password.length >= 6;
+    // An Indian mobile is ten digits. The field already strips everything else and caps at
+    // ten, but nothing required the tenth - so one digit enabled both buttons, and the account
+    // was created with the mobile "+911". That account can never be found by mobile again,
+    // because the lookup searches for a ten-digit number.
+    const mobileDigits = mobile.replace(/\D/g, '');
+    const ready =
+      Boolean(email) &&
+      mobileDigits.length === 10 &&
+      password.length >= 6;
 
     ['signup-submit', 'signup-password'].forEach(action => {
       const button = buttonFor(root, action);

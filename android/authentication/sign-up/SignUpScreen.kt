@@ -62,7 +62,11 @@ fun SignUpScreen(
     val otpFocusRequester = FocusRequester()
 
     val hasMobile = mobile.filter(Char::isDigit).isNotEmpty()
-    val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else email.isNotBlank() && mobile.isNotBlank() && password.length >= 6
+    // Ten digits, not "not blank". The field caps at ten and drops anything that is not a
+    // digit, so a single digit used to be enough to create an account whose mobile was
+    // "+911" - unreachable by the mobile lookup ever after.
+    val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else
+        email.isNotBlank() && mobile.length == 10 && password.length >= 6
 
     LaunchedEffect(otpVisible) {
         if (otpVisible) otpFocusRequester.requestFocus()
