@@ -331,6 +331,9 @@ private fun LoginEntryPage(
     )
 }
 
+/** The wait between OTP sends. The web uses the same number, in login.js. */
+private const val RESEND_COOLDOWN_SECONDS = 60
+
 @Composable
 private fun LoginOtpPage(
     busy: Boolean,
@@ -390,9 +393,27 @@ private fun LoginOtpPage(
     )
 
     Spacer(Modifier.height(8.dp))
+    // Sixty seconds between sends. Without the wait a person taps Resend three times in ten
+    // seconds, Firebase answers TOO_MANY_REQUESTS, and the address is locked out for far
+    // longer than a minute. The remaining time is on the button so the wait is visible.
+    var resendSecondsLeft by rememberSaveable(otpEmail) {
+        mutableStateOf(RESEND_COOLDOWN_SECONDS)
+    }
+    LaunchedEffect(otpEmail) {
+        // Arriving here means an OTP was just sent, so the clock starts now.
+        resendSecondsLeft = RESEND_COOLDOWN_SECONDS
+        while (resendSecondsLeft > 0) {
+            kotlinx.coroutines.delay(1_000)
+            resendSecondsLeft -= 1
+        }
+    }
     AuthSecondaryButton(
-        text = if (busyAction == AuthBusyAction.RESEND_OTP) "Sending…" else "Resend OTP",
-        enabled = !busy,
+        text = when {
+            busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
+            resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
+            else -> "Resend OTP"
+        },
+        enabled = !busy && resendSecondsLeft == 0,
         onClick = onResendOtp,
     )
 
