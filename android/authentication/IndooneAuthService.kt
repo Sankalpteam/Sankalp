@@ -79,6 +79,10 @@ class IndooneAuthService(
 
     suspend fun verifyLoginOtp(otp: String) {
         val pending = loginPending ?: throw AuthException("Please request a new OTP.")
+        if (isStale(pending.requestedAt)) {
+            loginPending = null
+            throw AuthException("That code has expired. Please request a new OTP.")
+        }
         val code = otp.filter(Char::isDigit)
         if (code.length != 6) throw AuthException("Enter the 6-digit OTP.")
 
@@ -136,7 +140,10 @@ class IndooneAuthService(
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a new challenge ID.")
-            loginPending = pending.copy(challengeId = challengeId)
+            loginPending = pending.copy(
+                challengeId = challengeId,
+                requestedAt = System.currentTimeMillis(),
+            )
         }
         return pending.email
     }
@@ -198,6 +205,10 @@ class IndooneAuthService(
     }
 
     suspend fun resendSignupOtp(): String {
+        // No staleness check here on purpose: asking for another code is exactly what a person
+        // does once the first one has expired, and refusing them at that moment sends them back
+        // to the start of the form for no reason. The verify path is where a stale challenge
+        // must not be used.
         val pending = signupPending ?: throw AuthException("Signup session expired. Enter your details again.")
         withContext(Dispatchers.IO) {
             val result = post("/api/auth/resend-otp", JSONObject().apply {
@@ -206,13 +217,20 @@ class IndooneAuthService(
             })
             val challengeId = result.optString("challengeId")
             if (challengeId.isBlank()) throw AuthException("OTP service did not return a new challenge ID.")
-            signupPending = pending.copy(challengeId = challengeId)
+            signupPending = pending.copy(
+                challengeId = challengeId,
+                requestedAt = System.currentTimeMillis(),
+            )
         }
         return pending.email
     }
 
     suspend fun verifySignupOtp(otp: String): String {
         val pending = signupPending ?: throw AuthException("Signup session expired. Enter your details again.")
+        if (isStale(pending.requestedAt)) {
+            signupPending = null
+            throw AuthException("That code has expired. Enter your details again.")
+        }
         val code = otp.filter(Char::isDigit)
         if (code.length != 6) throw AuthException("Enter the 6-digit OTP.")
 
@@ -367,7 +385,28 @@ class IndooneAuthService(
     private suspend fun <T> await(task: Task<T>): T = withContext(Dispatchers.IO) { Tasks.await(task) }
 
     data class AuthException(override val message: String) : Exception(message)
-    private data class LoginPending(val email: String, val challengeId: String)
-    private data class SignupPending(val email: String, val mobile: String, val password: String, val challengeId: String)
+    private data class LoginPending(
+        val email: String,
+        val challengeId: String,
+        val requestedAt: Long = System.currentTimeMillis(),
+    )
+
+    private data class SignupPending(
+        val email: String,
+        val mobile: String,
+        val password: String,
+        val challengeId: String,
+        val requestedAt: Long = System.currentTimeMillis(),
+    )
+
+    /**
+     * How long a challenge may be used, the same ten minutes the web gives it.
+     *
+     * Without this the record lived as long as the process did: the app could sit in the
+     * background overnight and still send yesterday's challengeId, and the answer was whatever
+     * the service says about an expired challenge rather than "request a new code".
+     */
+    private fun isStale(requestedAt: Long): Boolean =
+        System.currentTimeMillis() - requestedAt > 10 * 60 * 1000
     private data class MobileIdentity(val email: String, val uid: String)
 }

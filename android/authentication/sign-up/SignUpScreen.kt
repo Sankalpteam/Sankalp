@@ -354,7 +354,11 @@ fun SignUpScreen(
             var resendSecondsLeft by rememberSaveable {
                 mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
             }
-            LaunchedEffect(otpVisible) {
+            // Keyed on the status as well: a successful resend changes it, and the countdown
+            // has to start again from there. Keyed on otpVisible alone it never restarted, so
+            // the button was ready to press the instant the new code went out - the exact
+            // tapping the cooldown exists to prevent.
+            LaunchedEffect(otpVisible, status) {
                 if (!otpVisible) return@LaunchedEffect
                 resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
                 while (resendSecondsLeft > 0) {
