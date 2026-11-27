@@ -170,13 +170,20 @@ window.initMenuDeleteAccount = function () {
           .toLowerCase();
         const mobile = String(profile.mobile || '').trim();
 
-        const updates = { [`users/${liveUser.uid}`]: null };
+        // Two writes, not one. In a single update, a path the rules refuse fails the whole
+        // update - so a mobile index entry that belongs to some other uid, which is exactly
+        // what a number reused after an old account leaves behind, would have stopped the
+        // account itself from being deleted. The account goes first and on its own; the index
+        // entry is cleanup and is allowed to fail.
+        await db.ref(`users/${liveUser.uid}`).remove();
 
         if (mobile) {
-          updates[`mobileIndex/${encodeURIComponent(mobile)}`] = null;
+          try {
+            await db.ref(`mobileIndex/${encodeURIComponent(mobile)}`).remove();
+          } catch (error) {
+            // the account is already gone; a stale index entry is not worth failing over
+          }
         }
-
-        await db.ref().update(updates);
 
         // Best effort, and deliberately not awaited: any other node carrying this email is
         // cleanup, and it must never be able to block the deletion itself. The app does the

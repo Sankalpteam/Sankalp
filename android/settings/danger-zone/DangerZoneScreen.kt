@@ -280,13 +280,18 @@ private fun removeOwnCloudData(
     onSuccess: () -> Unit,
     onError: (String) -> Unit,
 ) {
-    val updates = hashMapOf<String, Any?>()
-    updates["users/$uid"] = null
-    if (mobile.isNotBlank()) {
-        updates["mobileIndex/${java.net.URLEncoder.encode(mobile, Charsets.UTF_8.name())}"] = null
-    }
-    db.updateChildren(updates)
+    // The account node first, on its own. In one updateChildren, a path the rules refuse
+    // fails the whole update - and a mobile index entry naming some other uid, which is what
+    // a number reused after an old account leaves behind, is refused. That would have stopped
+    // the account itself from being deleted.
+    db.child("users").child(uid).removeValue()
         .addOnSuccessListener {
+            if (mobile.isNotBlank()) {
+                // cleanup, and allowed to fail: the account is already gone
+                db.child("mobileIndex")
+                    .child(java.net.URLEncoder.encode(mobile, Charsets.UTF_8.name()))
+                    .removeValue()
+            }
             onStatus("Deleting your Sankalp account…")
             val current = auth.currentUser
             if (current == null) {
