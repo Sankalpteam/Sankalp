@@ -85,10 +85,15 @@ class AuthActivity : ComponentActivity() {
                 // the keyboard away - left the form entirely and landed on sign-in. That is
                 // why it looked intermittent: it only happened while a field was focused.
                 val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-                val imeVisible = androidx.compose.foundation.layout.WindowInsets.isImeVisible
+                // Asked of the platform rather than of Compose: WindowInsets.isImeVisible is
+                // not resolvable in this Compose version, and a guess about whether the
+                // keyboard is up is what put a person on the sign-in screen in the first place.
+                val view = androidx.compose.ui.platform.LocalView.current
 
                 BackHandler(enabled = true) {
-                    if (imeVisible) {
+                    val insets = androidx.core.view.ViewCompat.getRootWindowInsets(view)
+                    val imeUp = insets?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
+                    if (imeUp) {
                         keyboard?.hide()
                         return@BackHandler
                     }
