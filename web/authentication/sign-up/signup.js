@@ -278,12 +278,6 @@
 
     mobile.dataset.digitFilterBound = 'true';
 
-    const consent = root.querySelector('#signupConsent');
-    if (consent && consent.dataset.consentBound !== 'true') {
-      consent.dataset.consentBound = 'true';
-      consent.addEventListener('change', () => applyRules(root));
-    }
-
     mobile.addEventListener('input', () => {
       // A pasted number usually arrives with its country code. Drop it before the ten-digit
       // cap: capping first kept "91" and threw away the last two digits of the number, so
@@ -381,6 +375,15 @@
     if (!root?.querySelector) return;
 
     bindMobileFilter(root);
+
+    // Its own binding, not a line inside the mobile filter. It lived there, behind that
+    // function's early return, so a missing mobile field would have left the checkbox with no
+    // listener at all - ticked, and the buttons beside it still disabled.
+    const consent = root.querySelector('#signupConsent');
+    if (consent && consent.dataset.consentBound !== 'true') {
+      consent.dataset.consentBound = 'true';
+      consent.addEventListener('change', () => applyRules(root));
+    }
 
     // The code field holds digits and nothing else, the way the app's does. Left alone it
     // accepted "12a34b" - six characters, four digits, a disabled button and a screen that
