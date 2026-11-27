@@ -208,7 +208,40 @@
 
   // The app enables both buttons only once the email and mobile are filled and
   // the password is six characters or more; and Verify only at six digits.
+  // The same sixty seconds as the login screen, for the same reason: three taps in ten
+  // seconds is what a person does when the mail has not arrived, and Firebase answers the
+  // third with TOO_MANY_REQUESTS - a lockout far longer than the wait this imposes.
+  const RESEND_COOLDOWN_MS = 60_000;
+  let resendUntil = 0;
+  let resendTicker = null;
+
+  function resendSecondsLeft() {
+    return Math.max(0, Math.ceil((resendUntil - Date.now()) / 1000));
+  }
+
+  function startResendCooldown(root = document) {
+    resendUntil = Date.now() + RESEND_COOLDOWN_MS;
+    if (resendTicker) return;
+    resendTicker = window.setInterval(() => {
+      if (resendSecondsLeft() <= 0) {
+        window.clearInterval(resendTicker);
+        resendTicker = null;
+        resendUntil = 0;
+      }
+      applyRules(document);
+    }, 1000);
+    applyRules(root);
+  }
+
   function applyRules(root) {
+    const resend = buttonFor(root, 'signup-resend');
+    if (resend) {
+      const left = resendSecondsLeft();
+      resend.disabled = left > 0;
+      resend.textContent = left > 0 ? `Resend in ${left}s` : 'Resend OTP';
+      resend.setAttribute('aria-live', 'polite');
+    }
+
     const email = (root.querySelector('#signupEmail')?.value || '').trim();
     const mobile = (root.querySelector('#signupMobile')?.value || '').trim();
     const password = root.querySelector('#signupPassword')?.value || '';
@@ -355,6 +388,7 @@
     otpEmail,
     values,
     applyRules,
+    startResendCooldown,
     show: () => window.IndooneAuthUI?.showSignup?.()
   };
 })();
