@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -161,6 +162,15 @@ fun SignUpScreen(
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            // Done does what the button under it does. The keyboard offered the key and
+            // nothing listened to it.
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (actionEnabled) {
+                        onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password)
+                    }
+                },
+            ),
         )
 
         Spacer(Modifier.height(20.dp))
@@ -220,6 +230,9 @@ fun SignUpScreen(
                 enabled = !busy,
                 modifier = Modifier.focusRequester(otpFocusRequester),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = { if (!busy && otp.length == 6) onVerifyOtp(otp) },
+                ),
             )
             Spacer(Modifier.height(4.dp))
             AuthPrimaryButton(

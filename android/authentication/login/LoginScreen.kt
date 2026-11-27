@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.border
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -383,6 +384,12 @@ private fun LoginOtpPage(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done,
         ),
+        // Done submits, on the same terms as the button: six digits in, nothing in flight.
+        // Asking the keyboard for Done and ignoring the press left the person with a key that
+        // did nothing.
+        keyboardActions = KeyboardActions(
+            onDone = { if (!busy && otp.length == 6) onVerifyOtp() },
+        ),
     )
 
     Spacer(Modifier.height(16.dp))
@@ -495,6 +502,14 @@ private fun LoginPasswordPage(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done,
+        ),
+        // Done on the password field submits, on the same terms as the button below it.
+        keyboardActions = KeyboardActions(
+            onDone = {
+                if (!busy && password.isNotBlank() && identifier.isNotBlank()) {
+                    onCompleteLogin()
+                }
+            },
         ),
     )
 
