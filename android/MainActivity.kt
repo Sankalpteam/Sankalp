@@ -214,7 +214,7 @@ class MainActivity : ComponentActivity() {
                             if (showUpToDateMessage) {
                                 Toast.makeText(
                                     this@MainActivity,
-                                    error.message ?: "Could not check for updates.",
+                                    "Could not check for updates.",
                                     Toast.LENGTH_SHORT,
                                 ).show()
                             }
@@ -248,7 +248,7 @@ class MainActivity : ComponentActivity() {
                             // route that does not depend on this app's download working.
                             Toast.makeText(
                                 this@MainActivity,
-                                error.message ?: "Could not download the update.",
+                                "Could not download the update.",
                                 Toast.LENGTH_LONG,
                             ).show()
 
@@ -325,7 +325,7 @@ class MainActivity : ComponentActivity() {
                         }.onFailure { error ->
                             Toast.makeText(
                                 this@MainActivity,
-                                error.message ?: "Could not load accounts.",
+                                "Could not load accounts.",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
@@ -586,7 +586,7 @@ class MainActivity : ComponentActivity() {
                                 onBack = { route = AppRoute.ACCOUNT_DETAILS },
                                 onSave = {
                                     vm.prepareSave()
-                                        .onFailure { e -> vm.onSaveFailed(e.message ?: "Invalid account details.") }
+                                        .onFailure { e -> vm.onSaveFailed("Invalid account details.") }
                                         .onSuccess { request ->
                                             vm.onSaveStarted()
                                             coroutineScope.launch {
@@ -608,7 +608,7 @@ class MainActivity : ComponentActivity() {
                                                     loadAccounts()
                                                     route = AppRoute.ACCOUNT_DETAILS
                                                 }.onFailure { e ->
-                                                    vm.onSaveFailed(e.message ?: "Could not save account.")
+                                                    vm.onSaveFailed("Could not save account.")
                                                 }
                                             }
                                         }
@@ -741,7 +741,7 @@ class MainActivity : ComponentActivity() {
                             onBack = { route = AppRoute.ADD_ACCOUNT },
                             onSave = {
                                 enterSetupKeyViewModel.prepareSave()
-                                    .onFailure { e -> enterSetupKeyViewModel.onSaveFailed(e.message ?: "Invalid account details.") }
+                                    .onFailure { e -> enterSetupKeyViewModel.onSaveFailed("Invalid account details.") }
                                     .onSuccess { request ->
                                         enterSetupKeyViewModel.onSaveStarted()
                                         coroutineScope.launch {
@@ -752,7 +752,7 @@ class MainActivity : ComponentActivity() {
                                                     route = AppRoute.LOBBY
                                                 }
                                                 .onFailure { e ->
-                                                    enterSetupKeyViewModel.onSaveFailed(e.message ?: "Could not save account.")
+                                                    enterSetupKeyViewModel.onSaveFailed("Could not save account.")
                                                 }
                                         }
                                     }
@@ -948,7 +948,7 @@ private fun saveQrLikeAccount(
     onSuccess: () -> Unit,
 ) {
     viewModel.prepareSave()
-        .onFailure { error -> viewModel.onSaveFailed(error.message ?: "Invalid account details.") }
+        .onFailure { error -> viewModel.onSaveFailed("Invalid account details.") }
         .onSuccess {
             viewModel.onSaveStarted()
             scope.launch {
@@ -957,7 +957,7 @@ private fun saveQrLikeAccount(
                         viewModel.onSaveCompleted()
                         onSuccess()
                     }
-                    .onFailure { error -> viewModel.onSaveFailed(error.message ?: "Could not save account.") }
+                    .onFailure { error -> viewModel.onSaveFailed("Could not save account.") }
             }
         }
 }
