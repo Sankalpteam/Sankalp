@@ -112,6 +112,18 @@ class AuthActivity : ComponentActivity() {
                                                 "session could not be created. Please sign in."
                                         } else {
                                             session.setVerified(uid)
+                                            // The tick was made before there was a uid to
+                                            // write it against; this is the first moment
+                                            // there is one. Off the main thread, because
+                                            // Consent.record waits on a Firebase write and
+                                            // waiting on the main thread is an ANR.
+                                            scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                                Consent.record(
+                                                    FirebaseDatabase.getInstance(),
+                                                    uid,
+                                                    ageConfirmed = true,
+                                                )
+                                            }
                                             openMain()
                                         }
                                     }
@@ -130,6 +142,18 @@ class AuthActivity : ComponentActivity() {
                                                 "session could not be created. Please sign in."
                                         } else {
                                             session.setVerified(uid)
+                                            // The tick was made before there was a uid to
+                                            // write it against; this is the first moment
+                                            // there is one. Off the main thread, because
+                                            // Consent.record waits on a Firebase write and
+                                            // waiting on the main thread is an ANR.
+                                            scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                                Consent.record(
+                                                    FirebaseDatabase.getInstance(),
+                                                    uid,
+                                                    ageConfirmed = true,
+                                                )
+                                            }
                                             openMain()
                                         }
                                     }
