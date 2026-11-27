@@ -412,7 +412,7 @@
 
   // -------------------------------------------------------------- signup
 
-  async function startSignup({ email, mobile, password, agreed }) {
+  async function startSignup({ email, mobile, password, confirmPassword, agreed }) {
     const cleanEmailValue = cleanEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const secret = String(password || '');
@@ -421,6 +421,12 @@
     // caller that reaches here without going through the button.
     if (!agreed) {
       throw new Error('Please agree to the Terms of Use and Privacy Policy.');
+    }
+
+    // The screen already compares the two; this is the second check, for a caller that did
+    // not come through it.
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      throw new Error('The two passwords do not match.');
     }
 
     if (!cleanEmailValue.includes('@')) {
@@ -560,13 +566,19 @@
   }
 
   // Sign up with the password directly, no OTP - the app's other signup path.
-  async function createSignupWithPassword({ email, mobile, password, agreed }) {
+  async function createSignupWithPassword({ email, mobile, password, confirmPassword, agreed }) {
     const cleanEmailValue = cleanEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const secret = String(password || '');
 
     if (!agreed) {
       throw new Error('Please agree to the Terms of Use and Privacy Policy.');
+    }
+
+    // The screen already compares the two; this is the second check, for a caller that did
+    // not come through it.
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      throw new Error('The two passwords do not match.');
     }
 
     if (!cleanEmailValue.includes('@')) {

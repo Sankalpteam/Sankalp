@@ -107,6 +107,29 @@
         ${passwordField()}
       </div>
 
+      <!-- The recovery screen has asked for the new password twice since it existed; signup,
+           which is where the password is chosen for the first time, asked once. A typo here
+           makes an account whose password nobody knows. -->
+      <div class="field">
+        <label>CONFIRM PASSWORD</label>
+        <div class="password-wrap">
+          <input
+            id="signupConfirmPassword"
+            name="signupConfirmPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Type it again"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            data-password-toggle="signupConfirmPassword"
+            aria-label="Show password"
+            title="Show password"
+          >◉</button>
+        </div>
+      </div>
+
       <!-- The agreement, once, at the moment an account is created. The two documents are
            the ones already published at /legal/ - no new page, so a change to either reaches
            this screen and every other place that links it. -->
@@ -266,6 +289,7 @@
     const email = (root.querySelector('#signupEmail')?.value || '').trim();
     const mobile = (root.querySelector('#signupMobile')?.value || '').trim();
     const password = root.querySelector('#signupPassword')?.value || '';
+    const confirmPassword = root.querySelector('#signupConfirmPassword')?.value || '';
     // An Indian mobile is ten digits. The field strips everything else and caps at ten, but
     // nothing required the tenth, so one digit enabled both buttons and the person met the
     // service's refusal instead of a disabled button. (The service checks the format too, so
@@ -276,6 +300,7 @@
       Boolean(email) &&
       mobileDigits.length === 10 &&
       password.length >= 6 &&
+      password === confirmPassword &&
       agreed;
 
     ['signup-submit', 'signup-password'].forEach(action => {
@@ -409,6 +434,7 @@
       email: root.querySelector('#signupEmail')?.value || '',
       mobile: root.querySelector('#signupMobile')?.value || '',
       password: root.querySelector('#signupPassword')?.value || '',
+      confirmPassword: root.querySelector('#signupConfirmPassword')?.value || '',
       agreed: Boolean(root.querySelector('#signupConsent')?.checked)
     };
   }
