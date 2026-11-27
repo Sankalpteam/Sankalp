@@ -397,9 +397,10 @@
       return;
     }
 
-    const next = messages.slice(0, questionIndex + 1);
-    const updatedQuestion = { ...question, retryCount: currentRetryCount + 1 };
-    next[next.length - 1] = updatedQuestion;
+    // Both the reply and the question come off, which is what the comment above says and what
+    // the app does. Keeping the question and then calling send() put it in the thread twice -
+    // the same sentence, one under the other, with the second copy unanswered-looking.
+    const next = messages.slice(0, questionIndex);
     store.replace(next);
 
     const input = document.getElementById('chatInput');
@@ -409,7 +410,7 @@
       input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    send.send();
+    send.send({ retryCount: currentRetryCount + 1 });
   }
 
   function setListenState(button, isSpeaking) {

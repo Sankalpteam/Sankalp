@@ -540,6 +540,10 @@ private data class ChatMessage(
     // look like a brand-new item: all of them recomposed, and anything remembered inside them
     // was thrown away. The identity travels with the message now.
     val id: String = java.util.UUID.randomUUID().toString(),
+    // How many times this question has been re-asked. The cap counted replies in the thread
+    // instead, and a retry removes the old reply before the new one arrives, so the count was
+    // always one and the cap could never be reached.
+    val retryCount: Int = 0,
 )
 
 private enum class ChatActivityState {
@@ -688,6 +692,9 @@ fun HomeScreen(
     var input by remember { mutableStateOf("") }
     var messages by remember(userKey, startNewChat) { mutableStateOf(emptyList<ChatMessage>()) }
     var isSending by remember { mutableStateOf(false) }
+    // Set by a retry, read by the send it triggers. The count belongs to the question, and the
+    // question is created inside sendMessage.
+    var pendingRetryCount by remember { mutableStateOf(0) }
     var chatActivityState by remember { mutableStateOf(ChatActivityState.IDLE) }
     // How many answers the foreground stream has put on screen and the poll has not yet been
     // told about.
@@ -1031,7 +1038,13 @@ fun HomeScreen(
             "Please inspect the attached file(s) and describe their contents or visible details."
         }
         val requestConversationId = conversationId ?: UUID.randomUUID().toString()
-        messages = messages + ChatMessage(typed, true, attachmentsToSend)
+        messages = messages + ChatMessage(
+            typed,
+            true,
+            attachmentsToSend,
+            retryCount = pendingRetryCount,
+        )
+        pendingRetryCount = 0
         streamedReplies = 0
         input = ""
         conversationId = requestConversationId
@@ -2021,6 +2034,10 @@ fun HomeScreen(
                                             }
 
                                             if (question.isNotEmpty()) {
+                                                val previousRetryCount = messages
+                                                    .getOrNull(messages.indexOfLast { it.fromUser })
+                                                    ?.retryCount
+                                                    ?: 0
                                                 val trimmed = messages.toMutableList()
 
                                                 while (
@@ -2035,6 +2052,7 @@ fun HomeScreen(
                                                 }
 
                                                 messages = trimmed
+                                                pendingRetryCount = previousRetryCount + 1
                                                 input = question
                                                 // A stale flag would swallow the retry
                                                 // silently - the tap would do nothing.
@@ -2541,7 +2559,7 @@ private fun retriesAvailable(messages: List<ChatMessage>): Boolean {
         return false
     }
 
-    return messages.drop(lastQuestion + 1).count { !it.fromUser } <= 2
+    return messages[lastQuestion].retryCount < 2
 }
 
 // One icon button in a bubble's action row. 30dp is the icon's box, not the touch
