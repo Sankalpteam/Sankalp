@@ -107,8 +107,13 @@ class AuthActivity : ComponentActivity() {
                             scope.launch {
                                 runCatching { service.createSignupWithPassword(email, mobile, password) }
                                     .onSuccess { uid ->
-                                        session.setVerified(uid)
-                                        openMain()
+                                        if (uid.isBlank()) {
+                                            error = "The account was created, but the login " +
+                                                "session could not be created. Please sign in."
+                                        } else {
+                                            session.setVerified(uid)
+                                            openMain()
+                                        }
                                     }
                                     .onFailure { error = it.message ?: "Could not create account." }
                                 busyAction = null
@@ -120,8 +125,13 @@ class AuthActivity : ComponentActivity() {
                             scope.launch {
                                 runCatching { service.verifySignupOtp(otp) }
                                     .onSuccess { uid ->
-                                        session.setVerified(uid)
-                                        openMain()
+                                        if (uid.isBlank()) {
+                                            error = "The account was created, but the login " +
+                                                "session could not be created. Please sign in."
+                                        } else {
+                                            session.setVerified(uid)
+                                            openMain()
+                                        }
                                     }
                                     .onFailure { error = it.message ?: "Could not create account." }
                                 busyAction = null
@@ -177,8 +187,12 @@ class AuthActivity : ComponentActivity() {
                             scope.launch {
                                 runCatching { service.loginWithPassword(identifier, password) }
                                     .onSuccess { uid ->
-                                        session.setVerified(uid)
-                                        openMain()
+                                        if (uid.isBlank()) {
+                                            error = "Login failed. Please try again."
+                                        } else {
+                                            session.setVerified(uid)
+                                            openMain()
+                                        }
                                     }
                                     .onFailure { error = it.message ?: "Login failed." }
                                 busyAction = null
@@ -190,8 +204,20 @@ class AuthActivity : ComponentActivity() {
                             scope.launch {
                                 runCatching { service.verifyLoginOtp(otp) }
                                     .onSuccess {
-                                        auth.currentUser?.uid?.let(session::setVerified)
-                                        openMain()
+                                        // The code was verified; the session is a second thing
+                                        // that can fail on its own. Opening the app without
+                                        // one showed the chat screen to a client Firebase did
+                                        // not recognise, so every call in it was refused and
+                                        // the next launch asked for a code again. The web
+                                        // already refused to continue here.
+                                        val uid = auth.currentUser?.uid
+                                        if (uid.isNullOrBlank()) {
+                                            error = "OTP was verified, but the login session " +
+                                                "could not be created. Please try again."
+                                        } else {
+                                            session.setVerified(uid)
+                                            openMain()
+                                        }
                                     }
                                     .onFailure { error = it.message ?: "Login failed." }
                                 busyAction = null
