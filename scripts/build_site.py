@@ -38,7 +38,17 @@ SITE = ROOT / "site"
 
 DOMAIN = "sankalp.indoworkspace.in"
 LEGAL = ["privacy-policy", "terms-of-use", "data-privacy", "security"]
-ICONS = ["icon-48.png", "icon-96.png", "icon-180.png", "icon-192.png", "icon-512.png"]
+ICONS = [
+    "icon-48.png",
+    "icon-96.png",
+    "icon-180.png",
+    "icon-192.png",
+    "icon-512.png",
+    # The maskable variant is a separate file on purpose: the launcher crops a maskable icon
+    # to a circle, so the mark has to sit inside the centre 80%. Reusing icon-512.png there
+    # would have the ends of the mark cut off on Android.
+    "icon-maskable-512.png",
+]
 LOGOS = ["logo-1024.png", "logo-1024-white.png", "mark.png"]
 
 SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
@@ -182,7 +192,8 @@ def paint_console_nav() -> int:
 
 def main() -> None:
     require(
-        [LANDING / "index.html", LANDING / "style.css", APP / "index.html", APP / "update.json"]
+        [LANDING / "index.html", LANDING / "style.css", LANDING / "manifest.json",
+         APP / "index.html", APP / "update.json", APP / "manifest.json"]
         + [APP / "legal" / f"{slug}.html" for slug in LEGAL]
         + [APP / "favicon.ico"]
     )
@@ -194,6 +205,9 @@ def main() -> None:
     # 1. the landing page at the root
     shutil.copy2(LANDING / "index.html", SITE / "index.html")
     shutil.copy2(LANDING / "style.css", SITE / "style.css")
+    # The root manifest, so "add to home screen" at / installs Sankalp and not a bookmark.
+    # The app has its own at /app/manifest.json, with start_url /app/.
+    shutil.copy2(LANDING / "manifest.json", SITE / "manifest.json")
 
     # 2. the app, whole, so every relative path inside it keeps working
     shutil.copytree(APP, SITE / "app")
