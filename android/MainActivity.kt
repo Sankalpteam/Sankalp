@@ -1,7 +1,5 @@
 package com.indoone
 
-import android.util.Log
-
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -216,7 +214,7 @@ class MainActivity : ComponentActivity() {
                             if (showUpToDateMessage) {
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "Could not check for updates. Please try again.",
+                                    error.message ?: "Could not check for updates.",
                                     Toast.LENGTH_SHORT,
                                 ).show()
                             }
@@ -250,7 +248,7 @@ class MainActivity : ComponentActivity() {
                             // route that does not depend on this app's download working.
                             Toast.makeText(
                                 this@MainActivity,
-                                "Could not download the update. Please try again.",
+                                error.message ?: "Could not download the update.",
                                 Toast.LENGTH_LONG,
                             ).show()
 
@@ -327,7 +325,7 @@ class MainActivity : ComponentActivity() {
                         }.onFailure { error ->
                             Toast.makeText(
                                 this@MainActivity,
-                                "Could not load accounts. Please try again.",
+                                error.message ?: "Could not load accounts.",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
@@ -588,9 +586,7 @@ class MainActivity : ComponentActivity() {
                                 onBack = { route = AppRoute.ACCOUNT_DETAILS },
                                 onSave = {
                                     vm.prepareSave()
-                                        .onFailure { e ->
-                                            vm.onSaveFailed(readableFailure(e, "Could not save the account. Check the details and try again."))
-                                        }
+                                        .onFailure { e -> vm.onSaveFailed(e.message ?: "Invalid account details.") }
                                         .onSuccess { request ->
                                             vm.onSaveStarted()
                                             coroutineScope.launch {
@@ -612,7 +608,7 @@ class MainActivity : ComponentActivity() {
                                                     loadAccounts()
                                                     route = AppRoute.ACCOUNT_DETAILS
                                                 }.onFailure { e ->
-                                                    vm.onSaveFailed(readableFailure(e, "Could not save the account. Please try again."))
+                                                    vm.onSaveFailed(e.message ?: "Could not save account.")
                                                 }
                                             }
                                         }
@@ -745,9 +741,7 @@ class MainActivity : ComponentActivity() {
                             onBack = { route = AppRoute.ADD_ACCOUNT },
                             onSave = {
                                 enterSetupKeyViewModel.prepareSave()
-                                    .onFailure { e ->
-                                        enterSetupKeyViewModel.onSaveFailed(readableFailure(e, "Could not save the account. Check the details and try again."))
-                                    }
+                                    .onFailure { e -> enterSetupKeyViewModel.onSaveFailed(e.message ?: "Invalid account details.") }
                                     .onSuccess { request ->
                                         enterSetupKeyViewModel.onSaveStarted()
                                         coroutineScope.launch {
@@ -758,7 +752,7 @@ class MainActivity : ComponentActivity() {
                                                     route = AppRoute.LOBBY
                                                 }
                                                 .onFailure { e ->
-                                                    enterSetupKeyViewModel.onSaveFailed(readableFailure(e, "Could not save the account. Please try again."))
+                                                    enterSetupKeyViewModel.onSaveFailed(e.message ?: "Could not save account.")
                                                 }
                                         }
                                     }
@@ -920,23 +914,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-
-/**
- * A sentence a person can read, from a failure that has one that they cannot.
- *
- * `error.message ?: "fallback"` looks like it handles this and does not: an exception almost
- * always has a message, and it is a Java class name followed by an internal detail. The
- * fallback only fires when the message is null, which is the rare case. Every one of these
- * used to reach a Toast at the bottom of the screen verbatim.
- *
- * The real message is logged, because it is the thing that tells us what broke.
- */
-private fun readableFailure(error: Throwable?, fallback: String, tag: String = "Sankalp"): String {
-    val detail = error?.message.orEmpty()
-    if (detail.isNotBlank()) Log.w(tag, "failure: $detail")
-    return fallback
-}
-
 private fun FavoritesRoute(
     repository: com.indoone.lobby.accounts.AccountRepository,
     onBack: () -> Unit,
@@ -971,10 +948,7 @@ private fun saveQrLikeAccount(
     onSuccess: () -> Unit,
 ) {
     viewModel.prepareSave()
-        .onFailure { error ->
-            Log.w("SankalpAccounts", "save failed: ${error.message}")
-            viewModel.onSaveFailed("Could not save the account. Check the details and try again.")
-        }
+        .onFailure { error -> viewModel.onSaveFailed(error.message ?: "Invalid account details.") }
         .onSuccess {
             viewModel.onSaveStarted()
             scope.launch {
@@ -983,10 +957,7 @@ private fun saveQrLikeAccount(
                         viewModel.onSaveCompleted()
                         onSuccess()
                     }
-                    .onFailure { error ->
-                        Log.w("SankalpAccounts", "update failed: ${error.message}")
-                        viewModel.onSaveFailed("Could not save the account. Please try again.")
-                    }
+                    .onFailure { error -> viewModel.onSaveFailed(error.message ?: "Could not save account.") }
             }
         }
 }
