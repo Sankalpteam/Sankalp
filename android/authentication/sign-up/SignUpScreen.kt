@@ -3,6 +3,8 @@ package com.indoone.authentication.signup
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Text
@@ -35,7 +37,69 @@ import com.indoone.authentication.AuthPrimaryButton
 import com.indoone.authentication.AuthSecondaryButton
 import com.indoone.authentication.AuthStatus
 import com.indoone.authentication.AuthTextField
+import com.indoone.menu.legal.LegalWebScreen
 import kotlinx.coroutines.isActive
+
+
+/**
+ * The agreement, above the buttons that create an account.
+ *
+ * The two documents open in LegalWebScreen - the same component the menu uses, against the same
+ * pages, with the same snapshot bundled in the APK. This screen adds the box and the wording; it
+ * does not add a second copy of either document.
+ *
+ * Fully qualified names throughout, which is how this file already refers to Compose types, and
+ * which means no new imports: a duplicate import in a Kotlin file is what turned main red twice
+ * today.
+ */
+@Composable
+private fun ConsentRow(
+    agreed: Boolean,
+    onAgreedChange: (Boolean) -> Unit,
+    onOpenTerms: () -> Unit,
+    onOpenPrivacy: () -> Unit,
+    enabled: Boolean,
+) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = androidx.compose.ui.Alignment.Top,
+    ) {
+        androidx.compose.material3.Checkbox(
+            checked = agreed,
+            onCheckedChange = onAgreedChange,
+            enabled = enabled,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(Modifier.width(6.dp))
+        androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
+            Text(
+                text = "I am 18 or older and I agree to the",
+                fontSize = 13.sp,
+                lineHeight = 19.sp,
+                color = androidx.compose.ui.graphics.Color(0xFF4A4458),
+            )
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                TextButton(
+                    onClick = onOpenTerms,
+                    enabled = enabled,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                ) {
+                    Text("Terms of Use", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Text(" and the ", fontSize = 13.sp, color = androidx.compose.ui.graphics.Color(0xFF4A4458))
+                TextButton(
+                    onClick = onOpenPrivacy,
+                    enabled = enabled,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                ) {
+                    Text("Privacy Policy", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+    }
+}
 
 /** The wait between OTP sends, the same number the login screen and the web use. */
 private const val SIGNUP_RESEND_COOLDOWN_SECONDS = 60
@@ -59,6 +123,11 @@ fun SignUpScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var otp by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    // The agreement, and which document is open over this screen. The documents are the ones
+    // the menu already shows - LegalWebScreen against the live page, with the bundled snapshot
+    // as the offline fallback. Nothing is written a second time here.
+    var agreed by rememberSaveable { mutableStateOf(false) }
+    var openDocument by rememberSaveable { mutableStateOf("") }
     val otpFocusRequester = FocusRequester()
 
     val hasMobile = mobile.filter(Char::isDigit).isNotEmpty()
@@ -66,7 +135,25 @@ fun SignUpScreen(
     // digit, so a single digit used to be enough to create an account whose mobile was
     // "+911" - unreachable by the mobile lookup ever after.
     val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else
-        email.isNotBlank() && mobile.length == 10 && password.length >= 6
+        email.isNotBlank() && mobile.length == 10 && password.length >= 6 && agreed
+
+    // The menu's own screens, not copies of them: LegalWebScreen draws the live page and falls
+    // back to the snapshot bundled in the APK.
+    when (openDocument) {
+        "terms" -> LegalWebScreen(
+            title = "Terms of Use",
+            path = "/legal/terms-of-use.html",
+            assetFile = "legal/terms-of-use.html",
+            onBack = { openDocument = "" },
+        )
+        "privacy" -> LegalWebScreen(
+            title = "Privacy Policy",
+            path = "/legal/privacy-policy.html",
+            assetFile = "legal/privacy-policy.html",
+            onBack = { openDocument = "" },
+        )
+        else -> Unit
+    }
 
     LaunchedEffect(otpVisible) {
         if (otpVisible) otpFocusRequester.requestFocus()
@@ -176,6 +263,17 @@ fun SignUpScreen(
                 },
             ),
         )
+
+        if (!otpVisible) {
+            Spacer(Modifier.height(4.dp))
+            ConsentRow(
+                agreed = agreed,
+                onAgreedChange = { agreed = it },
+                onOpenTerms = { openDocument = "terms" },
+                onOpenPrivacy = { openDocument = "privacy" },
+                enabled = !busy,
+            )
+        }
 
         Spacer(Modifier.height(20.dp))
         if (!otpVisible) {
