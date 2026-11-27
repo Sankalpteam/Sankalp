@@ -670,7 +670,6 @@ private fun RowScope.QuickPromptChip(
 }
 
 @Composable
-@Composable
 fun HomeScreen(
     onMenuClick: () -> Unit,
     onLobbyClick: () -> Unit,
