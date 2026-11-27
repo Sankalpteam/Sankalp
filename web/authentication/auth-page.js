@@ -60,10 +60,14 @@
 
     // The status line sits below the card, not inside it, which is where the
     // app puts it.
+    // A form element, not just a div. Browsers and password managers only offer to save what
+    // was typed when the fields are inside a form; without one the account is created and the
+    // browser never asks, so the next visit means typing the password again. novalidate
+    // because the screens do their own validation and the native bubbles would double up.
     card.innerHTML = `
-      <div class="auth-page">
+      <form class="auth-page" novalidate>
         ${html}
-      </div>
+      </form>
       <div
         id="authStatus"
         class="auth-status"
@@ -71,6 +75,13 @@
         aria-live="polite"
       ></div>
     `;
+
+    // The buttons are type="button" and do the work themselves, so nothing here should ever
+    // submit. Prevented anyway: a stray Enter that reaches the form would otherwise reload the
+    // page and throw away everything typed into it.
+    card.querySelector('.auth-page')?.addEventListener('submit', event => {
+      event.preventDefault();
+    });
 
     bindButtons(card);
     bindMobileDefaults(card);
@@ -205,6 +216,11 @@
           button.textContent = showing ? '◉' : '◌';
           button.setAttribute(
             'aria-label',
+            showing ? 'Show password' : 'Hide password'
+          );
+          // the tooltip said "Show password" while the password was showing
+          button.setAttribute(
+            'title',
             showing ? 'Show password' : 'Hide password'
           );
           input.focus();
