@@ -241,34 +241,12 @@
   }
 
   // The app keeps only digits in the mobile field and stops at ten.
-  /**
-   * Put a filtered value back without losing the caret.
-   *
-   * Assigning to input.value moves the cursor to the end. On a field that is rewritten on
-   * every keystroke that means a person cannot correct a digit in the middle of their own
-   * number: each press sends them to the end. The caret is counted in digits before the
-   * change and restored after that many digits in the new value, which is where the person
-   * was looking.
-   */
+  // The caret-safe filter lives in auth-page.js, which both screens already reach for. A
+  // copy here was a second place for the same rule to be got wrong.
   function setFilteredValue(input, next) {
-    if (input.value === next) return;
-
-    const before = input.value.slice(0, input.selectionStart ?? input.value.length);
-    const digitsBefore = before.replace(/\D/g, '').length;
-
-    input.value = next;
-
-    let seen = 0;
-    let caret = next.length;
-    for (let i = 0; i < next.length; i += 1) {
-      if (/\d/.test(next[i])) seen += 1;
-      if (seen === digitsBefore) { caret = i + 1; break; }
-    }
-    try {
-      input.setSelectionRange(caret, caret);
-    } catch (error) {
-      // A field that cannot hold a selection is not worth failing over.
-    }
+    const shared = window.IndooneAuthUI?.setFilteredValue;
+    if (shared) return shared(input, next);
+    if (input && input.value !== next) input.value = next;
   }
 
   function bindMobileFilter(root) {
