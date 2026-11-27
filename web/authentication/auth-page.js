@@ -499,10 +499,43 @@
     currentScreen = null;
   }
 
+  /**
+   * Put a filtered value back into a field without sending the caret to the end.
+   *
+   * Assigning to input.value moves the cursor to the last character. On a field that is
+   * rewritten on every keystroke that means a person cannot correct a digit in the middle of
+   * their own number or code. The caret is counted in digits before the change and restored
+   * after that many digits in the new value.
+   *
+   * Here rather than in each screen: both of them filter a field this way, and a second copy
+   * is a second place for the caret rule to be got wrong.
+   */
+  function setFilteredValue(input, next) {
+    if (!input || input.value === next) return;
+
+    const before = input.value.slice(0, input.selectionStart ?? input.value.length);
+    const digitsBefore = before.replace(/\D/g, '').length;
+
+    input.value = next;
+
+    let seen = 0;
+    let caret = next.length;
+    for (let i = 0; i < next.length; i += 1) {
+      if (/\d/.test(next[i])) seen += 1;
+      if (seen === digitsBefore) { caret = i + 1; break; }
+    }
+    try {
+      input.setSelectionRange(caret, caret);
+    } catch (error) {
+      // a field that cannot hold a selection is not worth failing over
+    }
+  }
+
   const api = {
     showLogin,
     showSignup,
     showForgotPassword,
+    setFilteredValue,
     close
   };
 
