@@ -354,10 +354,24 @@
 
     bindMobileFilter(root);
 
+    // The code field holds digits and nothing else, the way the app's does. Left alone it
+    // accepted "12a34b" - six characters, four digits, a disabled button and a screen that
+    // looks like it has six of them.
+    const otpInput = root.querySelector('#signupOtp');
+    if (otpInput && otpInput.dataset.digitFilterBound !== 'true') {
+      otpInput.dataset.digitFilterBound = 'true';
+      otpInput.addEventListener('input', () => {
+        const digits = otpInput.value.replace(/\D/g, '').slice(0, 6);
+        if (otpInput.value !== digits) otpInput.value = digits;
+        applyRules(root);
+      });
+    }
+
     // The confirm field belongs in this list. Without it nothing re-evaluated the form when a
     // person finished typing the second password, so the buttons that had been disabled while
     // the two did not match stayed disabled - the form could not be completed at all.
-    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword', '#signupOtp']
+    // #signupOtp is not here: its own filter above already re-evaluates the form.
+    ['#signupEmail', '#signupMobile', '#signupPassword', '#signupConfirmPassword']
       .forEach(selector => {
         const input = root.querySelector(selector);
 
