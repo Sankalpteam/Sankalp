@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.indoone.authentication.AuthBrand
 import com.indoone.authentication.AuthBusyAction
+import com.indoone.authentication.ConsentRow
 import com.indoone.authentication.AuthFieldLabel
 import com.indoone.authentication.AuthHeading
 import com.indoone.authentication.AuthPage
@@ -53,54 +54,6 @@ import kotlinx.coroutines.isActive
  * today.
  */
 @Composable
-private fun ConsentRow(
-    agreed: Boolean,
-    onAgreedChange: (Boolean) -> Unit,
-    onOpenTerms: () -> Unit,
-    onOpenPrivacy: () -> Unit,
-    enabled: Boolean,
-) {
-    androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = androidx.compose.ui.Alignment.Top,
-    ) {
-        androidx.compose.material3.Checkbox(
-            checked = agreed,
-            onCheckedChange = onAgreedChange,
-            enabled = enabled,
-            modifier = Modifier.size(28.dp),
-        )
-        Spacer(Modifier.width(6.dp))
-        androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
-            Text(
-                text = "I am 18 or older and I agree to the",
-                fontSize = 13.sp,
-                lineHeight = 19.sp,
-                color = androidx.compose.ui.graphics.Color(0xFF4A4458),
-            )
-            androidx.compose.foundation.layout.Row(
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            ) {
-                TextButton(
-                    onClick = onOpenTerms,
-                    enabled = enabled,
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
-                ) {
-                    Text("Terms of Use", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-                Text(" and the ", fontSize = 13.sp, color = androidx.compose.ui.graphics.Color(0xFF4A4458))
-                TextButton(
-                    onClick = onOpenPrivacy,
-                    enabled = enabled,
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
-                ) {
-                    Text("Privacy Policy", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-    }
-}
-
 /** The wait between OTP sends, the same number the login screen and the web use. */
 private const val SIGNUP_RESEND_COOLDOWN_SECONDS = 60
 
