@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +59,25 @@ class AuthActivity : ComponentActivity() {
                 }
 
                 val busy = busyAction != null
+
+                // The system back button did nothing here. AuthActivity is the launcher
+                // activity, so back closed the app - from the OTP step, with a code already
+                // sent and about to be typed, the whole flow was gone. The screen has its own
+                // back arrow; this makes the gesture and the hardware key do the same thing,
+                // and only leaves the app from the first step.
+                BackHandler(enabled = true) {
+                    when {
+                        busy -> Unit
+                        otpVisible -> {
+                            otpVisible = false
+                            otpEmail = ""
+                            status = ""
+                            error = ""
+                        }
+                        showingSignup -> showingSignup = false
+                        else -> finish()
+                    }
+                }
 
                 if (showingSignup) {
                     SignUpScreen(

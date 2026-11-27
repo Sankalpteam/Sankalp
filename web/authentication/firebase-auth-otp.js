@@ -204,12 +204,29 @@
     }
   }
 
+  // Reading was guarded and writing was not. sessionStorage throws - Safari in private
+  // browsing, storage disabled by policy, a full quota - and the throw landed in the middle of
+  // startLoginOtp, so signing in by OTP failed with whatever the exception happened to say.
+  // A person cannot fix their browser storage from a sign-in screen, but they can be told what
+  // is wrong instead of being shown a failure with no cause.
   function writePending(key, value) {
-    if (value) {
-      sessionStorage.setItem(key, JSON.stringify(value));
-    } else {
-      sessionStorage.removeItem(key);
+    try {
+      if (value) {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } else {
+        sessionStorage.removeItem(key);
+      }
+      return true;
+    } catch (error) {
+      return false;
     }
+  }
+
+  function storageUnavailable() {
+    return new Error(
+      'Your browser is blocking storage, which this sign-in needs. Turn off private ' +
+      'browsing or allow site data for sankalp.indoworkspace.in, then try again.'
+    );
   }
 
   // --------------------------------------------------------------- login
@@ -229,12 +246,14 @@
       throw new Error('OTP service did not return a challenge ID.');
     }
 
-    writePending(LOGIN_PENDING_KEY, {
+    if (!writePending(LOGIN_PENDING_KEY, {
       email,
       rawIdentifier: raw,
       challengeId: result.challengeId,
       requestedAt: Date.now()
-    });
+    })) {
+      throw storageUnavailable();
+    }
 
     return email;
   }
@@ -339,7 +358,9 @@
 
     pending.challengeId = result.challengeId;
     pending.requestedAt = Date.now();
-    writePending(LOGIN_PENDING_KEY, pending);
+    if (!writePending(LOGIN_PENDING_KEY, pending)) {
+      throw storageUnavailable();
+    }
 
     return pending.email;
   }
@@ -415,13 +436,15 @@
       throw new Error('OTP service did not return a challenge ID.');
     }
 
-    writePending(SIGNUP_PENDING_KEY, {
+    if (!writePending(SIGNUP_PENDING_KEY, {
       email: cleanEmailValue,
       mobile: cleanMobile,
       password: secret,
       challengeId: result.challengeId,
       requestedAt: Date.now()
-    });
+    })) {
+      throw storageUnavailable();
+    }
 
     return cleanEmailValue;
   }
