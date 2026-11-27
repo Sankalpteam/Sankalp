@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Android 13+ themed icon layer.
+
+     The launcher tints this with the user's wallpaper palette, so the file carries only the
+     shape: the supplied mark's alpha, filled white, with no colour of its own. It is the
+     same bitmap the foreground uses, drawn the same way, so the themed icon is the same mark
+     and not a second drawing of it. Without this layer a themed launcher falls back to a
+     flat tinted square. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@mipmap/ic_launcher_monochrome"
+    android:gravity="fill"
+    android:filter="true" />
