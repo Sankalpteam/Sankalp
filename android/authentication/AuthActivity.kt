@@ -87,11 +87,11 @@ class AuthActivity : ComponentActivity() {
                         error = error,
                         otpVisible = otpVisible,
                         otpEmail = otpEmail,
-                        onSendOtp = { email, mobile, password ->
+                        onSendOtp = { email, mobile, password, confirmPassword ->
                             busyAction = AuthBusyAction.SEND_OTP
                             error = ""
                             scope.launch {
-                                runCatching { service.startSignup(email, mobile, password) }
+                                runCatching { service.startSignup(email, mobile, password, confirmPassword) }
                                     .onSuccess { destination ->
                                         otpEmail = destination
                                         otpVisible = true
@@ -101,11 +101,11 @@ class AuthActivity : ComponentActivity() {
                                 busyAction = null
                             }
                         },
-                        onCreateWithPassword = { email, mobile, password ->
+                        onCreateWithPassword = { email, mobile, password, confirmPassword ->
                             busyAction = AuthBusyAction.CREATE_ACCOUNT
                             error = ""
                             scope.launch {
-                                runCatching { service.createSignupWithPassword(email, mobile, password) }
+                                runCatching { service.createSignupWithPassword(email, mobile, password, confirmPassword) }
                                     .onSuccess { uid ->
                                         if (uid.isBlank()) {
                                             error = "The account was created, but the login " +

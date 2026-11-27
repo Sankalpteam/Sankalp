@@ -130,9 +130,16 @@ class IndooneAuthService(
         return pending.email
     }
 
-    suspend fun startSignup(emailValue: String, mobileValue: String, password: String): String {
+    suspend fun startSignup(
+        emailValue: String,
+        mobileValue: String,
+        password: String,
+        confirmPassword: String = password,
+    ): String {
         val email = emailValue.trim().lowercase()
         val mobile = normalizeMobile(mobileValue)
+        // The screen compares them; this is the second check, where the account is made.
+        if (password != confirmPassword) throw AuthException("The two passwords do not match.")
         if (!email.contains('@')) throw AuthException("Enter a valid email address.")
         if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
         if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
@@ -150,9 +157,15 @@ class IndooneAuthService(
         return email
     }
 
-    suspend fun createSignupWithPassword(emailValue: String, mobileValue: String, password: String): String {
+    suspend fun createSignupWithPassword(
+        emailValue: String,
+        mobileValue: String,
+        password: String,
+        confirmPassword: String = password,
+    ): String {
         val email = emailValue.trim().lowercase()
         val mobile = normalizeMobile(mobileValue)
+        if (password != confirmPassword) throw AuthException("The two passwords do not match.")
         if (!email.contains('@')) throw AuthException("Enter a valid email address.")
         if (!mobile.matches(Regex("\\+91\\d{10}"))) throw AuthException("Enter a valid 10-digit Indian mobile number.")
         if (password.length < 6) throw AuthException("Password should be at least 6 characters.")
