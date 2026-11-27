@@ -267,10 +267,7 @@
   cursor: pointer;
 }
 
-.auth-page .primary:disabled {
-  opacity: .6;
-  cursor: default;
-}
+
 
 .auth-page .secondary {
   height: 46px;
@@ -486,15 +483,15 @@
 /* The app puts Continue with OTP and Continue with Password side by side,
    both as primary buttons. */
 .auth-page .auth-button-row {
+  /* One under the other, full width. Side by side, the two labels had to shrink to 12px to
+     fit a phone and "Continue with Password" still ran to the edges of its button. */
   display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
 .auth-page .auth-button-row .primary {
-  flex: 1 1 0;
-  min-width: 0;
-  font-size: 12px;
-  padding: 0 6px;
+  width: 100%;
 }
 
 .auth-page .secondary.auth-green {
@@ -590,12 +587,16 @@
 /* A button the app would not let you press yet reads as unavailable. */
 .auth-page .primary:disabled,
 .auth-page .secondary:disabled {
-  opacity: .55;
   cursor: default;
 }
 
 .auth-page .primary:disabled {
-  background: linear-gradient(90deg, #cbbfe8, #d8cdf0);
+  /* Grey rather than a faded purple, and the label is a readable grey instead of white on
+     pale: a button nobody can read is a button that looks broken. */
+  background: #f0eef5;
+  /* 4.86:1 against the grey it sits on. The grey background is what says "not yet"; the label
+     does not have to be faint as well. */
+  color: #6b6577;
 }
 
 .auth-page .secondary:disabled {
