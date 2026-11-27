@@ -27,6 +27,7 @@
           hidden
         >+91</span>
         <input
+          aria-describedby="authStatus"
           id="signupMobile"
           name="phone"
           type="tel"
@@ -45,6 +46,7 @@
     return `
       <div class="password-wrap">
         <input
+          aria-describedby="authStatus"
           id="signupPassword"
           name="signupPassword"
           type="password"
@@ -86,10 +88,11 @@
       <div class="field">
         <label for="signupEmail">EMAIL ID</label>
         <input
+          aria-describedby="authStatus"
           id="signupEmail"
           name="email"
           type="email"
-          autocomplete="email"
+          autocomplete="username"
           autocapitalize="none"
           spellcheck="false"
           placeholder="you@example.com"
@@ -113,6 +116,7 @@
         <label for="signupConfirmPassword">CONFIRM PASSWORD</label>
         <div class="password-wrap">
           <input
+          aria-describedby="authStatus"
             id="signupConfirmPassword"
             name="signupConfirmPassword"
             type="password"
@@ -176,6 +180,7 @@
         <div class="field">
           <label for="signupOtp">VERIFICATION OTP</label>
           <input
+          aria-describedby="authStatus"
             id="signupOtp"
             name="one-time-code"
             inputmode="numeric"
@@ -209,7 +214,8 @@
            step panels, so on the code step the box appeared above the Back button. -->
       <div class="auth-consent">
         <label class="auth-consent-row">
-          <input type="checkbox" id="signupConsent" data-signup-consent />
+          <input
+          aria-describedby="authStatus" type="checkbox" id="signupConsent" data-signup-consent />
           <span>
             I am 18 or older and I agree to the
             <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>

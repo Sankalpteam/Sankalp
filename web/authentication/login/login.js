@@ -25,6 +25,7 @@
           hidden
         >+91</span>
         <input
+          aria-describedby="authStatus"
           id="loginIdentifier"
           name="login-identifier"
           type="text"
@@ -43,6 +44,7 @@
     return `
       <div class="password-wrap">
         <input
+          aria-describedby="authStatus"
           id="loginPassword"
           name="loginPassword"
           type="password"
@@ -87,7 +89,8 @@
              It sits above the buttons because it gates them. -->
         <div class="auth-consent">
           <label class="auth-consent-row">
-            <input type="checkbox" id="loginConsent" />
+            <input
+          aria-describedby="authStatus" type="checkbox" id="loginConsent" />
             <span>
               I am 18 or older and I agree to the
               <a href="/legal/terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a>
@@ -144,6 +147,7 @@
         <div class="field">
           <label>VERIFICATION OTP</label>
           <input
+          aria-describedby="authStatus"
             id="loginOtp"
             name="one-time-code"
             inputmode="numeric"
@@ -188,6 +192,7 @@
         <div class="field">
           <label>EMAIL OR MOBILE NUMBER</label>
           <input
+          aria-describedby="authStatus"
             id="loginPasswordIdentifier"
             name="login-password-identifier"
             type="text"
