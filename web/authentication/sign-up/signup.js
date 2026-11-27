@@ -171,12 +171,15 @@
         data-signup-step="otp"
         hidden
       >
+        <!-- The handler for this has existed in auth-page.js since the screen was written and
+             nothing ever had the attribute, so it was dead code: a person who typed their
+             email wrong could only go back to Login and start again. -->
         <button
           type="button"
-          class="primary auth-action-button"
-          data-auth-action="signup-resend"
+          class="auth-back auth-action-button"
+          data-auth-action="signup-back"
         >
-          Resend OTP
+          ← Back
         </button>
 
         <p class="auth-note auth-note-tight">
@@ -201,6 +204,17 @@
           data-auth-action="signup-verify"
         >
           Verify &amp; Create Account
+        </button>
+
+        <!-- Resend belongs under Verify: the screen is asking for a code, and the way to get
+             another one comes after the way to use the one you have. It sat above the field,
+             which read as the first thing to do. -->
+        <button
+          type="button"
+          class="secondary auth-action-button"
+          data-auth-action="signup-resend"
+        >
+          Resend OTP
         </button>
       </div>
 

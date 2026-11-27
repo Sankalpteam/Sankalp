@@ -181,6 +181,13 @@ class AuthActivity : ComponentActivity() {
                             }
                         },
                         onLogin = { showingSignup = false },
+                        onBackToDetails = {
+                            // The fields keep what was typed; only the code step is left.
+                            otpVisible = false
+                            otpEmail = ""
+                            status = ""
+                            error = ""
+                        },
                     )
                 } else {
                     LoginScreen(

@@ -117,6 +117,7 @@ fun SignUpScreen(
     onVerifyOtp: (otp: String) -> Unit,
     onResendOtp: () -> Unit,
     onLogin: () -> Unit,
+    onBackToDetails: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var mobile by rememberSaveable { mutableStateOf("") }
@@ -312,33 +313,12 @@ fun SignUpScreen(
                 enabled = actionEnabled,
                 onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password, confirmPassword) },
             )
-        } else {
-            // The same sixty seconds as the login screen. Without it a person taps Resend
-            // while the first mail is still in flight, and the third answer from Firebase is
-            // TOO_MANY_REQUESTS - a lockout far longer than the minute this waits.
-            var resendSecondsLeft by rememberSaveable {
-                mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
-            }
-            LaunchedEffect(otpVisible) {
-                if (!otpVisible) return@LaunchedEffect
-                resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
-                while (resendSecondsLeft > 0) {
-                    kotlinx.coroutines.delay(1_000)
-                    resendSecondsLeft -= 1
-                }
-            }
-            AuthPrimaryButton(
-                text = when {
-                    busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
-                    resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
-                    else -> "Resend OTP"
-                },
-                enabled = actionEnabled && resendSecondsLeft == 0,
-                onClick = { onResendOtp() },
-            )
         }
 
         if (otpVisible) {
+            TextButton(onClick = onBackToDetails, enabled = !busy) {
+                Text("← Back", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
             Spacer(Modifier.height(6.dp))
             Text(
                 buildAnnotatedString {
@@ -366,6 +346,31 @@ fun SignUpScreen(
                 enabled = !busy && otp.length == 6,
                 onClick = { onVerifyOtp(otp) },
             )
+
+            // The same sixty seconds as the login screen. Without it a person taps Resend
+            // while the first mail is still in flight, and the third answer from Firebase is
+            // TOO_MANY_REQUESTS - a lockout far longer than the minute this waits.
+            var resendSecondsLeft by rememberSaveable {
+                mutableStateOf(SIGNUP_RESEND_COOLDOWN_SECONDS)
+            }
+            LaunchedEffect(otpVisible) {
+                if (!otpVisible) return@LaunchedEffect
+                resendSecondsLeft = SIGNUP_RESEND_COOLDOWN_SECONDS
+                while (resendSecondsLeft > 0) {
+                    kotlinx.coroutines.delay(1_000)
+                    resendSecondsLeft -= 1
+                }
+            }
+            AuthPrimaryButton(
+                text = when {
+                    busyAction == AuthBusyAction.RESEND_OTP -> "Sending…"
+                    resendSecondsLeft > 0 -> "Resend in ${resendSecondsLeft}s"
+                    else -> "Resend OTP"
+                },
+                enabled = actionEnabled && resendSecondsLeft == 0,
+                onClick = { onResendOtp() },
+            )
+
             AuthStatus(status, error = false)
         }
 
