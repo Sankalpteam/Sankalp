@@ -59,6 +59,12 @@ fun LegalWebScreen(
 ) {
     val context = LocalContext.current
 
+    // The system back button closed the app from these screens: nothing in menu/ handled it,
+    // so the only way out was the arrow at the top. One handler here covers all four documents
+    // - Terms, Privacy, Data Privacy and Security - because they all come through this
+    // component and all pass an onBack.
+    androidx.activity.compose.BackHandler { onBack() }
+
     // Read the snapshot once, up front: if the network is already gone by the time the
     // WebView asks, there is nothing left to fall back to.
     val offlineSnapshot = remember(assetFile) {
@@ -165,6 +171,7 @@ fun LegalWebScreen(
 @Composable
 private fun LegalAddressBar(title: String, url: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+
     var copied by remember(url) { mutableStateOf(false) }
 
     Row(

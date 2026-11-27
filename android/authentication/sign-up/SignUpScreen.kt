@@ -144,6 +144,13 @@ fun SignUpScreen(
         password == confirmPassword &&
         agreed
 
+    // Back closes the document first. Compose gives the press to the innermost enabled
+    // handler, so this one wins over the activity's while a page is open - without it, reading
+    // the terms and pressing back threw away the half-filled form behind them.
+    androidx.activity.compose.BackHandler(enabled = openDocument.isNotEmpty()) {
+        openDocument = ""
+    }
+
     // The menu's own screens, not copies of them: LegalWebScreen draws the live page and falls
     // back to the snapshot bundled in the APK.
     when (openDocument) {
