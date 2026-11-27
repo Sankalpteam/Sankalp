@@ -112,8 +112,8 @@ fun SignUpScreen(
     error: String,
     otpVisible: Boolean,
     otpEmail: String,
-    onSendOtp: (email: String, mobile: String, password: String) -> Unit,
-    onCreateWithPassword: (email: String, mobile: String, password: String) -> Unit,
+    onSendOtp: (email: String, mobile: String, password: String, confirm: String) -> Unit,
+    onCreateWithPassword: (email: String, mobile: String, password: String, confirm: String) -> Unit,
     onVerifyOtp: (otp: String) -> Unit,
     onResendOtp: () -> Unit,
     onLogin: () -> Unit,
@@ -123,6 +123,8 @@ fun SignUpScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var otp by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
+    var confirmVisible by rememberSaveable { mutableStateOf(false) }
     // The agreement, and which document is open over this screen. The documents are the ones
     // the menu already shows - LegalWebScreen against the live page, with the bundled snapshot
     // as the offline fallback. Nothing is written a second time here.
@@ -135,7 +137,11 @@ fun SignUpScreen(
     // digit, so a single digit used to be enough to create an account whose mobile was
     // "+911" - unreachable by the mobile lookup ever after.
     val actionEnabled = !busy && if (otpVisible) otpEmail.isNotBlank() else
-        email.isNotBlank() && mobile.length == 10 && password.length >= 6 && agreed
+        email.isNotBlank() &&
+        mobile.length == 10 &&
+        password.length >= 6 &&
+        password == confirmPassword &&
+        agreed
 
     // The menu's own screens, not copies of them: LegalWebScreen draws the live page and falls
     // back to the snapshot bundled in the APK.
@@ -252,13 +258,31 @@ fun SignUpScreen(
                     Text(if (passwordVisible) "◌" else "◉", fontSize = 17.sp)
                 }
             },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+        )
+
+        // The recovery screen has asked for the new password twice since it existed; signup,
+        // where the password is chosen for the first time, asked once. A typo here makes an
+        // account whose password nobody knows.
+        Spacer(Modifier.height(14.dp))
+        AuthFieldLabel("CONFIRM PASSWORD")
+        AuthTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it.take(128) },
+            placeholder = "Type it again",
+            enabled = !busy,
+            visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingContent = {
+                TextButton(onClick = { confirmVisible = !confirmVisible }, enabled = !busy) {
+                    Text(if (confirmVisible) "◌" else "◉", fontSize = 17.sp)
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            // Done does what the button under it does. The keyboard offered the key and
-            // nothing listened to it.
+            // Done now belongs to the last field, which is the one a person finishes on.
             keyboardActions = KeyboardActions(
                 onDone = {
                     if (actionEnabled) {
-                        onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password)
+                        onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password, confirmPassword)
                     }
                 },
             ),
@@ -280,13 +304,13 @@ fun SignUpScreen(
             AuthPrimaryButton(
                 text = if (busyAction == AuthBusyAction.SEND_OTP) "Sending OTP…" else "Continue with OTP",
                 enabled = actionEnabled,
-                onClick = { onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password) },
+                onClick = { onSendOtp(email, "+91${mobile.filter(Char::isDigit).take(10)}", password, confirmPassword) },
             )
             Spacer(Modifier.height(8.dp))
             AuthPrimaryButton(
                 text = if (busyAction == AuthBusyAction.CREATE_ACCOUNT) "Creating account…" else "Continue with Password",
                 enabled = actionEnabled,
-                onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password) },
+                onClick = { onCreateWithPassword(email, "+91${mobile.filter(Char::isDigit).take(10)}", password, confirmPassword) },
             )
         } else {
             // The same sixty seconds as the login screen. Without it a person taps Resend
