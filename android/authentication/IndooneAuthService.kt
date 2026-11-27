@@ -1,6 +1,8 @@
 package com.indoone.authentication
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
+import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -321,7 +323,16 @@ class IndooneAuthService(
             message.contains("EMAIL_ALREADY_IN_USE", true) -> AuthException("An account already exists with this email.")
             message.contains("WEAK_PASSWORD", true) -> AuthException("Password should be at least 6 characters.")
             error is java.net.SocketTimeoutException -> AuthException("OTP service request timed out. Please try again.")
-            else -> AuthException(message.ifBlank { "Authentication failed." })
+            // Anything unmapped used to reach the screen verbatim. A Firebase exception
+            // reads like "com.google.firebase.auth.FirebaseAuthException: The supplied auth
+            // credential is malformed or has expired. [ Cannot parse Google ID token ]" -
+            // a class name and an internal detail in the middle of a sign-in screen, which
+            // tells the person nothing and tells a curious one more than they should know.
+            // The web already answers with a sentence; this is the same sentence.
+            else -> {
+                Log.w("SankalpAuth", "unmapped auth failure: $message")
+                AuthException("Authentication failed. Please try again.")
+            }
         }
     }
 
