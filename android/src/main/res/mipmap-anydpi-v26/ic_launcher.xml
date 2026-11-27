@@ -1,4 +1,6 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/indoone_icon_background" />
     <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <!-- Android 13+ tints this with the wallpaper palette. Same mark, shape only. -->
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
 </adaptive-icon>
