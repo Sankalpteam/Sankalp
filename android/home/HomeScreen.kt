@@ -1241,8 +1241,10 @@ fun HomeScreen(
                 }
                 chatActivityState = ChatActivityState.PREPARING
                 delay(600L)
+                // The worker path already refuses a blank reply; this one added it as a bubble
+                // with nothing in it, which reads as a reply that arrived and said nothing.
                 messages = messages + ChatMessage(
-                    response.reply,
+                    response.reply.ifBlank { "Sankalp returned an empty answer." },
                     false,
                     chips = response.actionChips,
                 )

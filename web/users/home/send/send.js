@@ -397,16 +397,32 @@
       }
 
       store.setConversationId(result.conversationId);
-      setActivity(null);
       window.IndooneInflight?.finish();
 
+      // A reply that is missing or empty is not an answer. Without this the thread got a
+      // bubble with nothing in it - or the word "undefined" - and no way to tell it apart from
+      // a reply that arrived and was blank on purpose.
+      if (!String(result?.reply ?? '').trim()) {
+        throw new Error('Sankalp returned an empty answer.');
+      }
+
       if (streamedMessage) {
+        // The words are already on screen, so there is nothing left to prepare.
+        setActivity(null);
+
         // The streamed bubble becomes the finished one: same text, plus the chips the
         // reply offered.
         streamedMessage.text = result.reply;
         streamedMessage.chips = result.chips || [];
         paint(null);
       } else {
+        // The app's last beat before a whole answer appears: Received, Thinking, Preparing,
+        // then the answer. The web had the label and never used it, so the indicator vanished
+        // a moment before anything replaced it and the screen looked like it had stalled.
+        setActivity('preparing');
+        await new Promise(resolve => setTimeout(resolve, 600));
+        setActivity(null);
+
         store.add({ text: result.reply, mine: false, chips: result.chips || [] });
       }
 
