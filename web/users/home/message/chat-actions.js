@@ -83,6 +83,20 @@
       throw new Error('The share link could not be made just now. Please try again.');
     }
 
+    // The share sheet first, where there is one. A link is meant to be sent, and putting it on
+    // the clipboard means the person still has to find somewhere to paste it - and what they
+    // paste is text until an app decides otherwise. navigator.share passes it as a URL.
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'Sankalp chat', url });
+        return;
+      } catch (error) {
+        // A cancelled share sheet is not a failure worth reporting; anything else falls
+        // through to the clipboard, which always works.
+        if (error?.name === 'AbortError') return;
+      }
+    }
+
     if (await copy(url)) {
       toast('Link copied — anyone with it can view this chat');
     } else {
