@@ -907,6 +907,13 @@ fun HomeScreen(
                         }
                     )
                     addReply(reply, restoredChips)
+
+                    // The answer is on screen, so the activity row has done its job and goes
+                    // now - not after the save below. That save is a network call, and the
+                    // state was left at PREPARING until it finished: the reply sat there with
+                    // "Preparing your answer…" still under it for as long as the write took.
+                    chatActivityState = ChatActivityState.IDLE
+
                     runCatching {
                         withContext(Dispatchers.IO) {
                             cloudChatRepository.appendMessage(
