@@ -20,7 +20,8 @@
 
     window.IndooneMessages?.render(document.getElementById('chatList'), messages, activity ?? null);
     welcome?.toggleAttribute('hidden', messages.length > 0);
-    window.IndooneChatScroll?.toBottom?.();
+    // A redraw, not a reply arriving: the bottom is where the newest thing is.
+    window.IndooneChatScroll?.toBottom?.({ force: true });
   }
 
   function clearActivity() {
@@ -424,6 +425,16 @@
 
       console.error('Sankalp chat send failed:', error);
       window.IndooneInflight?.finish();
+
+      // A stream that died halfway leaves the words it managed to produce. The fallback path
+      // already removes its partial bubble before retrying; this is the same rule for the path
+      // that gives up. Half an answer above an error reads as an answer that was cut off
+      // mid-sentence with no explanation.
+      if (streamedMessage) {
+        store.remove(streamedMessage);
+        streamedMessage = null;
+      }
+
       store.remove(mine);
 
       // The text goes back where it came from. Removing the message and leaving an error

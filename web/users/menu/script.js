@@ -355,6 +355,9 @@
   async function openPath(path, initializerName) {
     closeDrawer();
 
+    // A reply being read aloud belongs to the conversation that is leaving the screen.
+    window.IndooneMessages?.stopSpeaking?.();
+
     // a menu page opening another keeps the one underneath, so back returns to it
     const open = document.getElementById('modal');
     if (open && !open.hasAttribute('hidden') && open.dataset.menuPath) {
@@ -463,6 +466,7 @@
 
     if (action === 'new-chat') {
       closeDrawer();
+      window.IndooneMessages?.stopSpeaking?.();
       window.IndooneChatStore?.clear?.();
       window.showHome?.();
       window.IndooneChatHome?.refresh?.();

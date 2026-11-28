@@ -763,5 +763,11 @@
     }
   }
 
-  window.IndooneMessages = { render };
+  window.IndooneMessages = {
+    render,
+    // Reading a reply out loud outlives the row it was started from. Anything that takes the
+    // conversation off the screen has to be able to stop it, or the voice carries on over
+    // whatever came next.
+    stopSpeaking
+  };
 })();
