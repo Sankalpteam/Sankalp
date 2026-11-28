@@ -123,6 +123,32 @@
       return;
     }
 
+    // The size limits were only checked when the message was sent, so a file far too large sat
+    // in the composer looking accepted, and the refusal came after the person had written the
+    // message it was attached to. Said now, while they are still picking.
+    const mimeType = String(file.type || '').toLowerCase();
+    const limit = mimeType.startsWith('image/')
+      ? 5 * 1024 * 1024
+      : 8 * 1024 * 1024;
+
+    if (file.size > limit) {
+      window.IndooneMessages?.render(
+        document.getElementById('chatList'),
+        [
+          ...(window.IndooneChatStore?.getMessages?.() || []),
+          {
+            text: mimeType.startsWith('image/')
+              ? 'This attachment exceeds the 5 MB limit.'
+              : 'This attachment exceeds the 8 MB limit.',
+            mine: false
+          }
+        ],
+        null
+      );
+      window.IndooneChatScroll?.toBottom?.({ force: true });
+      return;
+    }
+
     if (pending.length >= MAX_ATTACHMENTS) {
       window.IndooneMessages?.render(
         document.getElementById('chatList'),
