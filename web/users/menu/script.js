@@ -220,7 +220,9 @@
     page.setAttribute('hidden', '');
     document.getElementById(back)?.removeAttribute('hidden');
 
-    const tab = back === 'content' ? 'homeNav'
+    // #content is the accounts screen - "Your accounts" is its heading. It was mapped to
+    // homeNav, so returning to it highlighted Home.
+    const tab = back === 'content' ? 'lobbyNav'
       : back === 'lobbyContent' ? 'lobbyNav'
       : back === 'settingsContent' ? 'settingsNav'
       : 'homeNav';
@@ -410,10 +412,30 @@
   };
 
   // The four tabs and the brand leave a menu page behind when they are used.
-  ['homeNav', 'lobbyNav', 'settingsNav'].forEach(id => {
-    document.getElementById(id)?.addEventListener('click', closeMenuPage);
+  document.getElementById('homeNav')?.addEventListener('click', () => {
+    closeMenuPage();
+
+    // The accounts screen is a section of its own, not a menu page, so closing the menu does
+    // not leave it. Pressing Home did nothing at all from there.
+    document.getElementById('content')?.setAttribute('hidden', '');
+    document.getElementById('addBtn')?.setAttribute('hidden', '');
+    document.getElementById('searchWrap')?.setAttribute('hidden', '');
+    window.IndooneHome?.restoreHome?.();
+
+    // One timer, on the screen that shows the codes.
+    window.IndooneTotpController?.stop?.();
   });
-  document.getElementById('brandBtn')?.addEventListener('click', closeMenuPage);
+  document.getElementById('settingsNav')?.addEventListener('click', closeMenuPage);
+
+  // Lobby is the accounts screen, as it is in the app. Both of these used to call
+  // closeMenuPage, which returns to Home - so the Lobby tab did nothing at all, and the brand
+  // button, whose label is "Go to accounts", went to the chat instead.
+  document.getElementById('lobbyNav')?.addEventListener('click', () => {
+    window.showAccounts?.();
+  });
+  document.getElementById('brandBtn')?.addEventListener('click', () => {
+    window.showAccounts?.();
+  });
 
   window.openMenuFeature = function (feature) {
     const initializerName = featureInitializers[feature];
@@ -433,6 +455,12 @@
     event.preventDefault();
     event.stopPropagation();
     const action = item.dataset.action;
+    if (action === 'accounts') {
+      closeDrawer();
+      window.showAccounts?.();
+      return;
+    }
+
     if (action === 'new-chat') {
       closeDrawer();
       window.IndooneChatStore?.clear?.();
