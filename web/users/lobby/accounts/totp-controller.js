@@ -49,9 +49,15 @@ window.IndooneTotpController = (() => {
     timerId = setInterval(refreshAll, 1000);
   }
 
+  function stop() {
+    clearInterval(timerId);
+    timerId = null;
+  }
+
   return {
     refreshAccount,
     refreshAll,
-    start
+    start,
+    stop
   };
 })();
