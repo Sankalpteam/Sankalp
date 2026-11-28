@@ -1108,19 +1108,27 @@ fun HomeScreen(
                     ChatApi.streamMessage(
                         message = messageToBackend,
                         conversationId = requestConversationId,
-                        onMeta = { id -> conversationId = id },
+                        // streamMessage runs on Dispatchers.IO, so these callbacks arrive on
+                        // a background thread. Writing Compose state from there is not safe -
+                        // the write can be missed, and the activity row it was meant to clear
+                        // stayed on screen over the answer. Every write goes to Main first.
+                        onMeta = { id ->
+                            withContext(Dispatchers.Main) { conversationId = id }
+                        },
                         onDelta = { full ->
-                            // First token: the wait is over. The poll below does not need to be
-                            // told - it asks the thread whether the answer is already there.
-                            chatActivityState = ChatActivityState.IDLE
+                            withContext(Dispatchers.Main) {
+                                // First token: the wait is over. The poll below does not need to
+                                // be told - it asks the thread whether the answer is there.
+                                chatActivityState = ChatActivityState.IDLE
 
-                            if (streamedIndex < 0) {
-                                messages = messages + ChatMessage(full, false)
-                                streamedIndex = messages.lastIndex
-                            } else {
-                                val updated = messages.toMutableList()
-                                updated[streamedIndex] = updated[streamedIndex].copy(text = full)
-                                messages = updated
+                                if (streamedIndex < 0) {
+                                    messages = messages + ChatMessage(full, false)
+                                    streamedIndex = messages.lastIndex
+                                } else {
+                                    val updated = messages.toMutableList()
+                                    updated[streamedIndex] = updated[streamedIndex].copy(text = full)
+                                    messages = updated
+                                }
                             }
                         },
                     )

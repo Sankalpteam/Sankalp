@@ -421,9 +421,12 @@
         // a moment before anything replaced it and the screen looked like it had stalled.
         setActivity('preparing');
         await new Promise(resolve => setTimeout(resolve, 600));
-        setActivity(null);
 
+        // Add, then draw. store.add() only stores - it does not render - so the reply went
+        // into the thread and nothing put it on screen, and the last thing painted was the
+        // activity bubble, which is why it sat there over an answer that had already arrived.
         store.add({ text: result.reply, mine: false, chips: result.chips || [] });
+        paint(null);
       }
 
       void window.IndooneCloudChat
