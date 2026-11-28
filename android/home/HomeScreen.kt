@@ -695,6 +695,8 @@ fun HomeScreen(
     // Set by a retry, read by the send it triggers. The count belongs to the question, and the
     // question is created inside sendMessage.
     var pendingRetryCount by remember { mutableStateOf(0) }
+    // Set where the bottom is the right place regardless of where the reader is.
+    var forceScrollToBottom by remember { mutableStateOf(true) }
     var chatActivityState by remember { mutableStateOf(ChatActivityState.IDLE) }
     // How many answers the foreground stream has put on screen and the poll has not yet been
     // told about.
@@ -959,16 +961,37 @@ fun HomeScreen(
     // the first frame knows the item count, the next ones know the real heights.
     LaunchedEffect(isLoadingHistory, messages.size, chatActivityState, startNewChat, openConversationId) {
         if (!isLoadingHistory && (messages.isNotEmpty() || chatActivityState != ChatActivityState.IDLE)) {
-            // A large positive scroll offset on the final item clamps the viewport to the
-            // real list bottom, rather than to the top of a long final message.
-            repeat(3) {
-                withFrameNanos { }
-                val lastItemIndex = chatListState.layoutInfo.totalItemsCount - 1
-                if (lastItemIndex >= 0) {
-                    chatListState.scrollToItem(
-                        lastItemIndex,
-                        scrollOffset = Int.MAX_VALUE / 4,
-                    )
+            // Follow the conversation - unless the reader has gone somewhere else in it.
+            //
+            // This used to jump to the last item every time a message arrived and every time
+            // the activity state changed, which is four times for one turn. Someone scrolled up
+            // to read the start of a long answer was pulled back down on each one, so reading
+            // a reply as it arrived was impossible past the first screenful. The web had the
+            // same bug and was fixed the same way.
+            val layout = chatListState.layoutInfo
+            val lastVisible = layout.visibleItemsInfo.lastOrNull()
+            val nearBottom = lastVisible == null ||
+                (lastVisible.index >= layout.totalItemsCount - 1 &&
+                    lastVisible.offset + lastVisible.size <= layout.viewportEndOffset + 80)
+
+            // The two moments where the bottom is right whatever the reader was doing:
+            // sending their own message, and opening a conversation.
+            val forced = forceScrollToBottom
+
+            if (nearBottom || forced) {
+                forceScrollToBottom = false
+
+                // A large positive scroll offset on the final item clamps the viewport to the
+                // real list bottom, rather than to the top of a long final message.
+                repeat(3) {
+                    withFrameNanos { }
+                    val lastItemIndex = chatListState.layoutInfo.totalItemsCount - 1
+                    if (lastItemIndex >= 0) {
+                        chatListState.scrollToItem(
+                            lastItemIndex,
+                            scrollOffset = Int.MAX_VALUE / 4,
+                        )
+                    }
                 }
             }
         }
@@ -978,6 +1001,7 @@ fun HomeScreen(
         if (userKey.isBlank() || startNewChat) {
             conversationId = null
             messages = emptyList()
+            forceScrollToBottom = true
             isLoadingHistory = false
             return@LaunchedEffect
         }
@@ -1005,6 +1029,9 @@ fun HomeScreen(
             conversationId = null
             messages = emptyList()
         }
+        // A thread that has just been read back lands on its newest message, whatever the
+        // scroll position was on the thread before it.
+        forceScrollToBottom = true
         isLoadingHistory = false
     }
 
@@ -1024,6 +1051,7 @@ fun HomeScreen(
                     conversationId = null
                     messages = emptyList()
                 }
+            forceScrollToBottom = true
             isLoadingHistory = false
         }
     }
@@ -1038,6 +1066,7 @@ fun HomeScreen(
             "Please inspect the attached file(s) and describe their contents or visible details."
         }
         val requestConversationId = conversationId ?: UUID.randomUUID().toString()
+        forceScrollToBottom = true
         messages = messages + ChatMessage(
             typed,
             true,
@@ -1630,9 +1659,19 @@ fun HomeScreen(
                     .onSuccess { url ->
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp chat", url))
+                        // The system says "Copied" itself from Android 13, so repeating that
+                        // half is noise. The warning is not: anyone holding the link can read
+                        // the conversation, and that has to be said every time.
+                        val systemSaysCopied =
+                            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+
                         Toast.makeText(
                             context,
-                            "Link copied to clipboard! Anyone with this link can view this chat",
+                            if (systemSaysCopied) {
+                                "Anyone with this link can view this chat"
+                            } else {
+                                "Link copied to clipboard! Anyone with this link can view this chat"
+                            },
                             Toast.LENGTH_LONG,
                         ).show()
                     }
@@ -2499,8 +2538,12 @@ private fun MessageActions(
                 val clipboard =
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp exchange", pair))
-                // A tap with no visible result reads as a broken button.
-                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                // A tap with no visible result reads as a broken button - but from Android 13
+                // the system draws its own confirmation over the clipboard write, so this
+                // toast landed on top of it and the screen showed "Copied" twice.
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                }
             }
 
             IconAction(
