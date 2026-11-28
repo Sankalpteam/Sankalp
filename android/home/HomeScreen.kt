@@ -193,6 +193,38 @@ private fun supportedAttachmentMimeType(context: Context, uri: Uri, filename: St
     }
 }
 
+/**
+ * The size refusal, at the moment the file is picked.
+ *
+ * The limits were only checked when the message was sent, so a file far too large sat in the
+ * composer looking accepted and the refusal came after the person had written the message it was
+ * attached to. The wording is the one ChatApi uses, so the same file gets the same sentence
+ * wherever it is refused.
+ */
+private fun attachmentSizeRefusal(context: Context, uri: Uri, filename: String): String? {
+    val mimeType = runCatching {
+        supportedAttachmentMimeType(context, uri, filename)
+    }.getOrNull()?.lowercase().orEmpty()
+
+    val limit = if (mimeType.startsWith("image/")) {
+        MAX_CHAT_IMAGE_BYTES
+    } else {
+        MAX_CHAT_DOCUMENT_BYTES
+    }
+
+    val size = runCatching {
+        context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }
+    }.getOrNull() ?: return null
+
+    if (size <= limit) return null
+
+    return if (mimeType.startsWith("image/")) {
+        "This attachment exceeds the 5 MB limit."
+    } else {
+        "This attachment exceeds the 8 MB limit."
+    }
+}
+
 private fun decodeAttachmentThumbnail(
     context: Context,
     uri: Uri,
@@ -1415,7 +1447,19 @@ fun HomeScreen(
                 false,
             )
         }
-        pendingAttachments = pendingAttachments + selected.map { uri ->
+        val accepted = selected.filter { uri ->
+            val name = displayNameForUri(uri, "Photo")
+            val refusal = attachmentSizeRefusal(context, uri, name)
+
+            if (refusal != null) {
+                messages = messages + ChatMessage(refusal, false)
+                false
+            } else {
+                true
+            }
+        }
+
+        pendingAttachments = pendingAttachments + accepted.map { uri ->
             ChatAttachment(displayName = displayNameForUri(uri, "Photo"), uri = uri)
         }
     }
@@ -1458,16 +1502,27 @@ fun HomeScreen(
                         }
                     } else {
                         val supported = runCatching { supportedAttachmentMimeType(context, uri, name) }
-                        if (supported.isSuccess) {
-                            pendingAttachments = (
-                                pendingAttachments + ChatAttachment(displayName = name, uri = uri)
-                            ).take(MAX_CHAT_ATTACHMENTS)
+                        // Refused here rather than at send time, while the person is still
+                        // choosing: a file far too large used to sit in the composer looking
+                        // accepted until the message it was attached to was already written.
+                        val refusal = if (supported.isSuccess) {
+                            attachmentSizeRefusal(context, uri, name)
                         } else {
-                            messages = messages + ChatMessage(
+                            null
+                        }
+
+                        when {
+                            supported.isFailure -> messages = messages + ChatMessage(
                                 supported.exceptionOrNull()?.message
                                     ?: "This attachment type is not supported: $name",
                                 false,
                             )
+
+                            refusal != null -> messages = messages + ChatMessage(refusal, false)
+
+                            else -> pendingAttachments = (
+                                pendingAttachments + ChatAttachment(displayName = name, uri = uri)
+                            ).take(MAX_CHAT_ATTACHMENTS)
                         }
                     }
                 }
