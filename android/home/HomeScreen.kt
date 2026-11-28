@@ -1657,6 +1657,18 @@ fun HomeScreen(
             scope.launch {
                 runCatching { ChatApi.shareThread(thread) }
                     .onSuccess { url ->
+                        // The share sheet, not the clipboard: a link is meant to be sent, and
+                        // pasting it into an app by hand is the step this was supposed to save.
+                        // EXTRA_TEXT carries the bare URL and nothing else - a sentence around
+                        // it is what stops some apps turning it into something tappable.
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, url)
+                            putExtra(Intent.EXTRA_TITLE, "Sankalp chat")
+                        }
+
+                        context.startActivity(Intent.createChooser(send, "Share chat link"))
+
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("Sankalp chat", url))
                         // The system says "Copied" itself from Android 13, so repeating that
@@ -2550,11 +2562,27 @@ private fun MessageActions(
                 icon = Icons.Outlined.Share,
                 label = "Share this exchange",
             ) {
-                val share = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, pair)
+                val thread = conversationId
+
+                fun send(body: String) {
+                    val share = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, body)
+                    }
+                    context.startActivity(Intent.createChooser(share, "Share exchange"))
                 }
-                context.startActivity(Intent.createChooser(share, "Share exchange"))
+
+                if (thread.isNullOrBlank()) {
+                    send(pair)
+                } else {
+                    // The words alone do not lead anywhere. The link goes on its own line at
+                    // the end, which is where a messaging app will turn it into something
+                    // tappable - inside a sentence most of them will not.
+                    scope.launch {
+                        val url = runCatching { ChatApi.shareThread(thread) }.getOrNull()
+                        send(if (url.isNullOrBlank()) pair else "$pair\n\n$url")
+                    }
+                }
             }
 
             if (onListen != null) {
