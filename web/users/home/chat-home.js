@@ -12,8 +12,8 @@
     'home/message/chat-store.js?v=20261018b',
     // The in-flight record. It has to load with the store, before anything can send.
     'home/message/inflight.js?v=20261026a',
-    'home/message/message.js?v=20261128b',
-    'home/send/send.js?v=20261128b',
+    'home/message/message.js?v=20261128c',
+    'home/send/send.js?v=20261128c',
     // Share chat and rename chat: the two actions the app has and the web did not.
     'home/message/chat-actions.js?v=20261117a',
     'home/voice/voice.js?v=20261019f',
@@ -81,12 +81,28 @@
     }
   }
 
-  function scrollToBottom() {
+  /**
+   * Follow the conversation - unless the reader has gone somewhere else in it.
+   *
+   * This was an unconditional jump to the bottom, called on every streamed token. A long answer
+   * arriving while someone scrolled up to read the start of it snapped them back down on every
+   * token, so reading a reply as it arrived was impossible past the first screenful.
+   *
+   * force is for the moments where the bottom is the right place whatever the reader was doing:
+   * opening a conversation, and sending their own message.
+   */
+  function scrollToBottom({ force = false } = {}) {
     const scroller = document.getElementById('chatScroll');
 
-    if (scroller) {
-      scroller.scrollTop = scroller.scrollHeight;
-    }
+    if (!scroller) return;
+
+    const distanceFromBottom =
+      scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+
+    // 80px of slack: a reply that grows by a line does not count as "the reader left".
+    if (!force && distanceFromBottom > 80) return;
+
+    scroller.scrollTop = scroller.scrollHeight;
   }
 
   function paintWelcome() {
@@ -275,7 +291,8 @@
 
     window.IndooneMessages?.render(list, messages, null);
     welcome?.toggleAttribute('hidden', messages.length > 0);
-    scrollToBottom();
+    // A whole thread painted at once: opening a conversation lands on the newest message.
+    scrollToBottom({ force: true });
 
     if (messages.length) {
       stopWelcomeLoop();
