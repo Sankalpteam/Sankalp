@@ -2067,6 +2067,41 @@ fun HomeScreen(
                                         MessageFeedbackStore.ratingFor(context, message.text)
                                     },
                                     onListen = { speakOrStop(message.text) },
+                                    onShareWithLink = {
+                                        val thread = conversationId
+                                        val asked = run {
+                                            var found = ""
+                                            for (position in index - 1 downTo 0) {
+                                                if (messages[position].fromUser) {
+                                                    found = messages[position].text.trim()
+                                                    break
+                                                }
+                                            }
+                                            found
+                                        }
+                                        val body = if (asked.isBlank()) {
+                                            message.text
+                                        } else {
+                                            "User: $asked\n\nAI: ${message.text}"
+                                        }
+
+                                        fun send(text: String) {
+                                            val share = Intent(Intent.ACTION_SEND).apply {
+                                                type = "text/plain"
+                                                putExtra(Intent.EXTRA_TEXT, text)
+                                            }
+                                            context.startActivity(Intent.createChooser(share, "Share exchange"))
+                                        }
+
+                                        if (thread.isNullOrBlank()) {
+                                            send(body)
+                                        } else {
+                                            scope.launch {
+                                                val url = runCatching { ChatApi.shareThread(thread) }.getOrNull()
+                                                send(if (url.isNullOrBlank()) body else "$body\n\n$url")
+                                            }
+                                        }
+                                    },
                                     onRate = { kind ->
                                         MessageFeedbackStore.record(context, message.text, kind)
                                     },
@@ -2506,6 +2541,7 @@ private fun MessageActions(
     onRate: ((String) -> Unit)? = null,
     onRetry: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
+    onShareWithLink: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val value = text.trim()
@@ -2562,26 +2598,18 @@ private fun MessageActions(
                 icon = Icons.Outlined.Share,
                 label = "Share this exchange",
             ) {
-                val thread = conversationId
-
-                fun send(body: String) {
+                // The words alone do not lead anywhere. Where the caller can fetch a link it
+                // does, and the link goes on its own line at the end - that is where a
+                // messaging app turns it into something tappable; inside a sentence most of
+                // them will not.
+                if (onShareWithLink != null) {
+                    onShareWithLink()
+                } else {
                     val share = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, body)
+                        putExtra(Intent.EXTRA_TEXT, pair)
                     }
                     context.startActivity(Intent.createChooser(share, "Share exchange"))
-                }
-
-                if (thread.isNullOrBlank()) {
-                    send(pair)
-                } else {
-                    // The words alone do not lead anywhere. The link goes on its own line at
-                    // the end, which is where a messaging app will turn it into something
-                    // tappable - inside a sentence most of them will not.
-                    scope.launch {
-                        val url = runCatching { ChatApi.shareThread(thread) }.getOrNull()
-                        send(if (url.isNullOrBlank()) pair else "$pair\n\n$url")
-                    }
                 }
             }
 
